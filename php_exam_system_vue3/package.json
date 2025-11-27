@@ -1,0 +1,44 @@
+{
+  "name": "web1",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "my-build": "run-p type-check \"my-build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "my-build-only": "vite build && move D:\\MyCodeTool\\phpstudy_pro\\WWW\\xiaolu.cn\\tp8\\public\\web\\index.html D:\\MyCodeTool\\phpstudy_pro\\WWW\\xiaolu.cn\\tp8\\app\\index\\view\\index",
+    "type-check": "vue-tsc --build --force"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "@fingerprintjs/fingerprintjs": "^4.6.2",
+    "@types/fingerprintjs": "^0.5.28",
+    "axios": "^1.7.7",
+    "echarts": "^5.5.1",
+    "element-plus": "^2.8.4",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
+    "pinia": "^2.2.4",
+    "vue-router": "^4.4.5",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.4",
+    "@types/lodash": "^4.17.13",
+    "@types/lodash-es": "^4.17.12",
+    "@types/node": "^20.16.10",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "@vue/tsconfig": "^0.5.1",
+    "globals": "^15.10.0",
+    "npm-run-all2": "^6.2.3",
+    "sass-embedded": "^1.80.3",
+    "typescript": "~5.4.5",
+    "typescript-vue-plugin": "^1.8.27",
+    "vite": "6.0.9",
+    "vue": "^3.5.10",
+    "vue-tsc": "^2.1.6"
+  }
+}
