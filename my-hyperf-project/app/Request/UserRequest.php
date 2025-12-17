@@ -8,22 +8,26 @@ use Hyperf\Validation\Request\FormRequest;
 
 class UserRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    public const SCENE_LOGIN = 'login';
+    public const SCENE_REGISTER = 'register';
+
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
+    protected array $scenes = [
+        self::SCENE_LOGIN => ['username', 'password'],
+        self::SCENE_REGISTER => ['username', 'password', 'nickname', 'avatar'],
+    ];
+
     public function rules(): array
     {
         return [
             'username' => 'required|string|min:6|max:20',
             'password' => 'required|string|min:6|max:20',
+            'nickname' => 'required|string|min:2|max:20',
+            'avatar' => 'nullable|image|max:2048',
         ];
     }
 }

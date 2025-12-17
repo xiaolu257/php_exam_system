@@ -148,8 +148,8 @@ onMounted(async () => {
   if (props.item.options instanceof SingleImageUploadOption) {
     const avatarUrl = props.formData[props.item.name];
     if (avatarUrl) {
-      thumbImageUrl.value = props.item.options.getThumbImageURL(avatarUrl);
-      originImageUrl.value = props.item.options.getOriginImageURL(avatarUrl);
+      thumbImageUrl.value = props.item.options.getThumbImageURL?.(avatarUrl) ?? '';
+      originImageUrl.value = props.item.options.getOriginImageURL?.(avatarUrl) ?? '';
     }
   }
 

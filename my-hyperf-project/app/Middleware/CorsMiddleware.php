@@ -12,20 +12,42 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class CorsMiddleware implements MiddlewareInterface
 {
+//    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+//    {
+//        $response = Context::get(ResponseInterface::class);
+//        $response = $response->withHeader('Access-Control-Allow-Origin', '*')
+//            ->withHeader('Access-Control-Allow-Credentials', 'true')
+//            // Headers 可以根据实际情况进行改写。
+//            ->withHeader('Access-Control-Allow-Headers', 'DNT,Keep-Alive,User-Agent,Cache-Control,Content-Type,Authorization,Fingerprint');
+//
+//        Context::set(ResponseInterface::class, $response);
+//
+//        if ($request->getMethod() == 'OPTIONS') {
+//            return $response;
+//        }
+//
+//        return $handler->handle($request);
+//    }
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $response = Context::get(ResponseInterface::class);
-        $response = $response->withHeader('Access-Control-Allow-Origin', '*')
-            ->withHeader('Access-Control-Allow-Credentials', 'true')
-            // Headers 可以根据实际情况进行改写。
-            ->withHeader('Access-Control-Allow-Headers', 'DNT,Keep-Alive,User-Agent,Cache-Control,Content-Type,Authorization,Fingerprint');
-
-        Context::set(ResponseInterface::class, $response);
-
-        if ($request->getMethod() == 'OPTIONS') {
-            return $response;
+        // 预检请求直接返回
+        if ($request->getMethod() === 'OPTIONS') {
+            return $this->buildResponse(Context::get(ResponseInterface::class));
         }
 
-        return $handler->handle($request);
+        // 继续执行业务
+        $response = $handler->handle($request);
+
+        // 给最终响应加跨域头
+        return $this->buildResponse($response);
+    }
+
+    private function buildResponse(ResponseInterface $response): ResponseInterface
+    {
+        return $response
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Credentials', 'true')
+            ->withHeader('Access-Control-Allow-Headers', 'DNT,Keep-Alive,User-Agent,Cache-Control,Content-Type,Authorization,Fingerprint')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     }
 }

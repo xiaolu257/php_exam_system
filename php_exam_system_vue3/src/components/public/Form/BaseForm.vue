@@ -171,9 +171,13 @@ const handleSave = () => {
 const validateAndSubmit = (dataToSubmit: any) => {
   formRef.value?.validate((valid) => {
     if (valid) {
-      props.submitAction(dataToSubmit, () => {
-        initData = cloneDeep(formData); // 更新初始数据
-      });
+      let callable = () => {}
+      if (initData) {
+        callable = () => {
+          initData = cloneDeep(formData); // 更新初始数据
+        }
+      }
+      props.submitAction(dataToSubmit, callable);
     }
   });
 };

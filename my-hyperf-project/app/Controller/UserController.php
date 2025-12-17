@@ -7,55 +7,58 @@ namespace App\Controller;
 use App\Model\User;
 use App\Model\UserToken;
 use App\Request\UserRequest;
+use App\Service\ImageService;
 use App\Util\TokenUtil;
 use Exception;
 use Firebase\JWT\ExpiredException;
+use Hyperf\Di\Annotation\Inject;
+use Hyperf\HttpMessage\Upload\UploadedFile;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
 use Hyperf\HttpServer\Annotation\PostMapping;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Validation\Annotation\Scene;
 
 #[Controller]
 class UserController
 {
+    #[Inject]
+    protected ImageService $imageService;
+
     #[GetMapping('index')]
-    public function index(RequestInterface $request, ResponseInterface $response)
+    public function index(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         return $response->raw('Hello Hyperf!');
     }
 
     #[PostMapping('register')]
-    public function register(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Scene(UserRequest::SCENE_REGISTER)]
+    public function register(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
-        /*$data = request()->post();
-        $image = request()->file('avatar');
-        // 合并数据用于校验（image 也放入数组）
-        $validateData = array_merge($data, ['avatar' => $image]);
-        validate(AdminValidator::class)->scene('add')->check($validateData);
-        if (AdminModel::where('username', $data['username'])->value('id')) {
-            return json(['msg' => '管理员账号重复'], 422);
-        }
-        $AdminPath = ImageUtils::saveImage($image, 'originalAvatars', 'thumbAvatars', $data['username']);
-        if (!$AdminPath) {
-            return json(['msg' => '头像文件保存失败，请稍后重新尝试'], 500);
-        }
-        $data['avatar_url'] = $AdminPath;
-        AdminModel::create($data, ['name', 'username', 'password', 'type', 'status', 'avatar_url']);
-        return json(['msg' => '新增管理员成功']);*/
-        $data = $request->all();
+        $data = $request->validated();
         if (User::where('username', $data['username'])->value('id')) {
             return $response->json(['msg' => '管理员账号重复'])->withStatus(422);
         }
-        User::insert([
+        $image = $request->file('avatar');
+        if ($image instanceof UploadedFile) {
+            $avatar_url = $this->imageService->saveUserAvatar($image, $data['username']);
+            if (!$avatar_url) {
+                return $response->json(['msg' => '由于头像保存失败，因此新增管理员失败，请稍后重试'])->withStatus(422);
+            }
+            $data['avatar_url'] = $avatar_url;
+        }
+        User::create(array_filter([
             'username' => $data['username'],
             'password' => password_hash($data['password'], PASSWORD_DEFAULT),
-        ]);
-        //User::create($data, ['name', 'username', 'password', 'type', 'status', 'avatar_url']);
+            'nickname' => $data['nickname'] ?? null,
+            'avatar_url' => $data['avatar_url'] ?? null,
+        ], fn($v) => !is_null($v)));
         return $response->json(['msg' => '新增管理员成功']);
     }
 
     #[PostMapping('login')]
+    #[Scene(UserRequest::SCENE_LOGIN)]
     public function login(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();

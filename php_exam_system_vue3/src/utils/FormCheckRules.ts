@@ -18,7 +18,7 @@ export const adminAccountRules: Record<string, FormItemRule[]> = {
             trigger: ['blur', 'change'],
         },
     ],
-    name: [
+    nickname: [
         {required: true, message: '请输入用户名', trigger: ['blur', 'change']},
         {
             pattern: /^[a-zA-Z0-9\u4e00-\u9fa5]{3,12}$/,

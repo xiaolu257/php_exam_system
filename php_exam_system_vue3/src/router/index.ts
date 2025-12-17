@@ -13,6 +13,11 @@ const routes = [
         component: () => import("@/view/Public/Login.vue"),
     },
     {
+        name: 'Register',
+        path: '/Register',
+        component: () => import("@/view/Public/Register.vue"),
+    },
+    {
         name: 'Manager',
         path: '/Manager',
         redirect: '/Manager/Home',
@@ -45,10 +50,10 @@ let lastRegisteredUserType = -1;
 // 全局前置守卫
 router.beforeEach(async (to) => {
     const isLogin = await checkIsLogin();
-    if (to.path === '/' && isLogin) {
+    if ((to.path === '/' || to.path === '/Register') && isLogin) {
         return '/Manager';
     }
-    if (to.path !== '/' && !isLogin) {
+    if ((to.path !== '/' && to.path !== '/Register') && !isLogin) {
         return '/';
     }
     const {userType} = useGlobalStore();
@@ -71,7 +76,7 @@ async function checkIsLogin() {
     // 刷新页面才验证一次
     if (!isTokenValidated) {
         try {
-            const { userData } = await myPost('user/validateAdminToken', {}, false);
+            const {userData} = await myPost('user/validateAdminToken', {}, false);
             loadAdminData(userData);
             isTokenValidated = true;
             return true;
@@ -83,7 +88,6 @@ async function checkIsLogin() {
 
     return true; // 内存状态已有，不必每次路由跳转都请求
 }
-
 
 
 export default router;

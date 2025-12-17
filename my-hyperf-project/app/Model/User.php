@@ -4,24 +4,26 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use Carbon\Carbon;
 use Hyperf\Database\Model\SoftDeletes;
 use Hyperf\DbConnection\Model\Model;
 
 /**
- * @property int $id 
- * @property string $username 
- * @property string $password 
- * @property string $role 
- * @property string $nickname 
- * @property string $avatar_url 
- * @property int $status 
- * @property \Carbon\Carbon $created_at 
- * @property \Carbon\Carbon $updated_at 
- * @property string $delete_time 
+ * @property int $id
+ * @property string $username
+ * @property string $password
+ * @property string $role
+ * @property string $nickname
+ * @property string $avatar_url
+ * @property int $status
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property string $delete_time
  */
 class User extends Model
 {
     use SoftDeletes;
+
     /**
      * The table associated with the model.
      */
@@ -30,7 +32,7 @@ class User extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected array $fillable = [];
+    protected array $fillable = ['username', 'password', 'nickname', 'avatar_url'];
 
     /**
      * The attributes that should be cast to native types.
