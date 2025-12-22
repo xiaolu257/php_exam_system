@@ -179,20 +179,25 @@ class UserController
             return $response->json(['msg' => '管理员账号不存在，修改失败'])->withStatus(404);
         }
         $image = $request->file('avatar');
+        $oldAvatarUrl = $model->avatar_url;
+        $newAvatarUrl = null;
         if ($image instanceof UploadedFile) {
-            $avatar_url = $this->imageService->saveUserAvatar($image, $validated['username']);
-            if (!$avatar_url) {
+            $newAvatarUrl = $this->imageService->saveUserAvatar($image, $validated['username']);
+            if (!$newAvatarUrl) {
                 return $response->json(['msg' => '由于新头像保存失败，因此修改个人资料失败，请稍后重试'])->withStatus(422);
             }
-            $validated['avatar_url'] = $avatar_url;
+            $validated['avatar_url'] = $newAvatarUrl;
+
         }
-        $model->update(array_filter([
+        $updateData = array_filter([
             'nickname' => $validated['nickname'] ?? null,
             'avatar_url' => $validated['avatar_url'] ?? null,
-        ], fn($v) => !is_null($v)));
-        return $response->json(['msg' => '修改个人资料成功', 'userData' => array_filter([
-            'nickname' => $validated['nickname'] ?? null,
-            'avatar_url' => $validated['avatar_url'] ?? null,
-        ], fn($v) => !is_null($v))]);
+        ], fn($v) => !is_null($v));
+        $model->update($updateData);
+        //执行到这一步说明更新操作没抛出异常，如果上传有新头像可以安全删除旧头像
+        if ($newAvatarUrl && $oldAvatarUrl && $oldAvatarUrl != $newAvatarUrl) {
+            $this->imageService->deleteUserAvatar($oldAvatarUrl);
+        }
+        return $response->json(['msg' => '修改个人资料成功', 'userData' => $updateData]);
     }
 }

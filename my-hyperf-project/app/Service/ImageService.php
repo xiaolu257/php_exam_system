@@ -3,11 +3,11 @@
 namespace App\Service;
 
 
-use Exception;
 use Hyperf\HttpMessage\Upload\UploadedFile;
 use Hyperf\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
 use Random\RandomException;
+use Throwable;
 
 class ImageService
 {
@@ -17,32 +17,6 @@ class ImageService
     {
         $this->logger = $loggerFactory->get('ImageService', 'upload_files');
     }
-
-
-//    /**
-//     * 获取头像或头像缩略图
-//     * @param string $avatarUrl
-//     * @param string $baseUrl
-//     * @return File|Json
-//     */
-//    public static function getImageFromPath(string $avatarUrl, string $baseUrl): File|Json
-//    {
-//        try {
-//            if (!$avatarUrl) {
-//                return json(['error' => 'No data provided']);
-//            }
-//
-//            $avatarPath = app()->getRootPath() . "uploads/$baseUrl/" . $avatarUrl;
-//            if (!file_exists($avatarPath)) {
-//                return json(['error' => '头像路径不存在']);
-//            }
-//
-//            return download($avatarPath, "$avatarUrl.jpg", false, 1)->force(false);
-//        } catch (Exception $e) {
-//            return json(['error' => '服务器内部错误: ' . $e->getMessage()]);
-//        }
-//    }
-
 
     public function saveUserAvatar(UploadedFile $file, string $username): ?string
     {
@@ -74,7 +48,7 @@ class ImageService
         // 移动文件
         try {
             $file->moveTo($savePath);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->logger->error($e->getMessage());
             return null;
         }
@@ -82,4 +56,40 @@ class ImageService
         return $date . '/' . $avatarName;
     }
 
+    public function deleteUserAvatar(string $avatarUrl): bool
+    {
+        if (empty($avatarUrl) || in_array($avatarUrl, ['default.jpg', 'default.png'], true)) {
+            return false;
+        }
+
+        // 真实文件路径
+        $filePath = BASE_PATH . '/uploads/userAvatars/' . $avatarUrl;
+
+        // 不存在直接返回 true（幂等）
+        if (!file_exists($filePath)) {
+            $this->logger->info("Avatar not found: {$filePath}");
+            return true;
+        }
+
+        // 非文件（安全兜底）
+        if (!is_file($filePath)) {
+            $this->logger->warning("Avatar path is not file: {$filePath}");
+            return false;
+        }
+
+        try {
+            if (unlink($filePath)) {
+                $dir = dirname($filePath);
+                // 只删空目录
+                if (is_dir($dir) && count(scandir($dir)) === 2) {
+                    @rmdir($dir);
+                }
+                return true;
+            }
+            return false;
+        } catch (Throwable $e) {
+            $this->logger->error('Delete avatar failed: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
