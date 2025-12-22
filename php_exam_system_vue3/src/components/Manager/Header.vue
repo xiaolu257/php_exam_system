@@ -9,7 +9,7 @@
       </el-button>
     </el-col>
     <el-col :span="18">
-      <el-tag>当前登录IP:{{ ipAddress }}</el-tag>
+
     </el-col>
     <el-col :span="4" class="col">
       <span>{{ userNickName }}</span>
@@ -23,7 +23,6 @@
           <p><strong>账号：</strong>{{ username }}</p>
           <p><strong>昵称：</strong>{{ userNickName }}</p>
           <p><strong>角色：</strong>{{ getAdminType(userType) }}</p>
-          <p><strong>IP 地址：</strong>{{ ipAddress }}</p>
           <el-row justify="center">
             <el-button type="primary" @click="goToProfile">修改</el-button>
           </el-row>
@@ -43,7 +42,7 @@ import {storeToRefs} from "pinia";
 import {AvatarThumbBaseURL} from "@/utils/global";
 import {getAdminType, quitLogin} from "@/api/Admin";
 
-const {isFolded, ipAddress, username, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
+const {isFolded, username, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
 
 function changeFolded() {
   isFolded.value = !isFolded.value;

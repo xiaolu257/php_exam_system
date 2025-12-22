@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Util\CorsUtil;
 use Hyperf\Context\Context;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -12,42 +13,20 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class CorsMiddleware implements MiddlewareInterface
 {
-//    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-//    {
-//        $response = Context::get(ResponseInterface::class);
-//        $response = $response->withHeader('Access-Control-Allow-Origin', '*')
-//            ->withHeader('Access-Control-Allow-Credentials', 'true')
-//            // Headers 可以根据实际情况进行改写。
-//            ->withHeader('Access-Control-Allow-Headers', 'DNT,Keep-Alive,User-Agent,Cache-Control,Content-Type,Authorization,Fingerprint');
-//
-//        Context::set(ResponseInterface::class, $response);
-//
-//        if ($request->getMethod() == 'OPTIONS') {
-//            return $response;
-//        }
-//
-//        return $handler->handle($request);
-//    }
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // 预检请求直接返回
+        // 取出请求 Origin（可能为空）
+        $origin = $request->getHeaderLine('Origin');
+
+        // 预检请求：直接返回带 CORS 的空响应
         if ($request->getMethod() === 'OPTIONS') {
-            return $this->buildResponse(Context::get(ResponseInterface::class));
+            $response = Context::get(ResponseInterface::class);
+            return CorsUtil::apply($response, $origin);
         }
 
-        // 继续执行业务
+        // 正常请求
         $response = $handler->handle($request);
 
-        // 给最终响应加跨域头
-        return $this->buildResponse($response);
-    }
-
-    private function buildResponse(ResponseInterface $response): ResponseInterface
-    {
-        return $response
-            ->withHeader('Access-Control-Allow-Origin', '*')
-            ->withHeader('Access-Control-Allow-Credentials', 'true')
-            ->withHeader('Access-Control-Allow-Headers', 'DNT,Keep-Alive,User-Agent,Cache-Control,Content-Type,Authorization,Fingerprint')
-            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        return CorsUtil::apply($response, $origin);
     }
 }

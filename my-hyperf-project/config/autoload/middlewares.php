@@ -16,7 +16,7 @@ use Hyperf\Validation\Middleware\ValidationMiddleware;
 
 return [
     'http' => [
-        ValidationMiddleware::class,
         CorsMiddleware::class,
+        ValidationMiddleware::class,
     ],
 ];

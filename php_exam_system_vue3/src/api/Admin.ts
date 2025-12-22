@@ -7,9 +7,8 @@ import {useGlobalStore} from "@/stores/counter";
 
 export function getAdminType(userType: number): string {
     const adminTypes: Record<number, string> = {
-        0: '审核管理员',
-        1: '普通管理员',
-        2: '超级管理员'
+        0: '用户',
+        1: '管理员',
     };
 
     return adminTypes[userType] ?? '未知类型';
@@ -35,12 +34,11 @@ export const intToIp = (ipInt: number): string => {
     return `${byte1}.${byte2}.${byte3}.${byte4}`;
 }
 export const loadAdminData = (userData: any) => {
-    const {username: _username = '', type = 0, name = '', avatar_url = '', login_ip = ''} = userData;
-    const {ipAddress, username, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
-    ipAddress.value = intToIp(login_ip);
+    const {username: _username = '', type = 0, nickname = '', avatar_url = ''} = userData;
+    const {username, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
     username.value = _username;
     userType.value = type;
-    userNickName.value = name;
+    userNickName.value = nickname;
     userAvatarUrl.value = avatar_url;
 }
 

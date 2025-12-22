@@ -19,6 +19,7 @@
     </template>
     <el-row justify="center">
       <el-button type="primary" @click="handleSave">{{ submitActionTitle }}</el-button>
+      <el-button v-if="initData" type="success" @click="onReset">重置</el-button>
       <el-button v-if="onCancel" @click="onCancel">取消</el-button>
       <slot name="otherButtons"></slot>
     </el-row>
@@ -121,8 +122,7 @@ const getChangedFields = () => {
   const originData = initData;
   if (!originData) return null;
 
-  const changedData: any = {};
-  console.log(props.requiredUpdateFields)
+  const changedData: Record<string, any> = {};
   const requiredUpdateFields = props.requiredUpdateFields ?? (props.formConfig.length > 0 ? [props.formConfig[0].name] : []);
   // 更新时的必备字段
   requiredUpdateFields.forEach((field) => {
@@ -168,18 +168,46 @@ const handleSave = () => {
   // 有变更才校验和提交
   validateAndSubmit(changedData);
 };
-const validateAndSubmit = (dataToSubmit: any) => {
+const validateAndSubmit = (dataToSubmit: Record<string, any>) => {
   formRef.value?.validate((valid) => {
     if (valid) {
       let callable = () => {}
       if (initData) {
         callable = () => {
-          initData = cloneDeep(formData); // 更新初始数据
+          const uploadKeys = props.formConfig
+              .filter(
+                  (item) => item instanceof FormUploadConfig && item.options instanceof SingleImageUploadOption
+              )
+              .map((item) => item.name);
+          Object.keys(initData).forEach((key) => {
+            if (uploadKeys.includes(key) && Array.isArray(formData[key]) && formData[key].length == 0) {
+              return
+            }
+            initData[key] = formData[key];
+          });
+        }
+      }
+      for (const key in dataToSubmit) {
+        if (dataToSubmit[key] == '') {
+          delete dataToSubmit[key];
         }
       }
       props.submitAction(dataToSubmit, callable);
     }
   });
+};
+const onReset = () => {
+  if (!formRef.value) return;
+
+  // 1️⃣ 重置校验状态
+  formRef.value.resetFields();
+
+  // 2️⃣ 如果是编辑表单，把 initData 同步回 formData
+  if (initData) {
+    Object.keys(formData).forEach((key) => {
+      formData[key] = initData![key];
+    });
+  }
 };
 // 表单校验规则
 const formRules: FormRules = props.formConfig.reduce((rules: FormRules, item: AbstractFormConfigItem) => {

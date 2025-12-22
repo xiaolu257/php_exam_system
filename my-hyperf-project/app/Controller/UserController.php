@@ -92,7 +92,7 @@ class UserController
         ]);
     }
 
-    #[PostMapping('validateAdminToken')]
+    #[PostMapping('validate-admin-token')]
     public function validateAdminToken(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         try {
@@ -153,5 +153,46 @@ class UserController
         } catch (Exception $e) {
             return $response->json(['msg' => 'Token 无效：' . $e->getMessage()])->withStatus(401);
         }
+    }
+
+    #[GetMapping('get-user-avatar-thumb')]
+    #[Scene(UserRequest::SCENE_GET_USER_AVATAR_THUMB)]
+    public function getUserAvatarThumb(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validated = $request->validated();
+        $avatarPath = BASE_PATH . "/uploads/userAvatars/" . $validated['avatarUrl'];
+        if (!file_exists($avatarPath)) {
+            return $response->json(['error' => '头像路径不存在'])->withStatus(404);
+        }
+
+        return $response->download($avatarPath, $validated['avatarUrl']);
+    }
+
+    #[PostMapping('update-profile')]
+    #[Scene(UserRequest::SCENE_UPDATE_PROFILE)]
+    public function updateProfile(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validated = $request->validated();
+
+        $model = User::query()->where('username', $validated['username'])->select(['id', 'username', 'nickname', 'avatar_url'])->first();
+        if (!$model) {
+            return $response->json(['msg' => '管理员账号不存在，修改失败'])->withStatus(404);
+        }
+        $image = $request->file('avatar');
+        if ($image instanceof UploadedFile) {
+            $avatar_url = $this->imageService->saveUserAvatar($image, $validated['username']);
+            if (!$avatar_url) {
+                return $response->json(['msg' => '由于新头像保存失败，因此修改个人资料失败，请稍后重试'])->withStatus(422);
+            }
+            $validated['avatar_url'] = $avatar_url;
+        }
+        $model->update(array_filter([
+            'nickname' => $validated['nickname'] ?? null,
+            'avatar_url' => $validated['avatar_url'] ?? null,
+        ], fn($v) => !is_null($v)));
+        return $response->json(['msg' => '修改个人资料成功', 'userData' => array_filter([
+            'nickname' => $validated['nickname'] ?? null,
+            'avatar_url' => $validated['avatar_url'] ?? null,
+        ], fn($v) => !is_null($v))]);
     }
 }

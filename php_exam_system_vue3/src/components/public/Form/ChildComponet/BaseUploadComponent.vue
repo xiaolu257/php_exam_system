@@ -51,7 +51,7 @@
 
 <script lang="ts" setup>
 import {type FormUploadConfig, MultipleImageUploadOption, SingleImageUploadOption,} from "@/utils/FormUploadConfig";
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, ref, watch} from "vue";
 import type {UploadFile} from "element-plus";
 import {ElMessage} from "element-plus";
 import {Delete, Plus} from "@element-plus/icons-vue";
@@ -97,10 +97,6 @@ const uploadLimit = computed(() => {
 
 // 处理上传成功
 const handleUploadSuccess = (response: any, uploadFile: UploadFile) => {
-  if (props.item.options instanceof SingleImageUploadOption) {
-    thumbImageUrl.value = URL.createObjectURL(uploadFile.raw!); // 设置单图片预览地址
-    originImageUrl.value = URL.createObjectURL(uploadFile.raw!); // 设置单图片预览地址
-  }
   fileList.value = [...fileList.value, uploadFile]; // 添加到文件列表
   emit("success", response); // 触发上传成功事件
 };
@@ -140,20 +136,25 @@ const beforeUploadCheck = (file: File) => {
 // 删除图片
 const removeImage = (event: Event) => {
   event.stopPropagation();
-  thumbImageUrl.value = ""; // 清空单图片预览地址
-  originImageUrl.value = ""; // 清空单图片预览地址
-  fileList.value = []; // 清空文件列表
+  fileList.value = [];
 };
-onMounted(async () => {
-  if (props.item.options instanceof SingleImageUploadOption) {
-    const avatarUrl = props.formData[props.item.name];
-    if (avatarUrl) {
-      thumbImageUrl.value = props.item.options.getThumbImageURL?.(avatarUrl) ?? '';
-      originImageUrl.value = props.item.options.getOriginImageURL?.(avatarUrl) ?? '';
-    }
-  }
-
-});
+watch(
+    () => props.formData[props.item.name],
+    (val) => {
+      if (Array.isArray(val) && val.length == 0) {
+        thumbImageUrl.value = "";
+        originImageUrl.value = "";
+      } else if (props.item.options instanceof SingleImageUploadOption && typeof val === "string") {
+        thumbImageUrl.value = props.item.options.getThumbImageURL?.(val) ?? "";
+        originImageUrl.value = props.item.options.getOriginImageURL?.(val) ?? "";
+      } else if (props.item.options instanceof SingleImageUploadOption && Array.isArray(val) && val[0] instanceof File) {
+        const url = URL.createObjectURL(val[0]);
+        thumbImageUrl.value = url;
+        originImageUrl.value = url;
+      }
+    },
+    {immediate: true}
+);
 
 </script>
 

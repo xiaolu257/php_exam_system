@@ -27,41 +27,48 @@ import {adminAccountRules} from "@/utils/FormCheckRules";
 import {FormUploadConfigFactory} from "@/utils/FormUploadConfig";
 import {storeToRefs} from "pinia";
 import {useGlobalStore} from "@/stores/counter";
-import {getAdminType, loadAdminData, quitLogin} from "@/api/Admin";
+import {getAdminType, quitLogin} from "@/api/Admin";
 import BaseEditFormDialog from "@/components/public/Table/BaseEditFormDialog.vue";
 import {myPost} from "@/api/utils/axios";
 import MyMessage from "@/utils/MyMessage";
 import {buildFormData} from "@/api/utils/FormData";
+import {AvatarBaseURL, AvatarThumbBaseURL} from "@/utils/global";
 
 const getOriginImageURL = (url: string): string => {
-  return `http://xiaolu.cn/api/SuperManager/getAdminAvatar?avatarUrl=${url}`;
+  return `${AvatarBaseURL}${url}`;
 };
 
 const getThumbImageURL = (url: string): string => {
-  return `http://xiaolu.cn/api/SuperManager/getAdminAvatarThumb?avatarUrl=${url}`;
+  return `${AvatarThumbBaseURL}${url}`;
 };
-const {ipAddress, username: globalUsername, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
+const {username: globalUsername, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
 const initData: Record<string, any> = {
   username: globalUsername.value,
   type: getAdminType(userType.value),
-  login_ip: ipAddress.value,
-  name: userNickName.value,
-  avatar_url: userAvatarUrl.value
+  nickname: userNickName.value,
+  avatar: userAvatarUrl.value
 };
 const formConfig: AbstractFormConfigItem[] = [
   FormInputConfigFactory.createReadOnlyTextInput('username', '账号'),
-  FormInputConfigFactory.createReadOnlyTextInput('type', '管理员类型'),
-  FormInputConfigFactory.createReadOnlyTextInput('login_ip', '登录IP'),
-  FormInputConfigFactory.createEditableTextInput('name', '昵称', 'name', adminAccountRules.name),
-  FormUploadConfigFactory.createSingleImageSelector('avatar_url', '头像', getThumbImageURL, getOriginImageURL),
+  FormInputConfigFactory.createReadOnlyTextInput('type', '用户类型'),
+  FormInputConfigFactory.createEditableTextInput('nickname', '昵称', 'name', adminAccountRules.name),
+  FormUploadConfigFactory.createSingleImageSelector('avatar', '头像', getThumbImageURL, getOriginImageURL),
 ];
 const updateProfile = async (data: Record<string, any>, callback: () => void) => {
-  const formData = buildFormData(data, 'avatar_url');
-  myPost('ManagerPublicAPI/adminUpdateProfile', formData, true, {
+  const formData = buildFormData(data, 'avatar');
+  myPost('user/update-profile', formData, true, {
     headers: {'Content-Type': 'multipart/form-data'}
   }).then(({msg, userData}) => {
+
+    const {nickname, avatar_url} = userData;
+    const {userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
+    if (nickname) {
+      userNickName.value = nickname;
+    }
+    if (avatar_url) {
+      userAvatarUrl.value = avatar_url;
+    }
     MyMessage.success(msg);
-    loadAdminData(userData)
     callback();
   })
 };

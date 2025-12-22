@@ -15,8 +15,7 @@ export const useGlobalStore = defineStore('global', () => {
     const isFolded = ref(false);
     const username = ref('');
     const userType = ref(0);
-    const ipAddress = ref('');
     const userNickName = ref('');
     const userAvatarUrl = ref('');
-    return {isFolded, username, userType, ipAddress, userNickName, userAvatarUrl};
+    return {isFolded, username, userType, userNickName, userAvatarUrl};
 })

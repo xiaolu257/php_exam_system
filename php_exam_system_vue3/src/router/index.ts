@@ -76,7 +76,7 @@ async function checkIsLogin() {
     // 刷新页面才验证一次
     if (!isTokenValidated) {
         try {
-            const {userData} = await myPost('user/validateAdminToken', {}, false);
+            const {userData} = await myPost('user/validate-admin-token', {}, false);
             loadAdminData(userData);
             isTokenValidated = true;
             return true;
