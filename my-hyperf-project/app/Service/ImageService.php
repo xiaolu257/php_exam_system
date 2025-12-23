@@ -5,8 +5,8 @@ namespace App\Service;
 
 use Hyperf\HttpMessage\Upload\UploadedFile;
 use Hyperf\Logger\LoggerFactory;
+use Imagick;
 use Psr\Log\LoggerInterface;
-use Random\RandomException;
 use Throwable;
 
 class ImageService
@@ -18,78 +18,118 @@ class ImageService
         $this->logger = $loggerFactory->get('ImageService', 'upload_files');
     }
 
-    public function saveUserAvatar(UploadedFile $file, string $username): ?string
+    private function generateAvatarThumb(string $srcPath, string $dstPath, int $maxWidth = 150, int $maxHeight = 150): bool
     {
-        // 获取扩展名
-        $ext = $file->getExtension();
-        // 随机字符串
         try {
-            $randString = bin2hex(random_bytes(4));
-        } catch (RandomException $e) {
-            $this->logger->warning('random_bytes failed, fallback. ' . $e->getMessage());
-            $randString = time() . mt_rand(1000, 9999);
-        }
-        //加上随机字符串组成文件名
-        $avatarName = $username . '_' . $randString . '.' . $ext;
-        $avatarDir = 'uploads/userAvatars';
-        $date = date('Y-m-d');
+            $img = new Imagick($srcPath);
 
-        // 真实保存目录（绝对路径）
-        $saveDir = BASE_PATH . '/' . $avatarDir . '/' . $date;
+            // 等比缩放（不会裁剪）
+            $img->thumbnailImage($maxWidth, $maxHeight, true);
 
-        // 创建目录
-        if (!is_dir($saveDir)) {
-            mkdir($saveDir, 0755, true);
-        }
+            // 写入文件
+            $img->writeImage($dstPath);
 
-        // 最终保存路径
-        $savePath = $saveDir . '/' . $avatarName;
+            // 释放资源
+            $img->clear();
 
-        // 移动文件
-        try {
-            $file->moveTo($savePath);
+            return true;
         } catch (Throwable $e) {
-            $this->logger->error($e->getMessage());
-            return null;
+            $this->logger->error('Generate avatar thumb failed: ' . $e->getMessage());
+            return false;
         }
-        // 返回前端可访问的 URL 路径
-        return $date . '/' . $avatarName;
     }
 
-    public function deleteUserAvatar(string $avatarUrl): bool
+    public function saveUserAvatar(UploadedFile $file, string $username): ?string
+    {
+        $ext = strtolower($file->getExtension());
+
+        // 允许的图片类型
+        $allowExt = ['jpg', 'jpeg', 'png', 'webp'];
+        if (!in_array($ext, $allowExt, true)) {
+            $this->logger->warning('Invalid avatar extension: ' . $ext);
+            return null;
+        }
+
+        // 随机名
+        try {
+            $randString = bin2hex(random_bytes(4));
+        } catch (Throwable) {
+            $randString = time() . mt_rand(1000, 9999);
+        }
+
+        $avatarName = "{$username}_{$randString}.{$ext}";
+        $date = date('Y-m-d');
+
+        $baseDir = BASE_PATH . '/uploads/userAvatars';
+        $originDir = "{$baseDir}/original/{$date}";
+        $thumbDir = "{$baseDir}/thumb/{$date}";
+
+        foreach ([$originDir, $thumbDir] as $dir) {
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+        }
+
+        $originPath = "{$originDir}/{$avatarName}";
+        $thumbPath = "{$thumbDir}/{$avatarName}";
+
+        // 保存原图
+        try {
+            $file->moveTo($originPath);
+            // 生成缩略图（默认 150*150）
+            if (!$this->generateAvatarThumb($originPath, $thumbPath)) {
+                @unlink($originPath);
+                @unlink($thumbPath);
+                return null;
+            }
+        } catch (Throwable $e) {
+            $this->logger->error('Save original avatar failed: ' . $e->getMessage());
+            return null;
+        }
+
+        // 返回逻辑路径（只存一份）
+        return "{$date}/{$avatarName}";
+    }
+
+
+    public function deleteUserAvatar(string $avatarUrl): void
     {
         if (empty($avatarUrl) || in_array($avatarUrl, ['default.jpg', 'default.png'], true)) {
-            return false;
+            return;
         }
 
-        // 真实文件路径
-        $filePath = BASE_PATH . '/uploads/userAvatars/' . $avatarUrl;
+        $baseDir = BASE_PATH . '/uploads/userAvatars';
 
-        // 不存在直接返回 true（幂等）
-        if (!file_exists($filePath)) {
-            $this->logger->info("Avatar not found: {$filePath}");
-            return true;
-        }
+        $paths = [
+            "$baseDir/original/$avatarUrl",
+            "$baseDir/thumb/$avatarUrl",
+        ];
 
-        // 非文件（安全兜底）
-        if (!is_file($filePath)) {
-            $this->logger->warning("Avatar path is not file: {$filePath}");
-            return false;
-        }
+        //尽最大努力删除，前一个失败，后一个继续
+        foreach ($paths as $path) {
+            if (!file_exists($path)) {
+                $this->logger->info("Avatar not found: $path");
+                continue; // 幂等
+            }
 
-        try {
-            if (unlink($filePath)) {
-                $dir = dirname($filePath);
-                // 只删空目录
+            if (!is_file($path)) {
+                $this->logger->warning("Avatar path is not file: $path");
+                continue;
+            }
+
+            try {
+                if (!unlink($path)) {
+                    $this->logger->warning("Failed to delete avatar: $path");
+                    continue;
+                }
+                // 删除空目录（只删日期层）
+                $dir = dirname($path);
                 if (is_dir($dir) && count(scandir($dir)) === 2) {
                     @rmdir($dir);
                 }
-                return true;
+            } catch (Throwable $e) {
+                $this->logger->error('Delete avatar failed: ' . $e->getMessage());
             }
-            return false;
-        } catch (Throwable $e) {
-            $this->logger->error('Delete avatar failed: ' . $e->getMessage());
-            return false;
         }
     }
 }

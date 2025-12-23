@@ -160,7 +160,20 @@ class UserController
     public function getUserAvatarThumb(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
-        $avatarPath = BASE_PATH . "/uploads/userAvatars/" . $validated['avatarUrl'];
+        $avatarPath = BASE_PATH . "/uploads/userAvatars/thumb/" . $validated['avatarUrl'];
+        if (!file_exists($avatarPath)) {
+            return $response->json(['error' => '头像路径不存在'])->withStatus(404);
+        }
+
+        return $response->download($avatarPath, $validated['avatarUrl']);
+    }
+
+    #[GetMapping('get-user-avatar')]
+    #[Scene(UserRequest::SCENE_GET_USER_AVATAR_THUMB)]
+    public function getUserAvatar(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validated = $request->validated();
+        $avatarPath = BASE_PATH . "/uploads/userAvatars/original/" . $validated['avatarUrl'];
         if (!file_exists($avatarPath)) {
             return $response->json(['error' => '头像路径不存在'])->withStatus(404);
         }
