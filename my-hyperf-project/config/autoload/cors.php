@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * 自定义 cors 配置
+ */
 return [
     // 允许的来源（白名单）
     'allow_origins' => [

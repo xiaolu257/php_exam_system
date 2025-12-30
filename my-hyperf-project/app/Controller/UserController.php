@@ -32,6 +32,12 @@ class UserController
         return $response->raw('Hello Hyperf!');
     }
 
+    #[GetMapping('test')]
+    public function test(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        return $response->json($request->all());
+    }
+
     #[PostMapping('register')]
     #[Scene(UserRequest::SCENE_REGISTER)]
     public function register(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
@@ -72,7 +78,7 @@ class UserController
             return $response->json(['msg' => '账号已被禁用，登录失败'])->withStatus(403);
         }
         // 创建 access_token & refresh_token
-        $accessToken = TokenUtil::createToken($model->id, $validated['fingerprint']);      // 1小时
+        $accessToken = TokenUtil::createToken($model->id, $validated['fingerprint'], 3600 * 24);      // 1小时
         $refreshToken = TokenUtil::createToken($model->id, $validated['fingerprint'], 3600 * 24 * 7); // 7天
         // 设置过期时间
         $expiresTime = date('Y-m-d H:i:s', time() + 3600);  // 当前时间 + 1小时（access_token过期时间）
@@ -169,7 +175,7 @@ class UserController
     }
 
     #[GetMapping('get-user-avatar')]
-    #[Scene(UserRequest::SCENE_GET_USER_AVATAR_THUMB)]
+    #[Scene(UserRequest::SCENE_GET_USER_AVATAR)]
     public function getUserAvatar(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
@@ -186,16 +192,13 @@ class UserController
     public function updateProfile(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
-
-        $model = User::query()->where('username', $validated['username'])->select(['id', 'username', 'nickname', 'avatar_url'])->first();
-        if (!$model) {
-            return $response->json(['msg' => '管理员账号不存在，修改失败'])->withStatus(404);
-        }
+        $user_id = $request->getAttribute('user_id');
+        $model = User::query()->select(['id', 'username', 'nickname', 'avatar_url'])->find($user_id);
         $image = $request->file('avatar');
         $oldAvatarUrl = $model->avatar_url;
         $newAvatarUrl = null;
         if ($image instanceof UploadedFile) {
-            $newAvatarUrl = $this->imageService->saveUserAvatar($image, $validated['username']);
+            $newAvatarUrl = $this->imageService->saveUserAvatar($image, $model->username);
             if (!$newAvatarUrl) {
                 return $response->json(['msg' => '由于新头像保存失败，因此修改个人资料失败，请稍后重试'])->withStatus(422);
             }

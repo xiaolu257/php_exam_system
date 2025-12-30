@@ -38,10 +38,10 @@ import {FormUploadConfig, SingleImageUploadOption} from "@/utils/FormUploadConfi
 import BaseUploadComponent from "@/components/public/Form/ChildComponet/BaseUploadComponent.vue";
 import BaseSelectComponent from "@/components/public/Form/ChildComponet/BaseSelectComponent.vue";
 // 处理表单保存
-import MyMessage from "@/utils/MyMessage";
 import BaseNumberInputComponent from "@/components/public/Form/ChildComponet/BaseNumberInputComponent.vue";
 import {FormNumberInputConfig} from "@/utils/FormNumberInputConfig";
-import {cloneDeep, isEqual} from "lodash-es";
+import {isEqual} from "lodash-es";
+import MyMessage from "@/utils/MyMessage";
 
 interface Props {
   formConfig: AbstractFormConfigItem[];//表单配置项，决定有什么输入
@@ -55,7 +55,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const width = props.width ?? 280;
-let initData = props.initData ?? cloneDeep(props.initData);
+let initData = props.initData;
 const submitActionTitle = props.submitActionTitle ?? '确认';
 // 计算最大 label 宽度
 const labelWidth = computed(() => {
@@ -123,7 +123,7 @@ const getChangedFields = () => {
   if (!originData) return null;
 
   const changedData: Record<string, any> = {};
-  const requiredUpdateFields = props.requiredUpdateFields ?? (props.formConfig.length > 0 ? [props.formConfig[0].name] : []);
+  const requiredUpdateFields = props.requiredUpdateFields ?? [];
   // 更新时的必备字段
   requiredUpdateFields.forEach((field) => {
     changedData[field] = formData[field];
@@ -141,7 +141,6 @@ const getChangedFields = () => {
 
     const newVal = formData[key];
     const oldVal = originData[key];
-
     if (uploadKeys.includes(key) && Array.isArray(newVal) && newVal.length === 0) return;
     if (!isEqual(newVal, oldVal)) {
       changedData[key] = newVal;

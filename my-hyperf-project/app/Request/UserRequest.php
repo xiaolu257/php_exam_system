@@ -10,6 +10,7 @@ class UserRequest extends FormRequest
 {
     public const SCENE_LOGIN = 'login';
     public const SCENE_REGISTER = 'register';
+    public const SCENE_GET_USER_AVATAR = 'getUserAvatar';
     public const SCENE_GET_USER_AVATAR_THUMB = 'getUserAvatarThumb';
     public const SCENE_UPDATE_PROFILE = 'updateProfile';
 
@@ -21,9 +22,9 @@ class UserRequest extends FormRequest
     protected array $scenes = [
         self::SCENE_LOGIN => ['username', 'password'],
         self::SCENE_REGISTER => ['username', 'password', 'nickname', 'avatar'],
+        self::SCENE_GET_USER_AVATAR => ['avatarUrl' => 'required|string'],
         self::SCENE_GET_USER_AVATAR_THUMB => ['avatarUrl' => 'required|string'],
         self::SCENE_UPDATE_PROFILE => [
-            'username',
             'nickname' => 'required_without:avatar|filled|string|min:2|max:20',
             'avatar' => 'required_without:nickname|image|max:2048',
         ],
