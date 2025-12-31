@@ -13,6 +13,7 @@ class UserRequest extends FormRequest
     public const SCENE_GET_USER_AVATAR = 'getUserAvatar';
     public const SCENE_GET_USER_AVATAR_THUMB = 'getUserAvatarThumb';
     public const SCENE_UPDATE_PROFILE = 'updateProfile';
+    public const SCENE_CHANGE_PASSWORD = 'changePassword';
 
     public function authorize(): bool
     {
@@ -28,6 +29,12 @@ class UserRequest extends FormRequest
             'nickname' => 'required_without:avatar|filled|string|min:2|max:20',
             'avatar' => 'required_without:nickname|image|max:2048',
         ],
+        self::SCENE_CHANGE_PASSWORD => [
+            'oldPassword' => 'required|string|min:6|max:20',
+            'newPassword' => 'required|string|min:6|max:20|different:oldPassword',
+            'confirmPassword' => 'required|string|min:6|max:20|same:newPassword',
+        ],
+
     ];
 
     public function rules(): array
@@ -48,7 +55,9 @@ class UserRequest extends FormRequest
             'password' => '密码',
             'nickname' => '昵称',
             'avatar' => '头像',
-
+            'oldPassword' => '旧密码',
+            'newPassword' => '新密码',
+            'confirmPassword' => '确认密码',
         ];
     }
 }

@@ -44,13 +44,13 @@ class UserController
     {
         $data = $request->validated();
         if (User::where('username', $data['username'])->value('id')) {
-            return $response->json(['msg' => '管理员账号重复'])->withStatus(422);
+            return $response->json(['msg' => '用户账号重复，注册失败'])->withStatus(422);
         }
         $image = $request->file('avatar');
         if ($image instanceof UploadedFile) {
             $avatar_url = $this->imageService->saveUserAvatar($image, $data['username']);
             if (!$avatar_url) {
-                return $response->json(['msg' => '由于头像保存失败，因此新增管理员失败，请稍后重试'])->withStatus(422);
+                return $response->json(['msg' => '由于头像保存失败，因此注册失败，请稍后重试'])->withStatus(422);
             }
             $data['avatar_url'] = $avatar_url;
         }
@@ -60,7 +60,7 @@ class UserController
             'nickname' => $data['nickname'] ?? null,
             'avatar_url' => $data['avatar_url'] ?? null,
         ], fn($v) => !is_null($v)));
-        return $response->json(['msg' => '新增管理员成功']);
+        return $response->json(['msg' => '注册成功']);
     }
 
     #[PostMapping('login')]
@@ -215,5 +215,20 @@ class UserController
             $this->imageService->deleteUserAvatar($oldAvatarUrl);
         }
         return $response->json(['msg' => '修改个人资料成功', 'userData' => $updateData]);
+    }
+
+    #[PostMapping('change-password')]
+    #[Scene(UserRequest::SCENE_CHANGE_PASSWORD)]
+    public function changePassword(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validated = $request->validated();
+        $user_id = $request->getAttribute('user_id');
+        $user = User::query()->select(['id', 'password'])->find($user_id);
+        if (!password_verify($validated['oldPassword'], $user->password)) {
+            return $response->json(['msg' => '旧密码错误，请重新尝试'])->withStatus(422);
+        }
+        $user->password = password_hash($validated['newPassword'], PASSWORD_DEFAULT);
+        $user->save();
+        return $response->json(['msg' => '修改密码成功']);
     }
 }

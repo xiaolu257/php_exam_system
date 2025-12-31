@@ -73,15 +73,14 @@ const updateProfile = async (data: Record<string, any>, callback: () => void) =>
   })
 };
 const editFormConfig: AbstractFormConfigItem[] = [
-  FormInputConfigFactory.createReadOnlyTextInput('username', '账号'),
-  FormInputConfigFactory.createEditablePasswordInput('old_password', '原密码', 'password', true, adminAccountRules.password),
-  FormInputConfigFactory.createEditablePasswordInput('new_password', '新密码', 'password', true, adminAccountRules.password),
-  FormInputConfigFactory.createEditablePasswordInput('confirm_password', '确认密码', 'password', true, adminAccountRules.password),
+  FormInputConfigFactory.createEditablePasswordInput('oldPassword', '原密码', 'oldPassword', true, adminAccountRules.password),
+  FormInputConfigFactory.createEditablePasswordInput('newPassword', '新密码', 'newPassword', true, adminAccountRules.password),
+  FormInputConfigFactory.createEditablePasswordInput('confirmPassword', '确认密码', 'confirmPassword', true, adminAccountRules.password),
 ];
 
 
 const updatePassword = async (data: Record<string, any>, callback: () => void) => {
-  myPost('ManagerPublicAPI/adminUpdatePassword', data)
+  myPost('user/change-password', data)
       .then(({msg}) => {
         MyMessage.success(msg);
         callback();
