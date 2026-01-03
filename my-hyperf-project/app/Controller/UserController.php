@@ -20,7 +20,7 @@ use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Validation\Annotation\Scene;
 
-#[Controller]
+#[Controller(prefix: 'user')]
 class UserController
 {
     #[Inject]

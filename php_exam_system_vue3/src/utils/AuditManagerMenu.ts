@@ -5,8 +5,12 @@ export const AuditManagerMenuRoutes = [
         path: menuBaseUrl + '/Home'
     },
     {
-        name: '信息审核',
+        name: '题目管理',
         children: [
+            {
+                name: '单选题管理',
+                path: menuBaseUrl + '/SingleChoiceQuestionManagement',
+            },
             {
                 name: '审核用户简历',
                 path: menuBaseUrl + '/AuditResume',

@@ -51,4 +51,10 @@ export const allAsyncRoutes = [
         name: 'AuditEnterpriseAuthentication',
         component: () => import("@/view/AuditManager/AuditEnterpriseAuthentication.vue"),
     },
+    {
+        path: 'SingleChoiceQuestionManagement',
+        name: 'SingleChoiceQuestionManagement',
+        component: () => import("@/view/AuditManager/SingleChoiceQuestionManagement.vue"),
+    },
+
 ];

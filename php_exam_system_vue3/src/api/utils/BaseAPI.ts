@@ -35,8 +35,8 @@ export async function deleteItemRows(
 }
 
 
-export async function getOnePageItem(currentPage: number, orderKey: string, orderDirection: string, callback: Function, url: string) {
-    myGet(url, {page: currentPage, orderKey: orderKey, orderDirection: orderDirection})
+export async function getOnePageItem(currentPage: number, orderBy: string, orderDirection: string, callback: Function, url: string) {
+    myGet(url, {page: currentPage, orderBy: orderBy, orderDirection: orderDirection})
         .then((res) => {
             const {data = [], last_page = 0, total = 0} = res;
             callback(data, last_page, total);
@@ -104,13 +104,19 @@ export async function updateItem(data: Record<string, any>, callback: Function, 
         })
 }
 
-export async function searchItem(key: string, value: string, page: number, orderKey: string, orderDirection: string, callback: Function, url: string) {
-    if (!key) {
+export async function searchItem(searchField: string, searchValue: string, page: number, orderBy: string, orderDirection: string, callback: Function, url: string) {
+    if (!searchField) {
         MyMessage.error('请选择搜索依据')
-    } else if (!value) {
+    } else if (!searchValue) {
         MyMessage.error('请输入要搜索的关键字')
     } else {
-        myGet(url, {key, value, page: page, orderKey: orderKey, orderDirection: orderDirection})
+        myGet(url, {
+            searchField,
+            searchValue,
+            page,
+            orderBy,
+            orderDirection
+        })
             .then((res) => {
                 const {data = [], last_page = 0, total = 0} = res;
                 callback(data, last_page, total);

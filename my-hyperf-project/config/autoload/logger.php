@@ -25,7 +25,7 @@ return [
                 //'format' => "[%datetime%] %channel%.%level_name%: %message%\n",
                 'dateFormat' => 'Y-m-d H:i:s',
                 'allowInlineLineBreaks' => true,
-                'includeStacktraces' => true,//添加这句不会在初始化日志文件时显示堆栈信息（一堆空白行），便于阅读
+                'includeStacktraces' => false,//添加这句不会在初始化日志文件时显示堆栈信息（一堆空白行），便于阅读
             ],
         ],
     ],
@@ -43,7 +43,7 @@ return [
                 'format' => null,
                 'dateFormat' => 'Y-m-d H:i:s',
                 'allowInlineLineBreaks' => true,
-                'includeStacktraces' => true,
+                'includeStacktraces' => false,
             ],
         ],
     ],
@@ -61,7 +61,7 @@ return [
                 'format' => null,
                 'dateFormat' => 'Y-m-d H:i:s',
                 'allowInlineLineBreaks' => true,
-                'includeStacktraces' => true,
+                'includeStacktraces' => false,
             ],
         ],
     ],
