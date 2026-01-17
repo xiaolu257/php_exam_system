@@ -1,6 +1,7 @@
 // 定义基础类 BaseSelectOption
 import {AbstractFormConfigItem} from "@/utils/FormInputConfig";
 import type {FormItemRule} from "element-plus";
+import type {ComputedRef} from "vue";
 
 abstract class BaseSelectOption {
     disabled: boolean;
@@ -33,6 +34,25 @@ export class SingleSelectOption extends BaseSelectOption {
     }
 }
 
+// 关联单选下拉框选项类
+export class AssociateSingleSelectOption extends BaseSelectOption {
+    associateFunction: (formData: Record<string, any>) => ComputedRef<{ label: string; value: any }[]>;
+
+    constructor(
+        associateFunction: (formData: Record<string, any>) => ComputedRef<{ label: string; value: any }[]>,
+        disabled: boolean = false,
+        placeholder: string = '',
+        clearable: boolean = false
+    ) {
+        super(disabled, placeholder, clearable);
+        this.associateFunction = associateFunction;
+    }
+
+    get options() {
+        return this.associateFunction({});
+    }
+}
+
 // 多选下拉框选项类
 export class MultipleSelectOption extends BaseSelectOption {
     options: Array<{ label: string; value: any }>;
@@ -47,37 +67,6 @@ export class MultipleSelectOption extends BaseSelectOption {
         super(disabled, placeholder, clearable);
         this.options = options;
         this.multiple = true;
-    }
-}
-
-// 分组下拉框选项类
-export class GroupedSelectOption extends BaseSelectOption {
-    groupedOptions: Array<{ groupLabel: string; options: Array<{ label: string; value: any }> }>;
-
-    constructor(
-        groupedOptions: Array<{ groupLabel: string; options: Array<{ label: string; value: any }> }>,
-        disabled: boolean = false,
-        placeholder: string = '',
-        clearable: boolean = false
-    ) {
-        super(disabled, placeholder, clearable);
-        this.groupedOptions = groupedOptions;
-    }
-}
-
-// 分组多选选项类
-export class GroupedMultipleSelectOption extends GroupedSelectOption {
-    multiple: boolean;
-
-    constructor(
-        groupedOptions: { groupLabel: string; options: { label: string; value: any }[] }[],
-        multiple: boolean = true,
-        disabled: boolean = false,
-        placeholder: string = '',
-        clearable: boolean = false
-    ) {
-        super(groupedOptions, disabled, placeholder, clearable);
-        this.multiple = multiple;
     }
 }
 
@@ -105,6 +94,18 @@ export class FormSelectConfigFactory {
         return new FormSelectConfig(name, label, selectOptions, rules);
     }
 
+    // 创建关联单选下拉框
+    static createAssociateSingleSelect(
+        name: string,
+        label: string,
+        associateFunction: (formData: Record<string, any>) => ComputedRef<{ label: string; value: any }[]>,
+        placeholder: string = '',
+        rules: FormItemRule[] = []
+    ): FormSelectConfig {
+        const selectOptions = new AssociateSingleSelectOption(associateFunction, false, placeholder);
+        return new FormSelectConfig(name, label, selectOptions, rules);
+    }
+
     // 创建多选下拉框
     static createMultipleSelect(
         name: string,
@@ -116,29 +117,4 @@ export class FormSelectConfigFactory {
         const selectOptions = new MultipleSelectOption(options, false, placeholder);
         return new FormSelectConfig(name, label, selectOptions, rules);
     }
-
-    // 创建分组下拉框
-    static createGroupedSelect(
-        name: string,
-        label: string,
-        groupedOptions: Array<{ groupLabel: string; options: Array<{ label: string; value: any }> }>,
-        placeholder: string = '',
-        rules: FormItemRule[] = []
-    ): FormSelectConfig {
-        const selectOptions = new GroupedSelectOption(groupedOptions, false, placeholder);
-        return new FormSelectConfig(name, label, selectOptions, rules);
-    }
-
-    // 创建分组多选
-    static createGroupedMultipleSelect(
-        name: string,
-        label: string,
-        groupedOptions: { groupLabel: string; options: { label: string; value: any }[] }[],
-        placeholder: string = '',
-        rules: FormItemRule[] = []
-    ): FormSelectConfig {
-        const options = new GroupedMultipleSelectOption(groupedOptions, true, false, placeholder);
-        return new FormSelectConfig(name, label, options, rules);
-    }
-
 }

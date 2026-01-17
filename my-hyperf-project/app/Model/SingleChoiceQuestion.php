@@ -10,7 +10,7 @@ use Hyperf\DbConnection\Model\Model;
 /**
  * @property int $id
  * @property string $content
- * @property string $options
+ * @property array<string, string> $options
  * @property string $correct_answer
  * @property int $score
  * @property Carbon $created_at
@@ -26,10 +26,10 @@ class SingleChoiceQuestion extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected array $fillable = [];
+    protected array $fillable = ['content', 'options', 'correct_answer'];
 
     /**
      * The attributes that should be cast to native types.
      */
-    protected array $casts = ['id' => 'integer', 'score' => 'integer', 'created_at' => 'datetime', 'updated_at' => 'datetime'];
+    protected array $casts = ['id' => 'integer', 'options' => 'json', 'created_at' => 'datetime', 'updated_at' => 'datetime'];
 }

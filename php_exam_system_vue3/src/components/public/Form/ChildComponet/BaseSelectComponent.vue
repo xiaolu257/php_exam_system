@@ -15,33 +15,26 @@
           :value="option.value"
       />
     </template>
-
-    <!-- 分组选项 -->
-    <template v-else-if="item.options instanceof GroupedSelectOption || item.options instanceof GroupedMultipleSelectOption">
-      <el-option-group
-          v-for="group in item.options.groupedOptions"
-          :key="group.groupLabel"
-          :label="group.groupLabel"
-      >
-        <el-option
-            v-for="option in group.options"
-            :key="option.value"
-            :label="option.label"
-            :value="option.value"
-        />
-      </el-option-group>
+    <!-- 关联选项 -->
+    <template v-else-if="item.options instanceof AssociateSingleSelectOption">
+      <el-option
+          v-for="option in associateOptions"
+          :key="option.value"
+          :label="option.label"
+          :value="option.value"
+      />
     </template>
   </el-select>
 </template>
 
 <script lang="ts" setup>
 import {
+  AssociateSingleSelectOption,
   type FormSelectConfig,
   MultipleSelectOption,
-  GroupedSelectOption,
-  GroupedMultipleSelectOption, SingleSelectOption
+  SingleSelectOption
 } from "@/utils/FormSelectConfig";
-import {computed} from "vue";
+import {computed, watch} from "vue";
 
 // Props 定义
 const props = defineProps<{
@@ -51,11 +44,28 @@ const props = defineProps<{
 
 // 计算额外的属性
 const additionalProps = computed(() => {
-  if (props.item.options instanceof MultipleSelectOption || props.item.options instanceof GroupedMultipleSelectOption) {
-    return { multiple: true };
+  if (props.item.options instanceof MultipleSelectOption) {
+    return {multiple: true};
   }
   return {};
 });
+const associateOptions = computed(() => {
+  return props.item.options instanceof AssociateSingleSelectOption
+      ? props.item.options.associateFunction(props.formData).value
+      : []
+})
+watch(
+    associateOptions,
+    (newOptions, oldOptions = []) => {
+      // 规则 1：删除选项 → 清空正确答案
+      if (newOptions.length < oldOptions.length) {
+        props.formData[props.item.name] = ''
+        return
+      }
+    },
+    {immediate: true}
+)
+
 </script>
 
 <style scoped>

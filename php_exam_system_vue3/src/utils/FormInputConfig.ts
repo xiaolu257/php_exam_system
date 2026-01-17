@@ -75,6 +75,16 @@ export class TextAreaWithAutosizeInputOption extends BaseInputOption {
     }
 }
 
+export class DynamicMultipleInputOption extends BaseInputOption {
+    constructor(
+        disabled: boolean = false,
+        placeholder: string = '',
+        clearable: boolean = true
+    ) {
+        super(disabled, placeholder, clearable);
+    }
+}
+
 // 抽象类 AbstractFormConfigItem
 export abstract class AbstractFormConfigItem {
     name: string;
@@ -153,12 +163,19 @@ export class FormInputConfigFactory {
         const options = new TextAreaWithAutosizeInputOption(autosize, true, ''); // disabled为true
         return new FormInputConfig(name, label, options, rules);
     }
+
+    // 创建动态多路文本输入框
+    static createDynamicMultipleTextInput(name: string, label: string, placeholder: string = '', rules: FormItemRule[] = []): FormInputConfig {
+        const options = new DynamicMultipleInputOption(false, placeholder); // disabled默认为false
+        return new FormInputConfig(name, label, options, rules);
+    }
 }
 
 export interface AddDialogConfig {
     addFormConfig: AbstractFormConfigItem[];
     addFormTitle?: string;
     addSubmitAction: (data: Record<string, any>, callback: () => void) => void; // 保存回调函数
+    atSuccess?: () => void
 }
 
 export interface EditDialogConfig {

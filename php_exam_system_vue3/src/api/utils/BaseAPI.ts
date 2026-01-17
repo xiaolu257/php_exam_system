@@ -88,11 +88,10 @@ export async function getToBeReviewedItemCount(url: string, name: string) {
     }
 }
 
-export async function addItem(data: Record<string, any>, callback: Function, url: string) {
-    myPost(url, data).then(({msg}) => {
+export function addItem(url: string, data: Record<string, any>, onSuccess: () => void = () => {}) {
+    myPost(url, data).then(({msg = 'addItem操作成功'}) => {
         MyMessage.success(msg);
-        callback();
-        console.log(callback)
+        onSuccess();
     })
 }
 

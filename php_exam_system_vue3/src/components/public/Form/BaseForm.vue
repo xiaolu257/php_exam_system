@@ -31,7 +31,7 @@
 import type {FormRules} from 'element-plus';
 import {ElForm} from 'element-plus';
 import {computed, reactive, ref} from 'vue';
-import {AbstractFormConfigItem, FormInputConfig,} from "@/utils/FormInputConfig";
+import {AbstractFormConfigItem, DynamicMultipleInputOption, FormInputConfig,} from "@/utils/FormInputConfig";
 import BaseInputComponent from "@/components/public/Form/ChildComponet/BaseInputComponent.vue";
 import {FormSelectConfig, SingleSelectOption} from "@/utils/FormSelectConfig";
 import {FormUploadConfig, SingleImageUploadOption} from "@/utils/FormUploadConfig";
@@ -104,7 +104,11 @@ const formData = reactive<Record<string, any>>(
         }
       } else {
         if (item instanceof FormInputConfig) {
-          acc[item.name] = '';
+          if (item.options instanceof DynamicMultipleInputOption) {
+            acc[item.name] = []
+          } else {
+            acc[item.name] = '';
+          }
         } else if (item instanceof FormSelectConfig) {
           if (item.options instanceof SingleSelectOption) {
             acc[item.name] = item.options.options[0]?.value;
@@ -167,6 +171,17 @@ const handleSave = () => {
   // 有变更才校验和提交
   validateAndSubmit(changedData);
 };
+const filterInvalidSubmitData = (dataToSubmit: Record<string, any>) => {
+  //不要把原来的formData暴露给外部，防止被错误更改导致ui异常或其他异常
+  const validSubmitData: Record<string, any> = {}
+  for (const key in dataToSubmit) {
+    if (dataToSubmit[key] === '' || dataToSubmit[key] === undefined) {
+      continue
+    }
+    validSubmitData[key] = dataToSubmit[key];
+  }
+  return validSubmitData;
+}
 const validateAndSubmit = (dataToSubmit: Record<string, any>) => {
   formRef.value?.validate((valid) => {
     if (valid) {
@@ -186,12 +201,8 @@ const validateAndSubmit = (dataToSubmit: Record<string, any>) => {
           });
         }
       }
-      for (const key in dataToSubmit) {
-        if (dataToSubmit[key] == '') {
-          delete dataToSubmit[key];
-        }
-      }
-      props.submitAction(dataToSubmit, callable);
+      const validSubmitData = filterInvalidSubmitData(dataToSubmit);
+      props.submitAction(validSubmitData, callable);
     }
   });
 };

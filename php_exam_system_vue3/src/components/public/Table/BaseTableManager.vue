@@ -1,9 +1,11 @@
 <template>
   <el-row class="row">
     <el-col v-if="addDialogConfig" :span="2">
-      <BaseAddFormDialog :form-config="addDialogConfig.addFormConfig" :submitAction="addSubmitAction"
+      <BaseAddFormDialog :form-config="addDialogConfig.addFormConfig"
+                         :submitAction="addSubmitAction"
                          :title="addDialogConfig.addFormTitle?? ''"
-                         :width="400"></BaseAddFormDialog>
+                         :width="400"
+      />
     </el-col>
     <el-col :span="8" style="display: flex;align-items: center;">
       总计

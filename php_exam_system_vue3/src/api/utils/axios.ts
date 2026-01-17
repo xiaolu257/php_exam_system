@@ -3,6 +3,7 @@ import axios from 'axios';
 import {ElLoading, ElMessage} from 'element-plus';
 import {useFingerprint} from "@/utils/fingerprint";
 import {quitLogin} from "@/api/Admin";
+import MyMessage from "@/utils/MyMessage";
 
 let loadingInstance: any = null;
 
@@ -73,7 +74,7 @@ const myRequest = async (
             if (res.status === 200) {
                 return res.data;
             } else {
-                ElMessage.error('服务器异常，状态码：' + res.status);
+                MyMessage.error('服务器异常，状态码：' + res.status);
                 return Promise.reject(res);
             }
         })

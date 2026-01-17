@@ -9,6 +9,7 @@ use Hyperf\Validation\Request\FormRequest;
 class SingleChoiceQuestionRequest extends FormRequest
 {
     public const SCENE_GET_ONE_PAGE_SINGLE_CHOICE_QUESTIONS = 'getOnePageSingleChoiceQuestions';
+    public const SCENE_ADD_SINGLE_CHOICE_QUESTIONS = 'addSingleChoiceQuestions';
 
     public function authorize(): bool
     {
@@ -18,20 +19,24 @@ class SingleChoiceQuestionRequest extends FormRequest
     protected array $scenes = [
         self::SCENE_GET_ONE_PAGE_SINGLE_CHOICE_QUESTIONS => [
             'page' => 'required|integer|gt:0',
-            'orderBy' => 'string',
+            'orderBy' => 'string|in:id,content,created_at',
             'orderDirection' => 'string|in:asc,desc',
-            'searchField' => 'string|in:content,options,correct_answer',
+            'searchField' => 'string|in:id,content,options,correct_answer',
             'searchValue' => 'required_with:searchField|string|filled|max:100'
         ],
+
+        self::SCENE_ADD_SINGLE_CHOICE_QUESTIONS => [
+            'content' => 'required|string|max:255',
+            'options' => 'required|array|min:2|max:10',
+            'options.*' => 'string|filled|max:50',
+            'correct_answer' => 'required|integer|index_in:options',
+        ]
     ];
 
     public function rules(): array
     {
         return [
-            'username' => 'required|string|min:6|max:20',
-            'password' => 'required|string|min:6|max:20',
-            'nickname' => 'required|string|min:2|max:20',
-            'avatar' => 'image|max:2048',
+
         ];
     }
 
@@ -43,6 +48,18 @@ class SingleChoiceQuestionRequest extends FormRequest
             'orderDirection' => '排序方向',
             'searchField' => '搜索字段',
             'searchValue' => '搜索值',
+            'content' => '题目',
+            'options' => '选项',
+            'options.*' => '选项内容',
+            'correct_answer' => '正确答案',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'options.*.filled' => ':attribute 不能为空',
+            'correct_answer.index_in' => ':attribute 必须存在于 :field 中',
         ];
     }
 }
