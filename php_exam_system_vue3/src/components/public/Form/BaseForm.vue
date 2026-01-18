@@ -20,6 +20,7 @@
     <el-row justify="center">
       <el-button type="primary" @click="handleSave">{{ submitActionTitle }}</el-button>
       <el-button v-if="initData" type="success" @click="onReset">重置</el-button>
+      <el-button v-else type="danger" @click="clearFormData">清空</el-button>
       <el-button v-if="onCancel" @click="onCancel">取消</el-button>
       <slot name="otherButtons"></slot>
     </el-row>
@@ -85,41 +86,33 @@ const labelWidth = computed(() => {
   });
   return `${maxLabelWidth}px`; // 返回字符串，绑定到 label-width 属性
 });
-
+const createFormData = () => {
+  return props.formConfig.reduce((acc: Record<string, any>, item: AbstractFormConfigItem) => {
+    if (initData) {
+      // 编辑场景，填入 initData
+      acc[item.name] = initData[item.name];
+    } else {
+      // 新增场景，填入默认值
+      if (item instanceof FormInputConfig) {
+        if (item.options instanceof DynamicMultipleInputOption) {
+          acc[item.name] = [];
+        } else {
+          acc[item.name] = '';
+        }
+      } else if (item instanceof FormSelectConfig && item.options instanceof SingleSelectOption) {
+        acc[item.name] = item.options.options[0]?.value ?? '';
+      } else if (item instanceof FormNumberInputConfig) {
+        acc[item.name] = item.options.min ?? 0;
+      } else if (item instanceof FormUploadConfig) {
+        acc[item.name] = null;
+      }
+    }
+    return acc;
+  }, {} as Record<string, any>);
+}
 
 // 创建响应式 formData 对象（深拷贝 initData 避免直接修改全局状态）
-const formData = reactive<Record<string, any>>(
-    props.formConfig.reduce((acc: Record<string, any>, item: AbstractFormConfigItem) => {
-      if (initData) {
-        if (item instanceof FormInputConfig) {
-          acc[item.name] = initData[item.name];
-        } else if (item instanceof FormSelectConfig) {
-          if (item.options instanceof SingleSelectOption) {
-            acc[item.name] = initData[item.name];
-          }
-        } else if (item instanceof FormUploadConfig) {
-          acc[item.name] = initData[item.name];
-        } else if (item instanceof FormNumberInputConfig) {
-          acc[item.name] = initData[item.name];
-        }
-      } else {
-        if (item instanceof FormInputConfig) {
-          if (item.options instanceof DynamicMultipleInputOption) {
-            acc[item.name] = []
-          } else {
-            acc[item.name] = '';
-          }
-        } else if (item instanceof FormSelectConfig) {
-          if (item.options instanceof SingleSelectOption) {
-            acc[item.name] = item.options.options[0]?.value;
-          }
-        } else if (item instanceof FormNumberInputConfig) {
-          acc[item.name] = item.options.min;
-        }
-      }
-      return acc;
-    }, {})
-);
+const formData = reactive<Record<string, any>>(createFormData());
 // 表单引用
 const formRef = ref<InstanceType<typeof ElForm> | null>(null);
 const getChangedFields = () => {
@@ -219,6 +212,10 @@ const onReset = () => {
     });
   }
 };
+const clearFormData = () => {
+  const newData = createFormData(); // 不传 initData，表示新增
+  Object.assign(formData, newData);
+}
 // 表单校验规则
 const formRules: FormRules = props.formConfig.reduce((rules: FormRules, item: AbstractFormConfigItem) => {
   if (item.rules) {
