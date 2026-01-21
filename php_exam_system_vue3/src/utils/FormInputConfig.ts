@@ -185,7 +185,7 @@ export interface EditDialogConfig {
     editFormConfig: AbstractFormConfigItem[];
     editFormTitle: string;
     editSubmitAction: (data: Record<string, any>, callback: () => void) => void; // 保存回调函数
-    requiredUpdateFields?: string[];//针对修改时，必须包含的字段
+    updateIdentityFields: string[];//针对修改时，必须包含的唯一标识字段
 }
 
 

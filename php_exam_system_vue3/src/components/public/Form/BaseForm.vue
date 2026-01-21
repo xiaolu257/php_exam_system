@@ -20,7 +20,7 @@
     <el-row justify="center">
       <el-button type="primary" @click="handleSave">{{ submitActionTitle }}</el-button>
       <el-button v-if="initData" type="success" @click="onReset">重置</el-button>
-      <el-button v-else type="danger" @click="clearFormData">清空</el-button>
+      <el-button v-else type="danger" @click="onReset">清空</el-button>
       <el-button v-if="onCancel" @click="onCancel">取消</el-button>
       <slot name="otherButtons"></slot>
     </el-row>
@@ -41,7 +41,6 @@ import BaseSelectComponent from "@/components/public/Form/ChildComponet/BaseSele
 // 处理表单保存
 import BaseNumberInputComponent from "@/components/public/Form/ChildComponet/BaseNumberInputComponent.vue";
 import {FormNumberInputConfig} from "@/utils/FormNumberInputConfig";
-import {isEqual} from "lodash-es";
 import MyMessage from "@/utils/MyMessage";
 
 interface Props {
@@ -51,13 +50,14 @@ interface Props {
   onCancel?: () => void;//点击取消后的回调函数
   width?: number;//表单的宽度
   initData?: Record<string, any>;//表单的初始化数据，一般用于编辑类表单
-  requiredUpdateFields?: string[];//针对修改时，必须包含的字段
+  updateIdentityFields?: string[];//针对修改时，必须包含的字段
 }
 
 const props = defineProps<Props>();
 const width = props.width ?? 280;
-let initData = props.initData;
 const submitActionTitle = props.submitActionTitle ?? '确认';
+const initData = props.initData ? Object.assign({}, props.initData) : null;
+const updateIdentityFields = props.updateIdentityFields ?? ['id'];
 // 计算最大 label 宽度
 const labelWidth = computed(() => {
   const baseChineseWidth = 14;        // 中文字符宽度
@@ -115,54 +115,31 @@ const createFormData = () => {
 const formData = reactive<Record<string, any>>(createFormData());
 // 表单引用
 const formRef = ref<InstanceType<typeof ElForm> | null>(null);
-const getChangedFields = () => {
-  const originData = initData;
-  if (!originData) return null;
-
-  const changedData: Record<string, any> = {};
-  const requiredUpdateFields = props.requiredUpdateFields ?? [];
-  // 更新时的必备字段
-  requiredUpdateFields.forEach((field) => {
-    changedData[field] = formData[field];
-  });
-
-  const uploadKeys = props.formConfig
-      .filter(
-          (item) => item instanceof FormUploadConfig && item.options instanceof SingleImageUploadOption
-      )
-      .map((item) => item.name);
-
-  let hasChanged = false;
-  Object.keys(formData).forEach((key) => {
-    if (requiredUpdateFields.includes(key)) return;
-
-    const newVal = formData[key];
-    const oldVal = originData[key];
-    if (uploadKeys.includes(key) && Array.isArray(newVal) && newVal.length === 0) return;
-    if (!isEqual(newVal, oldVal)) {
-      changedData[key] = newVal;
-      hasChanged = true;
-    }
-  });
-
-  return hasChanged ? changedData : null;
-};
-
-
 const handleSave = () => {
-  if (!initData) {
+  if (initData) {
+    //修改场景
+    const changedData: Record<string, any> = {};
+    Object.keys(formData).forEach((key) => {
+      const newVal = formData[key];
+      const oldVal = initData[key];
+      if (newVal !== oldVal) {
+        changedData[key] = newVal;
+      }
+    });
+    if (Object.keys(changedData).length === 0) {
+      MyMessage.warning("新数据与原数据一致，无需修改");
+    } else {
+      // 有变更才校验和提交,同时附带上更新标识符，如id等字段
+      Object.keys(updateIdentityFields).forEach((key) => {
+        changedData[key] = formData[key];
+      });
+      validateAndSubmit(changedData);
+    }
+
+  } else {
     // 新增场景直接校验提交
     validateAndSubmit(formData);
-    return;
   }
-  //修改场景
-  const changedData = getChangedFields();
-  if (!changedData) {
-    MyMessage.warning("新数据与原数据一致，无需修改");
-    return;
-  }
-  // 有变更才校验和提交
-  validateAndSubmit(changedData);
 };
 const filterInvalidSubmitData = (dataToSubmit: Record<string, any>) => {
   //不要把原来的formData暴露给外部，防止被错误更改导致ui异常或其他异常
@@ -200,22 +177,14 @@ const validateAndSubmit = (dataToSubmit: Record<string, any>) => {
   });
 };
 const onReset = () => {
-  if (!formRef.value) return;
-
-  // 1️⃣ 重置校验状态
-  formRef.value.resetFields();
-
-  // 2️⃣ 如果是编辑表单，把 initData 同步回 formData
   if (initData) {
     Object.keys(formData).forEach((key) => {
-      formData[key] = initData![key];
+      formData[key] = initData[key];
     });
+  } else {
+    formRef.value?.resetFields();
   }
 };
-const clearFormData = () => {
-  const newData = createFormData(); // 不传 initData，表示新增
-  Object.assign(formData, newData);
-}
 // 表单校验规则
 const formRules: FormRules = props.formConfig.reduce((rules: FormRules, item: AbstractFormConfigItem) => {
   if (item.rules) {

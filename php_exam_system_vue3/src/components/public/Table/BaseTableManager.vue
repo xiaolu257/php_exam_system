@@ -56,7 +56,7 @@
         <BaseEditFormDialog v-if="editDialogConfig" :control-name="editDialogConfig.editButtonName"
                             :form-config="editDialogConfig.editFormConfig"
                             :init-data="filterFormData(scope.row,editDialogConfig.editFormConfig)"
-                            :required-update-fields="editDialogConfig.requiredUpdateFields"
+                            :update-identity-fields="editDialogConfig.updateIdentityFields"
                             :submitAction="editSubmitAction"
                             :title="editDialogConfig.editFormTitle"
                             :width="editDialogConfig.editDialogWidth"

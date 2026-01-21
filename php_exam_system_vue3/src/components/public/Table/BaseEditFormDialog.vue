@@ -4,9 +4,13 @@
              destroy-on-close
              draggable>
     <el-row align="middle" justify="center">
-      <TableBaseForm :form-config="formConfig" :init-data="initData" :on-cancel="closeDialog"
-                     :required-update-fields="requiredUpdateFields"
-                     :submitAction="submitAction" :width="width"></TableBaseForm>
+      <BaseForm :form-config="formConfig"
+                :init-data="initData"
+                :on-cancel="closeDialog"
+                :submitAction="submitAction"
+                :width="width"
+                :update-identity-fields="updateIdentityFields"
+      />
     </el-row>
   </el-dialog>
 </template>
@@ -14,7 +18,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue';
 import {AbstractFormConfigItem} from "@/utils/FormInputConfig";
-import TableBaseForm from "@/components/public/Form/BaseForm.vue";
+import BaseForm from "@/components/public/Form/BaseForm.vue";
 
 // 定义 Props 的接口
 interface Props {
@@ -26,7 +30,7 @@ interface Props {
   buttonSize?: 'large' | 'default' | 'small';
   buttonType?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'text' | 'default';
   initData: Record<string, any>;
-  requiredUpdateFields?: string[];//针对修改时，必须包含的字段
+  updateIdentityFields: string[];//针对修改时，必须包含的字段
 }
 
 // 接收父组件传递的 props
