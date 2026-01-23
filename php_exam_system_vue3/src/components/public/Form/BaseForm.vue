@@ -35,7 +35,7 @@ import {computed, reactive, ref} from 'vue';
 import {AbstractFormConfigItem, DynamicMultipleInputOption, FormInputConfig,} from "@/utils/FormInputConfig";
 import BaseInputComponent from "@/components/public/Form/ChildComponet/BaseInputComponent.vue";
 import {FormSelectConfig, SingleSelectOption} from "@/utils/FormSelectConfig";
-import {FormUploadConfig, SingleImageUploadOption} from "@/utils/FormUploadConfig";
+import {FormUploadConfig} from "@/utils/FormUploadConfig";
 import BaseUploadComponent from "@/components/public/Form/ChildComponet/BaseUploadComponent.vue";
 import BaseSelectComponent from "@/components/public/Form/ChildComponet/BaseSelectComponent.vue";
 // 处理表单保存
@@ -155,24 +155,16 @@ const filterInvalidSubmitData = (dataToSubmit: Record<string, any>) => {
 const validateAndSubmit = (dataToSubmit: Record<string, any>) => {
   formRef.value?.validate((valid) => {
     if (valid) {
-      let callable = () => {}
+      const validSubmitData = filterInvalidSubmitData(dataToSubmit);
       if (initData) {
-        callable = () => {
-          const uploadKeys = props.formConfig
-              .filter(
-                  (item) => item instanceof FormUploadConfig && item.options instanceof SingleImageUploadOption
-              )
-              .map((item) => item.name);
-          Object.keys(initData).forEach((key) => {
-            if (uploadKeys.includes(key) && Array.isArray(formData[key]) && formData[key].length == 0) {
-              return
-            }
+        props.submitAction(validSubmitData, () => {
+          Object.keys(formData).forEach((key) => {
             initData[key] = formData[key];
           });
-        }
+        });
+      } else {
+        props.submitAction(validSubmitData, () => {});
       }
-      const validSubmitData = filterInvalidSubmitData(dataToSubmit);
-      props.submitAction(validSubmitData, callable);
     }
   });
 };

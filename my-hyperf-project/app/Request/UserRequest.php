@@ -27,7 +27,7 @@ class UserRequest extends FormRequest
         self::SCENE_GET_USER_AVATAR_THUMB => ['avatarUrl' => 'required|string'],
         self::SCENE_UPDATE_PROFILE => [
             'nickname' => 'required_without:avatar|filled|string|min:2|max:20',
-            'avatar' => 'required_without:nickname|image|max:2048',
+            'avatar' => 'required_without:nickname|filled|image|max:2048',
         ],
         self::SCENE_CHANGE_PASSWORD => [
             'oldPassword' => 'required|string|min:6|max:20',
@@ -44,7 +44,6 @@ class UserRequest extends FormRequest
             'password' => 'required|string|min:6|max:20',
             'nickname' => 'required|string|min:2|max:20',
             'avatar' => 'image|max:2048',
-
         ];
     }
 
@@ -58,6 +57,13 @@ class UserRequest extends FormRequest
             'oldPassword' => '旧密码',
             'newPassword' => '新密码',
             'confirmPassword' => '确认密码',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'avatar.filled' => '上传的头像不能为空',
         ];
     }
 }

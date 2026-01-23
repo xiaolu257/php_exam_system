@@ -30,7 +30,7 @@ interface Props {
   buttonSize?: 'large' | 'default' | 'small';
   buttonType?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'text' | 'default';
   initData: Record<string, any>;
-  updateIdentityFields: string[];//针对修改时，必须包含的字段
+  updateIdentityFields?: string[];//针对修改时，必须包含的字段
 }
 
 // 接收父组件传递的 props
