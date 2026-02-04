@@ -1,10 +1,7 @@
 <template>
   <el-row class="row">
     <el-col v-if="addDialogConfig" :span="2">
-      <BaseAddFormDialog :form-config="addDialogConfig.addFormConfig"
-                         :submitAction="addSubmitAction"
-                         :title="addDialogConfig.addFormTitle?? ''"
-                         :width="400"
+      <BaseAddFormDialog :add-dialog-config="addDialogConfig"
       />
     </el-col>
     <el-col :span="8" style="display: flex;align-items: center;">
@@ -97,11 +94,12 @@ import {computed, onMounted, ref} from "vue";
 import type {TableInstance} from "element-plus/es/components/table";
 import {ElTable} from "element-plus";
 import BaseTableColumns from "@/components/public/Table/BaseTableColumns.vue";
-import {AbstractFormConfigItem, type AddDialogConfig, type EditDialogConfig} from "@/utils/FormInputConfig";
+import {AbstractFormConfigItem, type EditDialogConfig} from "@/utils/FormInputConfig";
 import BaseAddFormDialog from "@/components/public/Table/BaseAddFormDialog.vue";
 import BaseEditFormDialog from "@/components/public/Table/BaseEditFormDialog.vue";
 import MyMessage from "@/utils/MyMessage";
 import type {TableConfig} from "@/utils/TableConfig";
+import type {AddDialogConfig} from "@/components/public/Form/Types";
 
 interface Props {
   tableConfig: TableConfig;
@@ -112,12 +110,24 @@ interface Props {
 
 const props = defineProps<Props>();
 const deleteRows = props.tableConfig.deleteRows;
-const addSubmitAction = (data: Record<string, any>, callback: () => void) => {
-  props.addDialogConfig?.addSubmitAction(data, () => {
-    callback();
-    refreshTableData();
-  })
-}
+
+const addDialogConfig = computed<AddDialogConfig | undefined>(() => {
+  const config = props.addDialogConfig;
+  if (!config) return undefined;
+
+  return {
+    title: config.title,
+    formConfig: config.formConfig,
+    width: config.width,
+    closeDialogAfterSuccess: config.closeDialogAfterSuccess,
+    submitAction: (data: Record<string, any>, callback: () => void) => {
+      config.submitAction(data, () => {
+        callback();
+        refreshTableData();
+      });
+    },
+  };
+});
 const editSubmitAction = (data: Record<string, any>, callback: () => void) => {
   props.editDialogConfig?.editSubmitAction(data, () => {
     callback();

@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 import BaseTableManager from "@/components/public/Table/BaseTableManager.vue";
 import {TextTableColumn} from "@/utils/MyTableTypeClass";
-import {type AddDialogConfig, FormInputConfigFactory} from "@/utils/FormInputConfig";
+import {FormInputConfigFactory} from "@/utils/FormInputConfig";
 import type {TableConfig} from "@/utils/TableConfig";
 // import {exportSingleChoiceQuestionsToExcel} from "@/api/Export";
 import {computed} from 'vue';
@@ -18,8 +18,9 @@ import {
   searchSingleChoiceQuestions
 } from "@/api/OperationManager";
 import {addItem} from "@/api/utils/BaseAPI";
+import type {AddDialogConfig} from "@/components/public/Form/Types";
 
-const fetchParentAreas = (formData: Record<string, any>) => {
+const associateSingleQuestionOptions = (formData: Record<string, any>) => {
   return computed<{
     label: string;
     value: any;
@@ -30,19 +31,17 @@ const fetchParentAreas = (formData: Record<string, any>) => {
     })) : []
   });
 }
-// 直接计算 addDialogConfig 和 editDialogConfig，避免额外的 computed 嵌套
-const addDialogConfig = computed<AddDialogConfig>(() => ({
-  addFormTitle: '新增单选题',
-  addFormConfig: [
+const addDialogConfig: AddDialogConfig = {
+  title: '新增单选题',
+  formConfig: [
     FormInputConfigFactory.createEditableTextInput('content', '题目', 'content'),
     FormInputConfigFactory.createDynamicMultipleTextInput('options', '选项', 'options'),
-    FormSelectConfigFactory.createAssociateSingleSelect('correct_answer', '正确答案', fetchParentAreas, 'correct_answer')
+    FormSelectConfigFactory.createAssociateSingleSelect('correct_answer', '正确答案', associateSingleQuestionOptions, 'correct_answer')
   ],
-  addSubmitAction: (data: Record<string, any>, onSuccess: () => void) => {
+  submitAction: (data: Record<string, any>, onSuccess: () => void) => {
     addItem('single-choice-question', data, onSuccess);
   },
-}));
-
+};
 
 const tableConfig: TableConfig = {
   deleteRows: deleteSingleChoiceQuestionsRows,

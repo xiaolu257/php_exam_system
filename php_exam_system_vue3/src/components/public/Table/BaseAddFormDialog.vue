@@ -1,25 +1,23 @@
 <!-- TestAddForm.vue -->
 <template>
   <el-button type="primary" @click="openDialog">新增</el-button>
-  <el-dialog v-model="dialogVisible" :title="title" :width="width" align-center append-to-body center destroy-on-close>
+  <el-dialog v-model="dialogVisible" :title="addDialogConfig.title" :width="addDialogConfig.width ?? 400" align-center
+             append-to-body center destroy-on-close>
     <el-row align="middle" justify="center">
-      <BaseForm :form-config="formConfig" :on-cancel="closeDialog" :submitAction="submitAction"></BaseForm>
+      <BaseForm :form-config="addDialogConfig.formConfig" :on-cancel="closeDialog"
+                :submitAction="submitAction"></BaseForm>
     </el-row>
   </el-dialog>
 </template>
 
 <script lang="ts" setup>
 import {ref} from 'vue';
-import {AbstractFormConfigItem} from "@/utils/FormInputConfig";
 import BaseForm from "@/components/public/Form/BaseForm.vue";
+import type {AddDialogConfig} from "@/components/public/Form/Types";
 
 // 定义 Props 的接口
 interface Props {
-  title: string;
-  formConfig: AbstractFormConfigItem[];
-  submitAction: (data: Record<string, any>, callback: () => void) => void;
-  closeDialogAfterSuccess?: boolean;
-  width?: number;
+  addDialogConfig: AddDialogConfig
 }
 
 // 接收父组件传递的 props
@@ -37,11 +35,11 @@ const closeDialog = () => {
   dialogVisible.value = false;
 };
 const submitAction = (data: Record<string, any>, onSuccess: () => void) => {
-  const newOnSuccess = props.closeDialogAfterSuccess ? () => {
+  const newOnSuccess = props.addDialogConfig.closeDialogAfterSuccess ? () => {
     closeDialog();
     onSuccess();
   } : onSuccess;
-  props.submitAction(data, newOnSuccess);
+  props.addDialogConfig.submitAction(data, newOnSuccess);
 }
 
 </script>

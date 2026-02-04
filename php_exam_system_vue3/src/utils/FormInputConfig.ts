@@ -171,12 +171,6 @@ export class FormInputConfigFactory {
     }
 }
 
-export interface AddDialogConfig {
-    addFormConfig: AbstractFormConfigItem[];
-    addFormTitle?: string;
-    addSubmitAction: (data: Record<string, any>, callback: () => void) => void; // 保存回调函数
-    atSuccess?: () => void
-}
 
 export interface EditDialogConfig {
     editButtonName?: string;
