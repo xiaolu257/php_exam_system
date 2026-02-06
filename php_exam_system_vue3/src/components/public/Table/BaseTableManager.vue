@@ -50,14 +50,8 @@
     <BaseTableColumns :table-columns="tableConfig.tableColumns"></BaseTableColumns>
     <el-table-column align="center" fixed="right" label="操作" width="200">
       <template #default="scope">
-        <BaseEditFormDialog v-if="editDialogConfig" :control-name="editDialogConfig.editButtonName"
-                            :form-config="editDialogConfig.editFormConfig"
-                            :init-data="filterFormData(scope.row,editDialogConfig.editFormConfig)"
-                            :update-identity-fields="editDialogConfig.updateIdentityFields"
-                            :submitAction="editSubmitAction"
-                            :title="editDialogConfig.editFormTitle"
-                            :width="editDialogConfig.editDialogWidth"
-        ></BaseEditFormDialog>
+        <BaseEditFormDialog v-if="tableColumnEditDialogConfig"
+                            :edit-dialog-config="createTableColumnEditDialogConfig(scope)"/>
         <el-button v-if="deleteRows" size="small" type="danger" @click="handleDelete(scope.row.id)">
           删除
         </el-button>
@@ -94,17 +88,17 @@ import {computed, onMounted, ref} from "vue";
 import type {TableInstance} from "element-plus/es/components/table";
 import {ElTable} from "element-plus";
 import BaseTableColumns from "@/components/public/Table/BaseTableColumns.vue";
-import {AbstractFormConfigItem, type EditDialogConfig} from "@/utils/FormInputConfig";
 import BaseAddFormDialog from "@/components/public/Table/BaseAddFormDialog.vue";
 import BaseEditFormDialog from "@/components/public/Table/BaseEditFormDialog.vue";
 import MyMessage from "@/utils/MyMessage";
 import type {TableConfig} from "@/utils/TableConfig";
-import type {AddDialogConfig} from "@/components/public/Form/Types";
+import type {AddDialogConfig, EditDialogConfig, TableColumnEditDialogConfig} from "@/components/public/Form/Types";
+import {type AbstractFormConfigItem, DynamicMultipleInputOption, FormInputConfig} from "@/utils/FormInputConfig";
 
 interface Props {
   tableConfig: TableConfig;
   addDialogConfig?: AddDialogConfig;
-  editDialogConfig?: EditDialogConfig;
+  tableColumnEditDialogConfig?: TableColumnEditDialogConfig;
   exportDataToExcel?: () => void;
 }
 
@@ -128,21 +122,37 @@ const addDialogConfig = computed<AddDialogConfig | undefined>(() => {
     },
   };
 });
-const editSubmitAction = (data: Record<string, any>, callback: () => void) => {
-  props.editDialogConfig?.editSubmitAction(data, () => {
-    callback();
-    refreshTableData();
-  })
-}
-const filterFormData = (scopeRow: Record<string, any>, formConfig: AbstractFormConfigItem[]): Record<string, any> => {
+
+const filterFormDataToInitData = (scopeRow: Record<string, any>, formConfig: AbstractFormConfigItem[]): Record<string, any> => {
   const filteredData: Record<string, any> = {};
-  // 遍历表单配置，根据每个项的 name 从 scope.row 中筛选数据
   formConfig.forEach((item) => {
-    if (scopeRow.hasOwnProperty(item.name)) {
-      filteredData[item.name] = scopeRow[item.name]; // 将符合条件的数据加入 filteredData
+    const key = item.name;
+    if (item instanceof FormInputConfig && item.options instanceof DynamicMultipleInputOption) {
+      filteredData[key] = Object.values(scopeRow[key])
+    } else {
+      filteredData[key] = structuredClone(scopeRow[key])
     }
-  });
+  })
   return filteredData;
+}
+const createTableColumnEditDialogConfig = (scope: any): EditDialogConfig => {
+  const config = props.tableColumnEditDialogConfig!;
+  return {
+    title: config.title,
+    formConfig: config.formConfig,
+    width: config.width,
+    controlButtonName: config.controlButtonName,
+    buttonSize: config.buttonSize,
+    buttonType: config.buttonType,
+    initData: filterFormDataToInitData(scope.row, config.formConfig),
+    updateIdentityFields: config.updateIdentityFields,
+    submitAction: (data: Record<string, any>, callback: () => void) => {
+      config.submitAction(data, () => {
+        callback();
+        refreshTableData();
+      });
+    },
+  };
 }
 const tableData = ref<Array<any>>([])//表格数据模型
 const isSearch = ref(false)//表格展示状态

@@ -1,15 +1,18 @@
 <template>
-  <el-button :size="buttonSize" :type="buttonType" @click="openDialog">{{ controlName }}</el-button>
-  <el-dialog v-model="dialogVisible" :title="title" :width="width?? 400" align-center append-to-body center
+  <el-button :size="editDialogConfig.buttonSize ?? 'small'" :type="editDialogConfig.buttonType ?? 'primary'"
+             @click="openDialog">
+    {{ editDialogConfig.controlButtonName ?? '编辑' }}
+  </el-button>
+  <el-dialog v-model="dialogVisible" :title="editDialogConfig.title" :width="editDialogConfig.width?? 400" align-center
+             append-to-body center
              destroy-on-close
              draggable>
     <el-row align="middle" justify="center">
-      <BaseForm :form-config="formConfig"
-                :init-data="initData"
+      <BaseForm :form-config="editDialogConfig.formConfig"
+                :init-data="editDialogConfig.initData"
                 :on-cancel="closeDialog"
                 :submitAction="submitAction"
-                :width="width"
-                :update-identity-fields="updateIdentityFields"
+                :update-identity-fields="editDialogConfig.updateIdentityFields"
       />
     </el-row>
   </el-dialog>
@@ -17,28 +20,17 @@
 
 <script lang="ts" setup>
 import {ref} from 'vue';
-import {AbstractFormConfigItem} from "@/utils/FormInputConfig";
 import BaseForm from "@/components/public/Form/BaseForm.vue";
+import type {EditDialogConfig} from "@/components/public/Form/Types";
 
 // 定义 Props 的接口
 interface Props {
-  title: string;
-  formConfig: AbstractFormConfigItem[];
-  submitAction: (data: Record<string, any>, callback: () => void) => void; // 保存回调函数
-  width?: number;
-  controlName?: string;
-  buttonSize?: 'large' | 'default' | 'small';
-  buttonType?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'text' | 'default';
-  initData: Record<string, any>;
-  updateIdentityFields?: string[];//针对修改时，必须包含的字段
+  editDialogConfig: EditDialogConfig;
 }
 
 // 接收父组件传递的 props
 const props = defineProps<Props>();
 
-const buttonSize = props.buttonSize ?? 'small';
-const buttonType = props.buttonType ?? 'primary';
-const controlName = props.controlName ?? '编辑';
 // 定义控制 dialog 显示与隐藏的响应式变量
 const dialogVisible = ref(false);
 
@@ -52,7 +44,7 @@ const closeDialog = () => {
   dialogVisible.value = false;
 };
 const submitAction = (data: Record<string, any>, callback: () => void) => {
-  props.submitAction(data, () => {
+  props.editDialogConfig.submitAction(data, () => {
     callback();
     closeDialog();
   });

@@ -1,5 +1,6 @@
 <template>
   <BaseTableManager :add-dialog-config="addDialogConfig"
+                    :table-column-edit-dialog-config="editDialogConfig"
                     :table-config="tableConfig">
   </BaseTableManager>
 </template>
@@ -16,9 +17,9 @@ import {
   deleteSingleChoiceQuestionsRows,
   getOnePageSingleChoiceQuestions,
   searchSingleChoiceQuestions
-} from "@/api/OperationManager";
-import {addItem} from "@/api/utils/BaseAPI";
-import type {AddDialogConfig} from "@/components/public/Form/Types";
+} from "@/api/SuperManager";
+import {addItem, updateItem} from "@/api/utils/BaseAPI";
+import type {AddDialogConfig, TableColumnEditDialogConfig} from "@/components/public/Form/Types";
 
 const associateSingleQuestionOptions = (formData: Record<string, any>) => {
   return computed<{
@@ -27,7 +28,7 @@ const associateSingleQuestionOptions = (formData: Record<string, any>) => {
   }[]>(() => {
     return Array.isArray(formData.options) ? formData.options.map((item: string, index: number) => ({
       label: String.fromCharCode(65 + index) + ':' + item,
-      value: index
+      value: String.fromCharCode(65 + index)
     })) : []
   });
 }
@@ -43,6 +44,18 @@ const addDialogConfig: AddDialogConfig = {
   },
 };
 
+const editDialogConfig: TableColumnEditDialogConfig = {
+  title: '修改单选题',
+  formConfig: [
+    FormInputConfigFactory.createReadOnlyTextInput('id', 'ID'),
+    FormInputConfigFactory.createEditableTextInput('content', '题目', 'content'),
+    FormInputConfigFactory.createDynamicMultipleTextInput('options', '选项', 'options'),
+    FormSelectConfigFactory.createAssociateSingleSelect('correct_answer', '正确答案', associateSingleQuestionOptions, 'correct_answer')
+  ],
+  submitAction: (data: Record<string, any>, onSuccess: () => void) => {
+    updateItem('single-choice-question', data, onSuccess);
+  },
+};
 const tableConfig: TableConfig = {
   deleteRows: deleteSingleChoiceQuestionsRows,
   getOnePageData: getOnePageSingleChoiceQuestions,

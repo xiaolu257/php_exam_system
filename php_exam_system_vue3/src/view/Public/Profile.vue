@@ -9,10 +9,7 @@
       <TableBaseForm :form-config="formConfig" :init-data="initData"
                      :submitAction="updateProfile">
         <template v-slot:otherButtons>
-          <BaseEditFormDialog :form-config="editFormConfig"
-                              :init-data="{username:globalUsername}"
-                              :submitAction="updatePassword" :width="400" button-size="default"
-                              control-name="修改密码" title="修改密码"></BaseEditFormDialog>
+          <BaseEditFormDialog :edit-dialog-config="editDialogConfig"/>
         </template>
       </TableBaseForm>
     </el-row>
@@ -33,6 +30,7 @@ import {myPost} from "@/api/utils/axios";
 import MyMessage from "@/utils/MyMessage";
 import {buildFormData} from "@/api/utils/FormData";
 import {AvatarBaseURL, AvatarThumbBaseURL} from "@/utils/global";
+import type {EditDialogConfig} from "@/components/public/Form/Types";
 
 const getOriginImageURL = (url: string): string => {
   return `${AvatarBaseURL}${url}`;
@@ -87,7 +85,14 @@ const updatePassword = async (data: Record<string, any>, callback: () => void) =
         quitLogin();
       })
 };
-
+const editDialogConfig: EditDialogConfig = {
+  formConfig: editFormConfig,
+  initData: [],
+  submitAction: updatePassword,
+  title: "修改密码",
+  controlButtonName: "修改密码",
+  buttonSize: "default"
+}
 </script>
 
 <style scoped>

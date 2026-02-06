@@ -42,6 +42,7 @@ import BaseSelectComponent from "@/components/public/Form/ChildComponet/BaseSele
 import BaseNumberInputComponent from "@/components/public/Form/ChildComponet/BaseNumberInputComponent.vue";
 import {FormNumberInputConfig} from "@/utils/FormNumberInputConfig";
 import MyMessage from "@/utils/MyMessage";
+import {isEqual} from "lodash-es";
 
 interface Props {
   formConfig: AbstractFormConfigItem[];//表单配置项，决定有什么输入
@@ -87,12 +88,12 @@ const labelWidth = computed(() => {
   return `${maxLabelWidth}px`; // 返回字符串，绑定到 label-width 属性
 });
 const createFormData = () => {
-  return props.formConfig.reduce((acc: Record<string, any>, item: AbstractFormConfigItem) => {
-    if (initData) {
-      // 编辑场景，填入 initData
-      acc[item.name] = initData[item.name];
-    } else {
-      // 新增场景，填入默认值
+  if (initData) {
+    // 编辑场景，填入 initData
+    return structuredClone(initData);
+  } else {
+    // 新增场景，填入默认值
+    return props.formConfig.reduce((acc: Record<string, any>, item: AbstractFormConfigItem) => {
       if (item instanceof FormInputConfig) {
         if (item.options instanceof DynamicMultipleInputOption) {
           acc[item.name] = [];
@@ -106,9 +107,9 @@ const createFormData = () => {
       } else if (item instanceof FormUploadConfig) {
         acc[item.name] = null;
       }
-    }
-    return acc;
-  }, {} as Record<string, any>);
+      return acc;
+    }, {} as Record<string, any>);
+  }
 }
 
 // 创建响应式 formData 对象（深拷贝 initData 避免直接修改全局状态）
@@ -122,7 +123,7 @@ const handleSave = () => {
     Object.keys(formData).forEach((key) => {
       const newVal = formData[key];
       const oldVal = initData[key];
-      if (newVal !== oldVal) {
+      if (!isEqual(newVal, oldVal)) {
         changedData[key] = newVal;
       }
     });
@@ -130,7 +131,7 @@ const handleSave = () => {
       MyMessage.warning("新数据与原数据一致，无需修改");
     } else {
       // 有变更才校验和提交,同时附带上更新标识符，如id等字段
-      Object.keys(updateIdentityFields).forEach((key) => {
+      updateIdentityFields.forEach((key) => {
         changedData[key] = formData[key];
       });
       validateAndSubmit(changedData);
@@ -171,7 +172,7 @@ const validateAndSubmit = (dataToSubmit: Record<string, any>) => {
 const onReset = () => {
   if (initData) {
     Object.keys(formData).forEach((key) => {
-      formData[key] = initData[key];
+      formData[key] = structuredClone(initData[key]);
     });
   } else {
     formRef.value?.resetFields();

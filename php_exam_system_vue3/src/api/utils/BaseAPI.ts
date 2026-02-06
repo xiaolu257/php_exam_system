@@ -1,6 +1,6 @@
 import {ElMessageBox} from "element-plus";
 import MyMessage from "@/utils/MyMessage";
-import {myAxios, myGet, myPost} from "@/api/utils/axios";
+import {myAxios, myGet, myPost, myPut} from "@/api/utils/axios";
 import {h} from "vue";
 
 export async function deleteItemRows(
@@ -95,12 +95,11 @@ export function addItem(url: string, data: Record<string, any>, onSuccess: () =>
     })
 }
 
-export async function updateItem(data: Record<string, any>, callback: Function, url: string, controlName: string = '修改') {
-    myPost(url, data)
-        .then(({msg}) => {
-            MyMessage.success(msg);
-            callback();
-        })
+export function updateItem(url: string, data: Record<string, any>, onSuccess: () => void = () => {}) {
+    myPut(url, data).then(({msg = 'updateItem操作成功'}) => {
+        MyMessage.success(msg);
+        onSuccess();
+    })
 }
 
 export async function searchItem(searchField: string, searchValue: string, page: number, orderBy: string, orderDirection: string, callback: Function, url: string) {

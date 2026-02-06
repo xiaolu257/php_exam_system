@@ -56,11 +56,12 @@ const associateOptions = computed(() => {
 })
 watch(
     associateOptions,
-    (newOptions, oldOptions = []) => {
-      // 规则 1：删除选项 → 清空正确答案
-      if (newOptions.length < oldOptions.length) {
-        props.formData[props.item.name] = ''
-        return
+    (newOptions) => {
+      // 规则 1：如果选择的选项不在关联选项数组中 → 清空当前选择的选项
+      const key = props.item.name;
+      const value = props.formData[key];
+      if (!newOptions.find(o => o.value === value)) {
+        props.formData[key] = ''
       }
     },
     {immediate: true}

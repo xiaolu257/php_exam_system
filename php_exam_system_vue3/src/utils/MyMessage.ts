@@ -1,4 +1,5 @@
 import {ElMessage} from 'element-plus'
+
 class MyMessage {
 
     static success(message: string, showClose = true, duration = 3000, plain = false) {
@@ -43,3 +44,7 @@ class MyMessage {
 }
 
 export default MyMessage
+
+export const testLog = (info: any) => {
+    MyMessage.info(info)
+}

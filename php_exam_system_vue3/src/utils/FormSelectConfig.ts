@@ -47,10 +47,6 @@ export class AssociateSingleSelectOption extends BaseSelectOption {
         super(disabled, placeholder, clearable);
         this.associateFunction = associateFunction;
     }
-
-    get options() {
-        return this.associateFunction({});
-    }
 }
 
 // 多选下拉框选项类
