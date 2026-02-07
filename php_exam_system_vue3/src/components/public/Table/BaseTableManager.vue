@@ -52,7 +52,7 @@
       <template #default="scope">
         <BaseEditFormDialog v-if="tableColumnEditDialogConfig"
                             :edit-dialog-config="createTableColumnEditDialogConfig(scope)"/>
-        <el-button v-if="deleteRows" size="small" type="danger" @click="handleDelete(scope.row.id)">
+        <el-button v-if="props.tableConfig.deleteRows" size="small" type="danger" @click="handleDelete(scope.row.id)">
           删除
         </el-button>
       </template>
@@ -60,7 +60,7 @@
   </el-table>
   <el-row style="margin: 15px">
     <el-col :span="6">
-      <template v-if="deleteRows">
+      <template v-if="tableConfig.deleteRows">
         <el-button type="primary" @click="selectAll">全选</el-button>
         <el-button type="primary" @click="clearSelection">取消选中行</el-button>
         <el-button type="danger" @click="deleteSelection">删除选中行</el-button>
@@ -87,9 +87,9 @@ import {computed, onMounted, ref} from "vue";
 
 import type {TableInstance} from "element-plus/es/components/table";
 import {ElTable} from "element-plus";
-import BaseTableColumns from "@/components/public/Table/BaseTableColumns.vue";
-import BaseAddFormDialog from "@/components/public/Table/BaseAddFormDialog.vue";
-import BaseEditFormDialog from "@/components/public/Table/BaseEditFormDialog.vue";
+import BaseTableColumns from "@/components/public/Table/ChildComponet/BaseTableColumns.vue";
+import BaseAddFormDialog from "@/components/public/Dialog/BaseAddFormDialog.vue";
+import BaseEditFormDialog from "@/components/public/Dialog/BaseEditFormDialog.vue";
 import MyMessage from "@/utils/MyMessage";
 import type {TableConfig} from "@/utils/TableConfig";
 import type {AddDialogConfig, EditDialogConfig, TableColumnEditDialogConfig} from "@/components/public/Form/Types";
@@ -103,7 +103,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const deleteRows = props.tableConfig.deleteRows;
 
 const addDialogConfig = computed<AddDialogConfig | undefined>(() => {
   const config = props.addDialogConfig;
@@ -189,8 +188,7 @@ const handleSelectionChange = (val: Array<any>) => {
   selectedRows.value = val.map((item: any) => item.id);
 };
 const handleDelete = (index: number) => {
-  deleteRows?.(tableData.value, [index], refreshTableData)
-
+  props.tableConfig.deleteRows?.([index], refreshTableData)
 };
 // 全选功能
 const selectAll = () => {
@@ -210,7 +208,7 @@ const deleteRowsSuccess = () => {
 const deleteSelection = () => {
   if (selectedRows.value.length > 0) {
     // 删除多行数据
-    deleteRows?.(tableData.value, selectedRows.value, deleteRowsSuccess)
+    props.tableConfig.deleteRows?.(selectedRows.value, deleteRowsSuccess)
   } else {
     MyMessage.error('请先选择要删除的数据！')
   }

@@ -25,7 +25,7 @@ import {FormUploadConfigFactory} from "@/utils/FormUploadConfig";
 import {storeToRefs} from "pinia";
 import {useGlobalStore} from "@/stores/counter";
 import {getAdminType, quitLogin} from "@/api/Admin";
-import BaseEditFormDialog from "@/components/public/Table/BaseEditFormDialog.vue";
+import BaseEditFormDialog from "@/components/public/Dialog/BaseEditFormDialog.vue";
 import {myPost} from "@/api/utils/axios";
 import MyMessage from "@/utils/MyMessage";
 import {buildFormData} from "@/api/utils/FormData";
