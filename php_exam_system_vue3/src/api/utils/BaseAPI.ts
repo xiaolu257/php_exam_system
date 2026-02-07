@@ -1,6 +1,6 @@
 import {ElMessageBox} from "element-plus";
 import MyMessage from "@/utils/MyMessage";
-import {myAxios, myGet, myPost, myPut} from "@/api/utils/axios";
+import {myAxios, myDel, myGet, myPost, myPut} from "@/api/utils/axios";
 import {h} from "vue";
 
 export async function deleteItemRows(
@@ -24,7 +24,7 @@ export async function deleteItemRows(
         }
     )
         .then(async () => {
-            myPost(url, {ids}).then(({msg}) => {
+            myDel(url, {ids}).then(({msg}) => {
                 MyMessage.success(msg);
                 deleteSuccess()
             })

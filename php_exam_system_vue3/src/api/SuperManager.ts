@@ -2,7 +2,7 @@ import {deleteItemRows, getOnePageItem, searchItem} from "@/api/utils/BaseAPI";
 
 //单选题管理相关
 export async function deleteSingleChoiceQuestionsRows(tableData: Array<any>, selectedRows: number[], deleteRowsSuccess: Function) {
-    await deleteItemRows(tableData, selectedRows, deleteRowsSuccess, 'OperationManager/deleteSingleChoiceQuestionsByIds')
+    await deleteItemRows(tableData, selectedRows, deleteRowsSuccess, 'single-choice-question')
 }
 
 export async function getOnePageSingleChoiceQuestions(currentPage: number, orderKey: string, orderDirection: string, callback: Function) {

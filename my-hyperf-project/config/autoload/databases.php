@@ -24,7 +24,6 @@ return [
         'charset' => env('DB_CHARSET', 'utf8'),
         'collation' => env('DB_COLLATION', 'utf8_unicode_ci'),
         'prefix' => env('DB_PREFIX', ''),
-        'timezone' => env('DB_TIMEZONE', '+08:00'),//北京时间为东八区
         'pool' => [
             'min_connections' => 1,
             'max_connections' => 10,

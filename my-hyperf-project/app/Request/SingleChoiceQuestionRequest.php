@@ -11,6 +11,7 @@ class SingleChoiceQuestionRequest extends FormRequest
     public const SCENE_GET_ONE_PAGE_SINGLE_CHOICE_QUESTIONS = 'getOnePageSingleChoiceQuestions';
     public const SCENE_ADD_SINGLE_CHOICE_QUESTIONS = 'addSingleChoiceQuestions';
     public const SCENE_UPDATE_SINGLE_CHOICE_QUESTIONS = 'updateSingleChoiceQuestions';
+    public const SCENE_DELETE_SINGLE_CHOICE_QUESTIONS = 'deleteSingleChoiceQuestions';
 
     public function authorize(): bool
     {
@@ -34,11 +35,16 @@ class SingleChoiceQuestionRequest extends FormRequest
         ],
 
         self::SCENE_UPDATE_SINGLE_CHOICE_QUESTIONS => [
-            'id' => 'required|integer|gt:0',
+            'id' => 'required|integer:strict|gt:0',
             'content' => 'string|max:255',
             'options' => 'array|min:2|max:10',
             'options.*' => 'string|filled|max:50',
             'correct_answer' => 'filled|regex:/^[A-J]$/',
+        ],
+
+        self::SCENE_DELETE_SINGLE_CHOICE_QUESTIONS => [
+            'ids' => 'required|array',
+            'ids.*' => 'integer:strict|gt:0',
         ]
     ];
 
@@ -61,6 +67,8 @@ class SingleChoiceQuestionRequest extends FormRequest
             'options' => '选项',
             'options.*' => '选项内容',
             'correct_answer' => '正确答案',
+            'ids' => 'ID列表',
+            'ids.*' => 'ID列表的每一项ID'
         ];
     }
 

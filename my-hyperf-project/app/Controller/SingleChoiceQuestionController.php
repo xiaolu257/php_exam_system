@@ -10,6 +10,7 @@ use App\Service\ImageService;
 use Hyperf\Database\Model\Builder;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Annotation\Controller;
+use Hyperf\HttpServer\Annotation\DeleteMapping;
 use Hyperf\HttpServer\Annotation\GetMapping;
 use Hyperf\HttpServer\Annotation\PostMapping;
 use Hyperf\HttpServer\Annotation\PutMapping;
@@ -141,4 +142,17 @@ class SingleChoiceQuestionController
 
         return $response->json(['msg' => '修改单选题成功']);
     }
+
+    #[DeleteMapping('')]
+    #[Scene(SingleChoiceQuestionRequest::SCENE_DELETE_SINGLE_CHOICE_QUESTIONS)]
+    public function deleteSingleChoiceQuestions(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validatedData = $request->validated();
+
+        $ids = $validatedData['ids'];
+
+        SingleChoiceQuestion::query()->whereIn('id', $ids)->delete();
+        return $response->json(['msg' => '删除单选题成功']);
+    }
+
 }
