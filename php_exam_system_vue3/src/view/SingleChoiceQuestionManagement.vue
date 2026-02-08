@@ -7,10 +7,9 @@
 
 <script lang="ts" setup>
 import BaseTableManager from "@/components/public/Table/BaseTableManager.vue";
-import {TextTableColumn} from "@/utils/MyTableTypeClass";
+import type {TableConfig} from "@/components/public/Table/TableTypes";
+import {TextTableColumn} from "@/components/public/Table/TableTypes";
 import {FormInputConfigFactory} from "@/utils/FormInputConfig";
-import type {TableConfig} from "@/utils/TableConfig";
-// import {exportSingleChoiceQuestionsToExcel} from "@/api/Export";
 import {computed} from 'vue';
 import {FormSelectConfigFactory} from "@/utils/FormSelectConfig";
 import {
@@ -19,7 +18,7 @@ import {
   searchSingleChoiceQuestions
 } from "@/api/SuperManager";
 import {addItem, updateItem} from "@/api/utils/BaseAPI";
-import type {AddDialogConfig, TableColumnEditDialogConfig} from "@/components/public/Form/Types";
+import type {AddDialogConfig, TableColumnEditDialogConfig} from "@/components/public/Form/FormTypes";
 
 const associateSingleQuestionOptions = (formData: Record<string, any>) => {
   return computed<{

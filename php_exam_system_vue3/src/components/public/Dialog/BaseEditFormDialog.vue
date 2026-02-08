@@ -21,7 +21,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue';
 import BaseForm from "@/components/public/Form/BaseForm.vue";
-import type {EditDialogConfig} from "@/components/public/Form/Types";
+import type {EditDialogConfig} from "@/components/public/Form/FormTypes";
 
 // 定义 Props 的接口
 interface Props {

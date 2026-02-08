@@ -11,17 +11,11 @@ function getOnePageItem(currentPage: number, orderBy: string, orderDirection: st
 }
 
 function searchItem(searchField: string, searchValue: string, page: number, orderBy: string, orderDirection: string, callback: Function, url: string) {
-    if (!searchField) {
-        MyMessage.error('请选择搜索依据')
-    } else if (!searchValue) {
-        MyMessage.error('请输入要搜索的关键字')
-    } else {
-        myGet(url, {searchField, searchValue, page, orderBy, orderDirection})
-            .then((res) => {
-                const {data = [], last_page = 0, total = 0} = res;
-                callback(data, last_page, total);
-            })
-    }
+    myGet(url, {searchField, searchValue, page, orderBy, orderDirection})
+        .then((res) => {
+            const {data = [], last_page = 0, total = 0} = res;
+            callback(data, last_page, total);
+        })
 }
 
 function addItem(url: string, data: Record<string, any>, onSuccess: () => void = () => {}) {

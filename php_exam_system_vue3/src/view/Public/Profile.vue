@@ -30,7 +30,7 @@ import {myPost} from "@/api/utils/axios";
 import MyMessage from "@/utils/MyMessage";
 import {buildFormData} from "@/api/utils/FormData";
 import {AvatarBaseURL, AvatarThumbBaseURL} from "@/utils/global";
-import type {EditDialogConfig} from "@/components/public/Form/Types";
+import type {EditDialogConfig} from "@/components/public/Form/FormTypes";
 
 const getOriginImageURL = (url: string): string => {
   return `${AvatarBaseURL}${url}`;

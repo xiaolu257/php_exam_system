@@ -84,3 +84,11 @@ export class PasswordTableColumn extends TableColumn {
         this.editDialogConfig = editDialogConfig;
     }
 }
+
+export interface TableConfig {
+    tableColumns: TableColumn[],
+    getOnePageData: (page: number, orderKey: string, orderDirection: string, callback: () => void) => void,
+    searchData: (key: string, value: string, page: number, orderKey: string, orderDirection: string, callback: () => void) => void
+    deleteRows?: (selectedRows: number[], deleteRowsSuccess: () => void) => void,
+}
+

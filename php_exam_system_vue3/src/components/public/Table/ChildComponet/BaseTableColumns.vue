@@ -17,7 +17,7 @@
 </template>
 <script lang="ts" setup>
 // 定义 Props 的接口
-import {ImageTableColumn, TableColumn, TextTableColumn} from "@/utils/MyTableTypeClass";
+import {ImageTableColumn, TableColumn, TextTableColumn} from "@/components/public/Table/TableTypes";
 
 interface Props {
   tableColumns: TableColumn[];
