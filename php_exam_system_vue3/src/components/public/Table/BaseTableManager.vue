@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, shallowRef, watch} from "vue";
+import {computed, ref, shallowRef, toRaw, watch} from "vue";
 import BaseTableColumns from "@/components/public/Table/ChildComponet/BaseTableColumns.vue";
 import BaseAddFormDialog from "@/components/public/Dialog/BaseAddFormDialog.vue";
 import BaseEditFormDialog from "@/components/public/Dialog/BaseEditFormDialog.vue";
@@ -70,6 +70,7 @@ import SearchBar from "@/components/public/Table/ChildComponet/SearchBar.vue";
 import BottomPagination from "@/components/public/Table/ChildComponet/BottomPagination.vue";
 import type {TableInstance} from "element-plus/es/components/table";
 import type {TableConfig} from "@/components/public/Table/TableTypes";
+import type {PageCallback} from "@/api/utils/BaseAPI";
 
 interface Props {
   tableConfig: TableConfig;
@@ -118,7 +119,7 @@ const createTableColumnEditDialogConfig = (scopeRow: Record<string, any>): EditD
       if (item instanceof FormInputConfig && item.options instanceof DynamicMultipleInputOption) {
         filteredData[key] = Object.values(scopeRow[key])
       } else {
-        filteredData[key] = structuredClone(scopeRow[key])
+        filteredData[key] = structuredClone(toRaw(scopeRow[key]))
       }
     })
     return filteredData;
@@ -171,17 +172,14 @@ const clearSelection = () => {
 //删除选中
 const deleteSelection = () => {
   if (selectedRows.value.length > 0) {
-    props.tableConfig.deleteRows?.(selectedRows.value, () => {
-      clearSelection();
-      refreshTableData();
-    })
+    props.tableConfig.deleteRows?.(selectedRows.value, refreshTableData)
   } else {
     MyMessage.error('请先选择要删除的数据！')
   }
 };
 
 const refreshTableData = () => {
-  const getPageDataSuccess = (data: Array<any>, lastPage: number, totalCount: number) => {
+  const getPageDataSuccess: PageCallback = (data: any[], lastPage: number, totalCount: number) => {
     tableData.value = data;
     pageCount.value = lastPage;
     totalDataLength.value = totalCount;

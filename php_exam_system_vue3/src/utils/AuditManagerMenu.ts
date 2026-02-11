@@ -12,16 +12,8 @@ export const AuditManagerMenuRoutes = [
                 path: menuBaseUrl + '/SingleChoiceQuestionManagement',
             },
             {
-                name: '审核用户简历',
-                path: menuBaseUrl + '/AuditResume',
-            },
-            {
-                name: '审核招工信息',
-                path: menuBaseUrl + '/AuditJob',
-            },
-            {
-                name: '审核企业认证',
-                path: menuBaseUrl + '/AuditEnterpriseAuthentication',
+                name: '多选题管理',
+                path: menuBaseUrl + '/MultipleChoiceQuestionManagement',
             },
         ]
     },

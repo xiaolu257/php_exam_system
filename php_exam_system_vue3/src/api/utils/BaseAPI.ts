@@ -2,7 +2,17 @@ import {ElMessageBox} from "element-plus";
 import MyMessage from "@/utils/MyMessage";
 import {myDel, myGet, myPost, myPut} from "@/api/utils/axios";
 
-function getOnePageItem(currentPage: number, orderBy: string, orderDirection: string, callback: Function, url: string) {
+export type PageCallback = (
+    data: any[],
+    lastPage: number,
+    total: number
+) => void
+
+function getOnePageItem(currentPage: number,
+                        orderBy: string,
+                        orderDirection: string,
+                        callback: PageCallback,
+                        url: string) {
     myGet(url, {page: currentPage, orderBy: orderBy, orderDirection: orderDirection})
         .then((res) => {
             const {data = [], last_page = 0, total = 0} = res;
@@ -10,7 +20,13 @@ function getOnePageItem(currentPage: number, orderBy: string, orderDirection: st
         })
 }
 
-function searchItem(searchField: string, searchValue: string, page: number, orderBy: string, orderDirection: string, callback: Function, url: string) {
+function searchItem(searchField: string,
+                    searchValue: string,
+                    page: number,
+                    orderBy: string,
+                    orderDirection: string,
+                    callback: PageCallback,
+                    url: string) {
     myGet(url, {searchField, searchValue, page, orderBy, orderDirection})
         .then((res) => {
             const {data = [], last_page = 0, total = 0} = res;
@@ -52,5 +68,6 @@ function deleteItemRows(
             MyMessage.info('取消删除');
         });
 }
+
 
 export {getOnePageItem, searchItem, addItem, updateItem, deleteItemRows};

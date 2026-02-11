@@ -1,4 +1,4 @@
-import type {EditDialogConfig} from "@/utils/FormInputConfig";
+import {type PageCallback} from "@/api/utils/BaseAPI";
 
 type myTextType = 'primary' | 'danger' | 'success' | 'info';
 type ImageObjectFitType = '' | 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
@@ -70,25 +70,22 @@ export class ImageTableColumn extends TableColumn {
     }
 }
 
-export class PasswordTableColumn extends TableColumn {
-    editDialogConfig: EditDialogConfig;
-
-    constructor(
-        min_width: string | number = 100,
-        prop: string,
-        label: string,
-        editDialogConfig: EditDialogConfig,
-        fixed: 'left' | 'right' | false = false,
-    ) {
-        super(min_width, prop, label, false, false, fixed);
-        this.editDialogConfig = editDialogConfig;
-    }
-}
+export type GetOnePageDataFunction = (currentPage: number,
+                                      orderKey: string,
+                                      orderDirection: string,
+                                      callback: PageCallback) => void
+export type SearchOnePageDataFunction = (key: string,
+                                         value: string,
+                                         page: number,
+                                         orderKey: string,
+                                         orderDirection: string,
+                                         callback: PageCallback) => void
+export type DeleteRowsFunction = (selectedRows: number[], deleteRowsSuccess: () => void) => void
 
 export interface TableConfig {
     tableColumns: TableColumn[],
-    getOnePageData: (page: number, orderKey: string, orderDirection: string, callback: () => void) => void,
-    searchData: (key: string, value: string, page: number, orderKey: string, orderDirection: string, callback: () => void) => void
-    deleteRows?: (selectedRows: number[], deleteRowsSuccess: () => void) => void,
+    getOnePageData: GetOnePageDataFunction,
+    searchData: SearchOnePageDataFunction,
+    deleteRows?: DeleteRowsFunction,
 }
 

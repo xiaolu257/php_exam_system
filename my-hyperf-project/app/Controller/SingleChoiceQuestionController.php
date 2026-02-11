@@ -6,9 +6,7 @@ namespace App\Controller;
 
 use App\Model\SingleChoiceQuestion;
 use App\Request\SingleChoiceQuestionRequest;
-use App\Service\ImageService;
 use Hyperf\Database\Model\Builder;
-use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\DeleteMapping;
 use Hyperf\HttpServer\Annotation\GetMapping;
@@ -20,9 +18,6 @@ use Hyperf\Validation\Annotation\Scene;
 #[Controller(prefix: 'single-choice-question')]
 class SingleChoiceQuestionController
 {
-    #[Inject]
-    protected ImageService $imageService;
-
     /**
      * 将数字下标0,1,2,... 映射为 A,B,C,...
      * @param int $index
