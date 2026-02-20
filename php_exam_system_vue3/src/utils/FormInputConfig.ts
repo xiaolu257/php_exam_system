@@ -75,7 +75,7 @@ export class TextAreaWithAutosizeInputOption extends BaseInputOption {
     }
 }
 
-export class DynamicMultipleInputOption extends BaseInputOption {
+export class OptionsListInputOption extends BaseInputOption {
     constructor(
         disabled: boolean = false,
         placeholder: string = '',
@@ -166,7 +166,7 @@ export class FormInputConfigFactory {
 
     // 创建动态多路文本输入框
     static createDynamicMultipleTextInput(name: string, label: string, placeholder: string = '', rules: FormItemRule[] = []): FormInputConfig {
-        const options = new DynamicMultipleInputOption(false, placeholder); // disabled默认为false
+        const options = new OptionsListInputOption(false, placeholder); // disabled默认为false
         return new FormInputConfig(name, label, options, rules);
     }
 }

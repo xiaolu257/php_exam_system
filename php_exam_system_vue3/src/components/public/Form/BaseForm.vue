@@ -7,7 +7,7 @@
           <BaseInputComponent :formData="formData" :item="item"/>
         </template>
         <template v-else-if="item instanceof FormSelectConfig">
-          <BaseSelectComponent :formData="formData" :item="item"/>
+          <BaseSelectComponent :formData="formData" :config="item"/>
         </template>
         <template v-else-if="item instanceof FormUploadConfig">
           <BaseUploadComponent :formData="formData" :item="item"/>
@@ -32,9 +32,12 @@
 import type {FormRules} from 'element-plus';
 import {ElForm} from 'element-plus';
 import {computed, reactive, ref} from 'vue';
-import {AbstractFormConfigItem, DynamicMultipleInputOption, FormInputConfig,} from "@/utils/FormInputConfig";
+import {AbstractFormConfigItem, OptionsListInputOption, FormInputConfig,} from "@/utils/FormInputConfig";
 import BaseInputComponent from "@/components/public/Form/ChildComponet/BaseInputComponent.vue";
-import {FormSelectConfig, SingleSelectOption} from "@/utils/FormSelectConfig";
+import {
+  AssociateSelectConfig,
+  FormSelectConfig,
+} from "@/utils/FormSelectConfig";
 import {FormUploadConfig} from "@/utils/FormUploadConfig";
 import BaseUploadComponent from "@/components/public/Form/ChildComponet/BaseUploadComponent.vue";
 import BaseSelectComponent from "@/components/public/Form/ChildComponet/BaseSelectComponent.vue";
@@ -95,13 +98,19 @@ const createFormData = () => {
     // 新增场景，填入默认值
     return props.formConfig.reduce((acc: Record<string, any>, item: AbstractFormConfigItem) => {
       if (item instanceof FormInputConfig) {
-        if (item.options instanceof DynamicMultipleInputOption) {
+        if (item.options instanceof OptionsListInputOption) {
           acc[item.name] = [];
         } else {
           acc[item.name] = '';
         }
-      } else if (item instanceof FormSelectConfig && item.options instanceof SingleSelectOption) {
-        acc[item.name] = item.options.options[0]?.value ?? '';
+      } else if (item instanceof FormSelectConfig) {
+        if (item instanceof AssociateSelectConfig) {
+          if (item.multiple){
+            acc[item.name] = [];
+          }else{
+            acc[item.name] = '';
+          }
+        }
       } else if (item instanceof FormNumberInputConfig) {
         acc[item.name] = item.options.min ?? 0;
       } else if (item instanceof FormUploadConfig) {

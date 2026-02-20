@@ -1,72 +1,27 @@
 <template>
-  <el-select
-      v-model="formData[item.name]"
-      :disabled="item.options.disabled"
-      :clearable="item.options.clearable"
-      :placeholder="item.options.placeholder"
-      v-bind="additionalProps"
-  >
-    <!-- 普通选项 -->
-    <template v-if="item.options instanceof SingleSelectOption || item.options instanceof MultipleSelectOption">
-      <el-option
-          v-for="option in item.options.options"
-          :key="option.value"
-          :label="option.label"
-          :value="option.value"
-      />
+  <template v-if="config instanceof AssociateSelectConfig">
+    <template v-if="config.multiple">
+      <AssociateMultipleSelect :formData="formData" :item="config"/>
     </template>
-    <!-- 关联选项 -->
-    <template v-else-if="item.options instanceof AssociateSingleSelectOption">
-      <el-option
-          v-for="option in associateOptions"
-          :key="option.value"
-          :label="option.label"
-          :value="option.value"
-      />
+    <template v-else>
+      <AssociateSingleSelect :formData="formData" :item="config"/>
     </template>
-  </el-select>
+  </template>
 </template>
 
 <script lang="ts" setup>
 import {
-  AssociateSingleSelectOption,
-  type FormSelectConfig,
-  MultipleSelectOption,
-  SingleSelectOption
+  AssociateSelectConfig,
+  type FormSelectConfig
 } from "@/utils/FormSelectConfig";
-import {computed, watch} from "vue";
+import AssociateSingleSelect from "@/components/public/Form/ChildComponet/SelectComponent/AssociateSingleSelect.vue";
+import AssociateMultipleSelect from "@/components/public/Form/ChildComponet/SelectComponent/AssociateMultipleSelect.vue";
 
 // Props 定义
-const props = defineProps<{
-  item: FormSelectConfig;
+defineProps<{
+  config: FormSelectConfig;
   formData: Record<string, any>;
 }>();
-
-// 计算额外的属性
-const additionalProps = computed(() => {
-  if (props.item.options instanceof MultipleSelectOption) {
-    return {multiple: true};
-  }
-  return {};
-});
-const associateOptions = computed(() => {
-  return props.item.options instanceof AssociateSingleSelectOption
-      ? props.item.options.associateFunction(props.formData).value
-      : []
-})
-watch(
-    associateOptions,
-    (newOptions) => {
-      // 规则 1：如果选择的选项不在关联选项数组中 → 清空当前选择的选项
-      const key = props.item.name;
-      const value = props.formData[key];
-      if (!newOptions.find(o => o.value === value)) {
-        props.formData[key] = ''
-      }
-    },
-    {immediate: true}
-)
-
 </script>
 
 <style scoped>

@@ -32,7 +32,7 @@ const addDialogConfig: AddDialogConfig = {
   formConfig: [
     FormInputConfigFactory.createEditableTextInput('content', '题目', 'content'),
     FormInputConfigFactory.createDynamicMultipleTextInput('options', '选项', 'options'),
-    FormSelectConfigFactory.createAssociateSingleSelect('correct_answer', '正确答案', associateSingleQuestionOptions, 'correct_answer')
+    FormSelectConfigFactory.createAssociateMultipleSelect('correct_answer', '正确答案', associateSingleQuestionOptions, 'correct_answer')
   ],
   submitAction: MultipleChoiceQuestionStandardCRUD.addItem,
 };

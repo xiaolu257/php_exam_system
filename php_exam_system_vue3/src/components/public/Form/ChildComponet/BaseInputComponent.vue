@@ -1,5 +1,5 @@
 <template>
-  <template v-if="item.options instanceof DynamicMultipleInputOption">
+  <template v-if="item.options instanceof OptionsListInputOption">
     <el-col
         style="margin-bottom: 5px"
         v-for="(option, index) in formData[item.name]"
@@ -33,7 +33,7 @@
 <script lang="ts" setup>
 import {computed} from 'vue';
 import {
-  DynamicMultipleInputOption,
+  OptionsListInputOption,
   type FormInputConfig,
   PasswordInputOption,
   TextAreaWithAutosizeInputOption,
