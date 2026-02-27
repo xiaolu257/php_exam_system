@@ -22,6 +22,24 @@ export class FormSelectConfig extends AbstractFormConfigItem {
     }
 }
 
+export class CommonSelectConfig extends FormSelectConfig {
+    multiple: boolean;
+    options: { label: string, value: any }[];
+
+    constructor(name: string,
+                label: string,
+                formRules: FormItemRule[] = [],
+                disabled: boolean = false,
+                placeholder: string = '',
+                clearable: boolean = false,
+                multiple: boolean = false,
+                options: { label: string, value: any }[] = [],) {
+        super(name, label, formRules, disabled, placeholder, clearable);
+        this.multiple = multiple;
+        this.options = options;
+    }
+}
+
 export class AssociateSelectConfig extends FormSelectConfig {
     multiple: boolean;
     dependKey: string;
@@ -45,6 +63,17 @@ export class AssociateSelectConfig extends FormSelectConfig {
 
 // 创建 FormSelectConfigFactory 工厂类
 export class FormSelectConfigFactory {
+    //创建普通单选下拉框
+    static createCommonSingleSelect(
+        name: string,
+        label: string,
+        options: { label: string; value: any }[],
+        placeholder: string = '',
+        formRules: FormItemRule[] = [],
+    ): FormSelectConfig {
+        return new CommonSelectConfig(name, label, formRules, false, placeholder, true, false, options);
+    }
+
     // 创建关联单选下拉框
     static createAssociateSingleSelect(
         name: string,

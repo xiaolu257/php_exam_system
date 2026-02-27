@@ -9,4 +9,9 @@ export const allAsyncRoutes = [
         name: 'MultipleChoiceQuestionManagement',
         component: () => import("@/view/MultipleChoiceQuestionManagement.vue"),
     },
+    {
+        path: 'TrueFalseQuestionManagement',
+        name: 'TrueFalseQuestionManagement',
+        component: () => import("@/view/TrueFalseQuestionManagement.vue"),
+    },
 ];

@@ -15,6 +15,10 @@ export const AuditManagerMenuRoutes = [
                 name: '多选题管理',
                 path: menuBaseUrl + '/MultipleChoiceQuestionManagement',
             },
+            {
+                name: '判断题管理',
+                path: menuBaseUrl + '/TrueFalseQuestionManagement',
+            },
         ]
     },
     {
