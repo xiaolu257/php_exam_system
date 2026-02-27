@@ -15,15 +15,15 @@ import {FormSelectConfigFactory} from "@/utils/FormSelectConfig";
 import type {AddDialogConfig, TableColumnEditDialogConfig} from "@/components/public/Form/FormTypes";
 import {TableCrudFactory} from "@/utils/TableCrudFactory";
 
-const associateSingleQuestionOptions = (formData: Record<string, any>) => {
+const associateSingleQuestionOptions = (options: string[]) => {
   return computed<{
     label: string;
     value: any;
   }[]>(() => {
-    return Array.isArray(formData.options) ? formData.options.map((item: string, index: number) => ({
+    return options.map((item: string, index: number) => ({
       label: String.fromCharCode(65 + index) + ':' + item,
       value: String.fromCharCode(65 + index)
-    })) : []
+    }))
   });
 }
 const MultipleChoiceQuestionStandardCRUD = TableCrudFactory.creatStandardCrud('multiple-choice-question');
@@ -32,7 +32,7 @@ const addDialogConfig: AddDialogConfig = {
   formConfig: [
     FormInputConfigFactory.createEditableTextInput('content', '题目', 'content'),
     FormInputConfigFactory.createDynamicMultipleTextInput('options', '选项', 'options'),
-    FormSelectConfigFactory.createAssociateMultipleSelect('correct_answer', '正确答案', associateSingleQuestionOptions, 'correct_answer')
+    FormSelectConfigFactory.createAssociateMultipleSelect('correct_answer', '正确答案', 'options', associateSingleQuestionOptions, 'correct_answer')
   ],
   submitAction: MultipleChoiceQuestionStandardCRUD.addItem,
 };
@@ -43,7 +43,7 @@ const editDialogConfig: TableColumnEditDialogConfig = {
     FormInputConfigFactory.createReadOnlyTextInput('id', 'ID'),
     FormInputConfigFactory.createEditableTextInput('content', '题目', 'content'),
     FormInputConfigFactory.createDynamicMultipleTextInput('options', '选项', 'options'),
-    FormSelectConfigFactory.createAssociateSingleSelect('correct_answer', '正确答案', associateSingleQuestionOptions, 'correct_answer')
+    FormSelectConfigFactory.createAssociateMultipleSelect('correct_answer', '正确答案', 'options', associateSingleQuestionOptions, 'correct_answer')
   ],
   submitAction: MultipleChoiceQuestionStandardCRUD.updateItem,
 };

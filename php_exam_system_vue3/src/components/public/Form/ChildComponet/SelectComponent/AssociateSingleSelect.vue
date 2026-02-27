@@ -1,6 +1,6 @@
 <template>
   <el-select
-      v-model="formData[item.name]"
+      v-model="currentSelectModel"
       :disabled="item.disabled"
       :clearable="item.clearable"
       :placeholder="item.placeholder"
@@ -15,35 +15,37 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  AssociateSelectConfig,
-} from "@/utils/FormSelectConfig";
+import {AssociateSelectConfig,} from "@/utils/FormSelectConfig";
 import {computed, watch} from "vue";
 
 // Props 定义
 const props = defineProps<{
   item: AssociateSelectConfig;
-  formData: Record<string, any>;
+  associateOptions: any[];
+  currentSelect: any;
 }>();
 
-
-const associateOptions = computed(() => {
-  return props.item.associateFunction(props.formData).value
+const emit = defineEmits<{
+  (e: 'update:currentSelect', value: any): void
+}>()
+const currentSelectModel = computed({
+  get: () => props.currentSelect ?? '',
+  set: (val: any) => emit('update:currentSelect', val)
 })
 watch(
-    associateOptions,
-    (newOptions) => {
-      //规则 1：如果选择的选项不在关联选项数组中 → 清空当前选择的选项
-      const key = props.item.name
-      const validValues = newOptions.map(o => o.value)
-      const current = props.formData[key]
-      if (!validValues.includes(current)) {
-        props.formData[key] = ''
+    () => props.associateOptions,
+    (newOptions, oldOptions = []) => {
+      //有选项被删除,如果选择的选项不在关联选项数组中 → 清空无效的选项
+      if (newOptions.length < oldOptions.length) {
+        const validValues = newOptions.map(o => o.value)
+        const current = props.currentSelect ?? ''
+        if (!validValues.includes(current)) {
+          emit('update:currentSelect', '')
+        }
       }
     },
     {immediate: true}
 )
-
 </script>
 
 <style scoped>

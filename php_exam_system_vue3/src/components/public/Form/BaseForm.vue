@@ -32,7 +32,7 @@
 import type {FormRules} from 'element-plus';
 import {ElForm} from 'element-plus';
 import {computed, reactive, ref} from 'vue';
-import {AbstractFormConfigItem, OptionsListInputOption, FormInputConfig,} from "@/utils/FormInputConfig";
+import {AbstractFormConfigItem, FormInputConfig, OptionsListInputConfig,} from "@/utils/FormInputConfig";
 import BaseInputComponent from "@/components/public/Form/ChildComponet/BaseInputComponent.vue";
 import {
   AssociateSelectConfig,
@@ -98,7 +98,7 @@ const createFormData = () => {
     // 新增场景，填入默认值
     return props.formConfig.reduce((acc: Record<string, any>, item: AbstractFormConfigItem) => {
       if (item instanceof FormInputConfig) {
-        if (item.options instanceof OptionsListInputOption) {
+        if (item instanceof OptionsListInputConfig) {
           acc[item.name] = [];
         } else {
           acc[item.name] = '';

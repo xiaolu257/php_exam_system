@@ -64,7 +64,7 @@ import BaseAddFormDialog from "@/components/public/Dialog/BaseAddFormDialog.vue"
 import BaseEditFormDialog from "@/components/public/Dialog/BaseEditFormDialog.vue";
 import MyMessage from "@/utils/MyMessage";
 import type {AddDialogConfig, EditDialogConfig, TableColumnEditDialogConfig} from "@/components/public/Form/FormTypes";
-import {OptionsListInputOption, FormInputConfig} from "@/utils/FormInputConfig";
+import {OptionsListInputConfig} from "@/utils/FormInputConfig";
 import TableSummaryBar from "@/components/public/Table/ChildComponet/TableSummaryBar.vue";
 import SearchBar from "@/components/public/Table/ChildComponet/SearchBar.vue";
 import BottomPagination from "@/components/public/Table/ChildComponet/BottomPagination.vue";
@@ -116,7 +116,7 @@ const createTableColumnEditDialogConfig = (scopeRow: Record<string, any>): EditD
     const filteredData: Record<string, any> = {};
     config.formConfig.forEach((item) => {
       const key = item.name;
-      if (item instanceof FormInputConfig && item.options instanceof OptionsListInputOption) {
+      if (item instanceof OptionsListInputConfig) {
         filteredData[key] = Object.values(scopeRow[key])
       } else {
         filteredData[key] = structuredClone(toRaw(scopeRow[key]))

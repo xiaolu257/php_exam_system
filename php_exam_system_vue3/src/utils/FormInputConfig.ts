@@ -1,90 +1,5 @@
 import type {FormItemRule} from 'element-plus';
 
-export type Runnable = () => void;
-
-// 定义基础类，所有输入框类型的公共类
-export abstract class BaseInputOption {
-    disabled: boolean;
-    placeholder: string;
-    clearable: boolean;
-
-    protected constructor(
-        disabled: boolean = false,
-        placeholder: string = '',
-        clearable: boolean = true
-    ) {
-        this.disabled = disabled;
-        this.placeholder = placeholder;
-        this.clearable = clearable;
-    }
-}
-
-// 定义 Text 输入框类
-export class TextInputOption extends BaseInputOption {
-    constructor(
-        disabled: boolean = false,
-        placeholder: string = '',
-        clearable: boolean = true
-    ) {
-        super(disabled, placeholder, clearable);
-    }
-}
-
-// 定义 Password 输入框类
-export class PasswordInputOption extends BaseInputOption {
-    showPassword: boolean;
-
-    constructor(
-        showPassword: boolean = false,
-        disabled: boolean = false,
-        placeholder: string = '',
-        clearable: boolean = true
-    ) {
-        super(disabled, placeholder, clearable);
-        this.showPassword = showPassword;
-    }
-}
-
-// 定义 TextArea 输入框类
-export class TextAreaWithRowsInputOption extends BaseInputOption {
-    rows: number;
-
-    constructor(
-        rows: number,
-        disabled: boolean = false,
-        placeholder: string = '',
-        clearable: boolean = true
-    ) {
-        super(disabled, placeholder, clearable);
-        this.rows = rows;
-    }
-}
-
-// 定义处理 autosize 的 TextAreaInputOption 类
-export class TextAreaWithAutosizeInputOption extends BaseInputOption {
-    autosize: boolean | { minRows?: number; maxRows?: number };
-
-    constructor(
-        autosize: boolean | { minRows?: number; maxRows?: number },
-        disabled: boolean = false,
-        placeholder: string = '',
-        clearable: boolean = true
-    ) {
-        super(disabled, placeholder, clearable);
-        this.autosize = autosize;
-    }
-}
-
-export class OptionsListInputOption extends BaseInputOption {
-    constructor(
-        disabled: boolean = false,
-        placeholder: string = '',
-        clearable: boolean = true
-    ) {
-        super(disabled, placeholder, clearable);
-    }
-}
-
 // 抽象类 AbstractFormConfigItem
 export abstract class AbstractFormConfigItem {
     name: string;
@@ -100,86 +15,87 @@ export abstract class AbstractFormConfigItem {
 
 // FormInputConfig 类继承 AbstractFormConfigItem
 export class FormInputConfig extends AbstractFormConfigItem {
-    options: BaseInputOption;
-
-    constructor(name: string, label: string, options: BaseInputOption, formRules: FormItemRule[] = []) {
+    disabled: boolean;
+    placeholder: string;
+    clearable: boolean;
+    constructor(name: string,
+                label: string,
+                formRules: FormItemRule[] = [],
+                disabled: boolean = false,
+                placeholder: string = '',
+                clearable: boolean = false) {
         super(name, label, formRules);
-        this.options = options;
+        this.disabled = disabled;
+        this.placeholder = placeholder;
+        this.clearable = clearable;
     }
 }
 
+export class TextInputConfig extends FormInputConfig {
+    constructor(name: string,
+                label: string,
+                formRules: FormItemRule[] = [],
+                disabled: boolean = false,
+                placeholder: string = '',
+                clearable: boolean = false) {
+        super(name, label, formRules, disabled, placeholder, clearable);
+    }
+}
+
+export class OptionsListInputConfig extends FormInputConfig {
+    constructor(name: string,
+                label: string,
+                formRules: FormItemRule[] = [],
+                disabled: boolean = false,
+                placeholder: string = '',
+                clearable: boolean = false) {
+        super(name, label, formRules, disabled, placeholder, clearable);
+    }
+}
+
+export class PasswordInputConfig extends FormInputConfig {
+    showPassword: boolean;
+    constructor(name: string,
+                label: string,
+                formRules: FormItemRule[] = [],
+                disabled: boolean = false,
+                placeholder: string = '',
+                clearable: boolean = false,
+                showPassword: boolean) {
+        super(name, label, formRules, disabled, placeholder, clearable);
+        this.showPassword = showPassword;
+    }
+}
 // 创建 FormInputConfigFactory 工厂类
 export class FormInputConfigFactory {
     // 创建可读可写的文本输入框
-    static createEditableTextInput(name: string, label: string, placeholder: string = '', rules: FormItemRule[] = []): FormInputConfig {
-        const options = new TextInputOption(false, placeholder); // disabled默认为false
-        return new FormInputConfig(name, label, options, rules);
+    static createEditableTextInput(name: string,
+                                   label: string,
+                                   placeholder: string = '',
+                                   rules: FormItemRule[] = []): FormInputConfig {
+        return new TextInputConfig(name, label, rules,false,placeholder,true);
     }
 
     // 创建只读的文本输入框
     static createReadOnlyTextInput(name: string, label: string, rules: FormItemRule[] = []): FormInputConfig {
-        const options = new TextInputOption(true, ''); // disabled为true
-        return new FormInputConfig(name, label, options, rules);
+        return new TextInputConfig(name, label, rules,true,'',true);
     }
 
     // 创建可读可写的密码输入框
-    static createEditablePasswordInput(name: string, label: string, placeholder: string = '', showPassword: boolean = false, rules: FormItemRule[] = []): FormInputConfig {
-        const options = new PasswordInputOption(showPassword, false, placeholder); // disabled默认为false
-        return new FormInputConfig(name, label, options, rules);
+    static createEditablePasswordInput(name: string,
+                                       label: string,
+                                       placeholder: string = '',
+                                       showPassword: boolean = false,
+                                       rules: FormItemRule[] = []): FormInputConfig {
+        return new PasswordInputConfig(name, label, rules,false,placeholder,true,showPassword);
     }
-
-    // 创建只读的密码输入框
-    static createReadOnlyPasswordInput(name: string, label: string, showPassword: boolean = false, rules: FormItemRule[] = []): FormInputConfig {
-        const options = new PasswordInputOption(showPassword, true, ''); // disabled为true
-        return new FormInputConfig(name, label, options, rules);
-    }
-
-    // 创建可读可写的带行数的文本区域
-    static createEditableTextAreaWithRows(name: string, label: string, rows: number, placeholder: string = '', rules: FormItemRule[] = []): FormInputConfig {
-        const options = new TextAreaWithRowsInputOption(rows, false, placeholder); // disabled默认为false
-        return new FormInputConfig(name, label, options, rules);
-    }
-
-    // 创建只读的带行数的文本区域
-    static createReadOnlyTextAreaWithRows(name: string, label: string, rows: number, rules: FormItemRule[] = []): FormInputConfig {
-        const options = new TextAreaWithRowsInputOption(rows, true, ''); // disabled为true
-        return new FormInputConfig(name, label, options, rules);
-    }
-
-    // 创建可读可写的自适应高度文本区域
-    static createEditableTextAreaWithAutosize(name: string, label: string, autosize: boolean | {
-        minRows?: number;
-        maxRows?: number
-    }, placeholder: string = '', rules: FormItemRule[] = []): FormInputConfig {
-        const options = new TextAreaWithAutosizeInputOption(autosize, false, placeholder); // disabled默认为false
-        return new FormInputConfig(name, label, options, rules);
-    }
-
-    // 创建只读的自适应高度文本区域
-    static createReadOnlyTextAreaWithAutosize(name: string, label: string, autosize: boolean | {
-        minRows?: number;
-        maxRows?: number
-    }, rules: FormItemRule[] = []): FormInputConfig {
-        const options = new TextAreaWithAutosizeInputOption(autosize, true, ''); // disabled为true
-        return new FormInputConfig(name, label, options, rules);
-    }
-
     // 创建动态多路文本输入框
-    static createDynamicMultipleTextInput(name: string, label: string, placeholder: string = '', rules: FormItemRule[] = []): FormInputConfig {
-        const options = new OptionsListInputOption(false, placeholder); // disabled默认为false
-        return new FormInputConfig(name, label, options, rules);
+    static createDynamicMultipleTextInput(name: string,
+                                          label: string,
+                                          placeholder: string = '',
+                                          rules: FormItemRule[] = []): FormInputConfig {
+        return new OptionsListInputConfig(name, label, rules,false,placeholder,true);
     }
-}
-
-
-export interface EditDialogConfig {
-    editButtonName?: string;
-    editButtonType?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'text' | 'default';
-    editDialogWidth?: number;
-    editFormConfig: AbstractFormConfigItem[];
-    editFormTitle: string;
-    editSubmitAction: (data: Record<string, any>, callback: () => void) => void; // 保存回调函数
-    updateIdentityFields?: string[];//针对修改时，可选包含的唯一标识字段
 }
 
 

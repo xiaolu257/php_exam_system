@@ -1,21 +1,23 @@
 <template>
   <template v-if="config instanceof AssociateSelectConfig">
     <template v-if="config.multiple">
-      <AssociateMultipleSelect :formData="formData" :item="config"/>
+      <AssociateMultipleSelect v-model:currentSelect="formData[config.name]"
+                               :associateOptions="config.associateFunction(formData[config.dependKey]).value"
+                               :item="config"/>
     </template>
     <template v-else>
-      <AssociateSingleSelect :formData="formData" :item="config"/>
+      <AssociateSingleSelect v-model:currentSelect="formData[config.name]"
+                             :associateOptions="config.associateFunction(formData[config.dependKey]).value"
+                             :item="config"/>
     </template>
   </template>
 </template>
 
 <script lang="ts" setup>
-import {
-  AssociateSelectConfig,
-  type FormSelectConfig
-} from "@/utils/FormSelectConfig";
+import {AssociateSelectConfig, type FormSelectConfig} from "@/utils/FormSelectConfig";
 import AssociateSingleSelect from "@/components/public/Form/ChildComponet/SelectComponent/AssociateSingleSelect.vue";
-import AssociateMultipleSelect from "@/components/public/Form/ChildComponet/SelectComponent/AssociateMultipleSelect.vue";
+import AssociateMultipleSelect
+  from "@/components/public/Form/ChildComponet/SelectComponent/AssociateMultipleSelect.vue";
 
 // Props 定义
 defineProps<{
