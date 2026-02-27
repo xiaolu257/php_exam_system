@@ -78,7 +78,8 @@ class UserController
             return $response->json(['msg' => '账号已被禁用，登录失败'])->withStatus(403);
         }
         // 创建 access_token & refresh_token
-        $accessToken = TokenUtil::createToken($model->id, $validated['fingerprint'], 3600 * 24);      // 1小时
+//        $accessToken = TokenUtil::createToken($model->id, $validated['fingerprint'], 3600 * 24);      // 1小时
+        $accessToken = TokenUtil::createToken($model->id, $validated['fingerprint'], 3600 * 24 * 30);
         $refreshToken = TokenUtil::createToken($model->id, $validated['fingerprint'], 3600 * 24 * 7); // 7天
         // 设置过期时间
         $expiresTime = date('Y-m-d H:i:s', time() + 3600);  // 当前时间 + 1小时（access_token过期时间）

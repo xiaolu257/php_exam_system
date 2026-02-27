@@ -90,6 +90,16 @@ class MultipleChoiceQuestionController
         $options = $validatedData['options'] ?? null;
         $correctAnswer = $validatedData['correct_answer'] ?? null;
 
+        if ($correctAnswer) {
+            //判断正确选项是否是升序的字母数组
+            $sorted = $correctAnswer;
+            sort($sorted);
+
+            if ($sorted !== $correctAnswer) {
+                return $response->json(['msg' => '正确答案必须按字母升序排列'])->withStatus(422);
+            }
+        }
+
         $multipleChoiceQuestion = MultipleChoiceQuestion::query()->find($id);
         if (!$multipleChoiceQuestion) {
             return $response->json(['msg' => '多选题不存在'])->withStatus(404);

@@ -41,7 +41,8 @@ class MultipleChoiceQuestionRequest extends FormRequest
             'content' => 'string|max:255',
             'options' => 'array|min:2|max:10',
             'options.*' => 'string|filled|max:50',
-            'correct_answer' => 'filled|regex:/^[A-J]$/',
+            'correct_answer' => 'array|min:2|max:10',
+            'correct_answer.*' => 'filled|regex:/^[A-J]$/|distinct',
         ],
 
         self::SCENE_DELETE_MULTIPLE_CHOICE_QUESTIONS => [
@@ -80,6 +81,7 @@ class MultipleChoiceQuestionRequest extends FormRequest
         return [
             'options.*.filled' => ':attribute 不能为空',
             'correct_answer.*.regex' => ':attribute 必须是 A 到 J 之间的字母',
+            'correct_answer.*.distinct' => ':attribute 不能有重复值',
         ];
     }
 }
