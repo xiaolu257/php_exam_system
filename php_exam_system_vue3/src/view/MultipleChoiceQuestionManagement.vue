@@ -55,7 +55,7 @@ const tableConfig: TableConfig = {
     new TextTableColumn(75, 'id', 'ID', true, true, 'left'),
     new TextTableColumn(200, 'content', '题目'),
     new TextTableColumn(200, 'options', '选项'),
-    new TextTableColumn(200, 'correct_answer', '正确答案'),
+    new TextTableColumn(200, 'correct_answer', '正确答案', false, false),
     new TextTableColumn(150, 'created_at', '创建时间', true, false)
   ]
 };

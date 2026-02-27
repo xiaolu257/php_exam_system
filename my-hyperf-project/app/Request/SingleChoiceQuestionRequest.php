@@ -23,7 +23,7 @@ class SingleChoiceQuestionRequest extends FormRequest
             'page' => 'required|integer|gt:0',
             'orderBy' => 'string|in:id,content,created_at',
             'orderDirection' => 'string|in:asc,desc',
-            'searchField' => 'string|in:id,content,options,correct_answer',
+            'searchField' => 'string|in:id,content,options',
             'searchValue' => 'required_with:searchField|string|max:100'
         ],
 
