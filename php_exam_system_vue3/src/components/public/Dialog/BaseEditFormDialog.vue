@@ -9,6 +9,7 @@
              draggable>
     <el-row align="middle" justify="center">
       <BaseForm :form-config="editDialogConfig.formConfig"
+                :width="editDialogConfig.width"
                 :init-data="editDialogConfig.initData"
                 :on-cancel="closeDialog"
                 :submitAction="submitAction"

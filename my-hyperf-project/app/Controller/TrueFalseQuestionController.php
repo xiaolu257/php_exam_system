@@ -18,23 +18,6 @@ use Hyperf\Validation\Annotation\Scene;
 #[Controller(prefix: 'true-false-question')]
 class TrueFalseQuestionController
 {
-    /**
-     * 将数字下标0,1,2,... 映射为 A,B,C,...
-     * @param int $index
-     * @return string
-     */
-    private function indexToOptionKey(int $index): string
-    {
-        return chr(ord('A') + $index);
-    }
-
-    #[GetMapping('test')]
-    #[Scene(TrueFalseQuestionRequest::SCENE_GET_ONE_PAGE_TRUE_FALSE_QUESTIONS)]
-    public function test(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
-    {
-        return $response->json(['data' => '']);
-    }
-
     #[GetMapping('')]
     #[Scene(TrueFalseQuestionRequest::SCENE_GET_ONE_PAGE_TRUE_FALSE_QUESTIONS)]
     public function getOnePageTrueFalseQuestions(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface

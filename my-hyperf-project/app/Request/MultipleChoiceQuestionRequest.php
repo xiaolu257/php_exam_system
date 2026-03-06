@@ -38,11 +38,11 @@ class MultipleChoiceQuestionRequest extends FormRequest
 
         self::SCENE_UPDATE_MULTIPLE_CHOICE_QUESTIONS => [
             'id' => 'required|integer:strict|gt:0',
-            'content' => 'string|max:255',
+            'content' => 'string|filled|max:255',
             'options' => 'array|min:2|max:10',
             'options.*' => 'string|filled|max:50',
             'correct_answer' => 'array|min:2|max:10',
-            'correct_answer.*' => 'filled|regex:/^[A-J]$/|distinct',
+            'correct_answer.*' => 'string|filled|regex:/^[A-J]$/|distinct',
         ],
 
         self::SCENE_DELETE_MULTIPLE_CHOICE_QUESTIONS => [
@@ -79,6 +79,7 @@ class MultipleChoiceQuestionRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'content.filled' => ':attribute 不能为空',
             'options.*.filled' => ':attribute 不能为空',
             'correct_answer.*.regex' => ':attribute 必须是 A 到 J 之间的字母',
             'correct_answer.*.distinct' => ':attribute 不能有重复值',

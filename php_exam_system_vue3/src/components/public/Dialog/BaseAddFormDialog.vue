@@ -5,7 +5,8 @@
              append-to-body center destroy-on-close>
     <el-row align="middle" justify="center">
       <BaseForm :form-config="addDialogConfig.formConfig" :on-cancel="closeDialog"
-                :submitAction="submitAction"></BaseForm>
+                :submitAction="submitAction"
+                :width="addDialogConfig.width"></BaseForm>
     </el-row>
   </el-dialog>
 </template>

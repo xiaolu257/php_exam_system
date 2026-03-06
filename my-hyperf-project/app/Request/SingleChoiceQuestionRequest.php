@@ -36,10 +36,10 @@ class SingleChoiceQuestionRequest extends FormRequest
 
         self::SCENE_UPDATE_SINGLE_CHOICE_QUESTIONS => [
             'id' => 'required|integer:strict|gt:0',
-            'content' => 'string|max:255',
+            'content' => 'string|filled|max:255',
             'options' => 'array|min:2|max:10',
             'options.*' => 'string|filled|max:50',
-            'correct_answer' => 'filled|regex:/^[A-J]$/',
+            'correct_answer' => 'string|filled|regex:/^[A-J]$/',
         ],
 
         self::SCENE_DELETE_SINGLE_CHOICE_QUESTIONS => [
@@ -75,6 +75,7 @@ class SingleChoiceQuestionRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'content.filled' => ':attribute 不能为空',
             'options.*.filled' => ':attribute 不能为空',
             'correct_answer.index_in' => ':attribute 必须存在于 :field 中',
             'correct_answer.regex' => ':attribute 必须是 A 到 J 之间的字母',

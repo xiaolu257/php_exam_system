@@ -14,4 +14,9 @@ export const allAsyncRoutes = [
         name: 'TrueFalseQuestionManagement',
         component: () => import("@/view/TrueFalseQuestionManagement.vue"),
     },
+    {
+        path: 'ShortAnswerQuestionManagement',
+        name: 'ShortAnswerQuestionManagement',
+        component: () => import("@/view/ShortAnswerQuestionManagement.vue"),
+    },
 ];

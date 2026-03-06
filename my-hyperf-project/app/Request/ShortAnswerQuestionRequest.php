@@ -6,12 +6,12 @@ namespace App\Request;
 
 use Hyperf\Validation\Request\FormRequest;
 
-class TrueFalseQuestionRequest extends FormRequest
+class ShortAnswerQuestionRequest extends FormRequest
 {
-    public const SCENE_GET_ONE_PAGE_TRUE_FALSE_QUESTIONS = 'getOnePageTrueFalseQuestions';
-    public const SCENE_ADD_TRUE_FALSE_QUESTIONS = 'addTrueFalseQuestions';
-    public const SCENE_UPDATE_TRUE_FALSE_QUESTIONS = 'updateTrueFalseQuestions';
-    public const SCENE_DELETE_TRUE_FALSE_QUESTIONS = 'deleteTrueFalseQuestions';
+    public const SCENE_GET_ONE_PAGE_SHORT_ANSWER_QUESTIONS = 'getOnePageShortAnswerQuestions';
+    public const SCENE_ADD_SHORT_ANSWER_QUESTIONS = 'addShortAnswerQuestions';
+    public const SCENE_UPDATE_SHORT_ANSWER_QUESTIONS = 'updateShortAnswerQuestions';
+    public const SCENE_DELETE_SHORT_ANSWER_QUESTIONS = 'deleteShortAnswerQuestions';
 
     public function authorize(): bool
     {
@@ -19,7 +19,7 @@ class TrueFalseQuestionRequest extends FormRequest
     }
 
     protected array $scenes = [
-        self::SCENE_GET_ONE_PAGE_TRUE_FALSE_QUESTIONS => [
+        self::SCENE_GET_ONE_PAGE_SHORT_ANSWER_QUESTIONS => [
             'page' => 'required|integer|gt:0',
             'orderBy' => 'string|in:id,content,created_at',
             'orderDirection' => 'string|in:asc,desc',
@@ -27,18 +27,18 @@ class TrueFalseQuestionRequest extends FormRequest
             'searchValue' => 'required_with:searchField|string|max:100'
         ],
 
-        self::SCENE_ADD_TRUE_FALSE_QUESTIONS => [
-            'content' => 'required|string|max:255',
-            'correct_answer' => 'required|integer:strict|in:0,1',
+        self::SCENE_ADD_SHORT_ANSWER_QUESTIONS => [
+            'content' => 'required|string|max:500',
+            'reference_answer' => 'required|string|max:1000',
         ],
 
-        self::SCENE_UPDATE_TRUE_FALSE_QUESTIONS => [
+        self::SCENE_UPDATE_SHORT_ANSWER_QUESTIONS => [
             'id' => 'required|integer:strict|gt:0',
-            'content' => 'string|filled|max:255',
-            'correct_answer' => 'integer:strict|in:0,1',
+            'content' => 'string|filled|max:500',
+            'reference_answer' => 'string|filled|max:1000',
         ],
 
-        self::SCENE_DELETE_TRUE_FALSE_QUESTIONS => [
+        self::SCENE_DELETE_SHORT_ANSWER_QUESTIONS => [
             'ids' => 'required|array',
             'ids.*' => 'integer:strict|gt:0',
         ]
@@ -60,7 +60,7 @@ class TrueFalseQuestionRequest extends FormRequest
             'searchField' => '搜索字段',
             'searchValue' => '搜索值',
             'content' => '题目',
-            'correct_answer' => '正确答案',
+            'reference_answer' => '参考答案',
             'ids' => 'ID列表',
             'ids.*' => 'ID列表的每一项ID'
         ];

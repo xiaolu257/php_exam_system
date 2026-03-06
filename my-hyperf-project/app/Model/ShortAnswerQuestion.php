@@ -11,19 +11,19 @@ use Hyperf\DbConnection\Model\Model;
 /**
  * @property int $id
  * @property string $content
- * @property int $correct_answer
+ * @property string $reference_answer
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property string $deleted_at
  */
-class TrueFalseQuestion extends Model
+class ShortAnswerQuestion extends Model
 {
     use SoftDeletes;
 
     /**
      * The table associated with the model.
      */
-    protected ?string $table = 'true_false_questions';
+    protected ?string $table = 'short_answer_questions';
 
     /**
      * The attributes that are mass assignable.
@@ -33,5 +33,5 @@ class TrueFalseQuestion extends Model
     /**
      * The attributes that should be cast to native types.
      */
-    protected array $casts = ['id' => 'integer', 'correct_answer' => 'integer', 'created_at' => 'datetime', 'updated_at' => 'datetime'];
+    protected array $casts = ['id' => 'integer', 'created_at' => 'datetime', 'updated_at' => 'datetime'];
 }

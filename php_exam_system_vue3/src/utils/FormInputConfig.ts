@@ -18,6 +18,7 @@ export class FormInputConfig extends AbstractFormConfigItem {
     disabled: boolean;
     placeholder: string;
     clearable: boolean;
+
     constructor(name: string,
                 label: string,
                 formRules: FormItemRule[] = [],
@@ -42,6 +43,23 @@ export class TextInputConfig extends FormInputConfig {
     }
 }
 
+type TextAreaAutosize = boolean | { minRows?: number; maxRows?: number };
+
+export class TextAreaInputConfig extends FormInputConfig {
+    autosize: TextAreaAutosize
+
+    constructor(name: string,
+                label: string,
+                formRules: FormItemRule[] = [],
+                disabled: boolean = false,
+                placeholder: string = '',
+                clearable: boolean = false,
+                autosize: TextAreaAutosize) {
+        super(name, label, formRules, disabled, placeholder, clearable);
+        this.autosize = autosize;
+    }
+}
+
 export class OptionsListInputConfig extends FormInputConfig {
     constructor(name: string,
                 label: string,
@@ -55,6 +73,7 @@ export class OptionsListInputConfig extends FormInputConfig {
 
 export class PasswordInputConfig extends FormInputConfig {
     showPassword: boolean;
+
     constructor(name: string,
                 label: string,
                 formRules: FormItemRule[] = [],
@@ -66,6 +85,7 @@ export class PasswordInputConfig extends FormInputConfig {
         this.showPassword = showPassword;
     }
 }
+
 // 创建 FormInputConfigFactory 工厂类
 export class FormInputConfigFactory {
     // 创建可读可写的文本输入框
@@ -73,12 +93,21 @@ export class FormInputConfigFactory {
                                    label: string,
                                    placeholder: string = '',
                                    rules: FormItemRule[] = []): FormInputConfig {
-        return new TextInputConfig(name, label, rules,false,placeholder,true);
+        return new TextInputConfig(name, label, rules, false, placeholder, true);
     }
 
     // 创建只读的文本输入框
     static createReadOnlyTextInput(name: string, label: string, rules: FormItemRule[] = []): FormInputConfig {
-        return new TextInputConfig(name, label, rules,true,'',true);
+        return new TextInputConfig(name, label, rules, true, '', true);
+    }
+
+    // 创建可读可写的文本域输入框
+    static createEditableTextAreaInput(name: string,
+                                       label: string,
+                                       placeholder: string = '',
+                                       autosize: TextAreaAutosize = false,
+                                       rules: FormItemRule[] = []): FormInputConfig {
+        return new TextAreaInputConfig(name, label, rules, false, placeholder, true, autosize);
     }
 
     // 创建可读可写的密码输入框
@@ -87,14 +116,15 @@ export class FormInputConfigFactory {
                                        placeholder: string = '',
                                        showPassword: boolean = false,
                                        rules: FormItemRule[] = []): FormInputConfig {
-        return new PasswordInputConfig(name, label, rules,false,placeholder,true,showPassword);
+        return new PasswordInputConfig(name, label, rules, false, placeholder, true, showPassword);
     }
+
     // 创建动态多路文本输入框
     static createDynamicMultipleTextInput(name: string,
                                           label: string,
                                           placeholder: string = '',
                                           rules: FormItemRule[] = []): FormInputConfig {
-        return new OptionsListInputConfig(name, label, rules,false,placeholder,true);
+        return new OptionsListInputConfig(name, label, rules, false, placeholder, true);
     }
 }
 
