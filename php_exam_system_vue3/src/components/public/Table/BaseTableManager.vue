@@ -18,6 +18,7 @@
 
   <el-table ref="tableRef"
             :data="tableData"
+            row-key="id"
             border
             show-overflow-tooltip
             stripe
@@ -25,7 +26,7 @@
             @sort-change="handleSortChange"
             @selection-change="handleSelectionChange"
   >
-    <el-table-column align="center" fixed="left" type="selection" width="40"/>
+    <el-table-column align="center" fixed="left" type="selection" width="40" :reserve-selection="true"/>
     <BaseTableColumns :table-columns="tableConfig.tableColumns"/>
     <el-table-column align="center" fixed="right" label="操作" width="200">
       <template #default="{row}">

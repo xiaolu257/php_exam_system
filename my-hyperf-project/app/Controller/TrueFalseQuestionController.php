@@ -94,9 +94,17 @@ class TrueFalseQuestionController
         $validatedData = $request->validated();
 
         $ids = $validatedData['ids'];
+        
+        $existingIds = TrueFalseQuestion::query()
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->toArray();
 
-        TrueFalseQuestion::query()->whereIn('id', $ids)->delete();
-        return $response->json(['msg' => '删除判断题成功']);
+        $count = TrueFalseQuestion::query()->whereIn('id', $existingIds)->delete();
+
+        return $response->json([
+            'msg' => "成功删除 $count 条判断题数据"
+        ]);
     }
 
 }

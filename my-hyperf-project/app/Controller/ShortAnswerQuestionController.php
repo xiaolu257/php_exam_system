@@ -95,8 +95,16 @@ class ShortAnswerQuestionController
 
         $ids = $validatedData['ids'];
 
-        ShortAnswerQuestion::query()->whereIn('id', $ids)->delete();
-        return $response->json(['msg' => '删除简答题成功']);
+        $existingIds = ShortAnswerQuestion::query()
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->toArray();
+
+        $count = ShortAnswerQuestion::query()->whereIn('id', $existingIds)->delete();
+
+        return $response->json([
+            'msg' => "成功删除 $count 条简答题数据"
+        ]);
     }
 
 }

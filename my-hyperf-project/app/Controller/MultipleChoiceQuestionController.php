@@ -157,8 +157,16 @@ class MultipleChoiceQuestionController
 
         $ids = $validatedData['ids'];
 
-        MultipleChoiceQuestion::query()->whereIn('id', $ids)->delete();
-        return $response->json(['msg' => '删除多选题成功']);
+        $existingIds = MultipleChoiceQuestion::query()
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->toArray();
+
+        $count = MultipleChoiceQuestion::query()->whereIn('id', $existingIds)->delete();
+
+        return $response->json([
+            'msg' => "成功删除 $count 条多选题数据"
+        ]);
     }
 
 }

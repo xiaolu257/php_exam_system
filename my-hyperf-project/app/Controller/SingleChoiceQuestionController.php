@@ -29,7 +29,6 @@ class SingleChoiceQuestionController
     }
 
     #[GetMapping('test')]
-    #[Scene(SingleChoiceQuestionRequest::SCENE_GET_ONE_PAGE_SINGLE_CHOICE_QUESTIONS)]
     public function test(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         return $response->json(['data' => '']);
@@ -146,8 +145,16 @@ class SingleChoiceQuestionController
 
         $ids = $validatedData['ids'];
 
-        SingleChoiceQuestion::query()->whereIn('id', $ids)->delete();
-        return $response->json(['msg' => '删除单选题成功']);
+        $existingIds = SingleChoiceQuestion::query()
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->toArray();
+
+        $count = SingleChoiceQuestion::query()->whereIn('id', $existingIds)->delete();
+
+        return $response->json([
+            'msg' => "成功删除 $count 条单选题数据"
+        ]);
     }
 
 }

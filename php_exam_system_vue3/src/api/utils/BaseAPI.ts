@@ -1,6 +1,7 @@
 import {ElMessageBox} from "element-plus";
 import MyMessage from "@/utils/MyMessage";
 import {myDel, myGet, myPost, myPut} from "@/api/utils/axios";
+import {h} from "vue";
 
 export type PageCallback = (
     data: any[],
@@ -53,9 +54,13 @@ function deleteItemRows(
     deleteSuccess: () => void,
     url: string
 ) {
-    const message = ids.length > 1
-        ? '数据被删除后可能无法恢复，请谨慎操作，您确认要删除选中的数据吗？'
-        : '数据被删除后可能无法恢复，请谨慎操作，您确认要删除吗？';
+    const message = h('div', [
+        '数据被删除后可能无法恢复，请谨慎操作',
+        h('br'),
+        `确认删除选中的 ${ids.length} 条数据吗？`,
+        h('br'),
+        `IDs: [${ids.join(', ')}]`
+    ])
 
     ElMessageBox.confirm(message, 'Warning', {confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning',})
         .then(() => {
