@@ -31,13 +31,10 @@
 <script lang="ts" setup>
 import type {FormRules} from 'element-plus';
 import {ElForm} from 'element-plus';
-import {computed, reactive, ref} from 'vue';
+import {computed, reactive, ref, toRaw} from 'vue';
 import {AbstractFormConfigItem, FormInputConfig, OptionsListInputConfig,} from "@/utils/FormInputConfig";
 import BaseInputComponent from "@/components/public/Form/ChildComponet/BaseInputComponent.vue";
-import {
-  AssociateSelectConfig,
-  FormSelectConfig,
-} from "@/utils/FormSelectConfig";
+import {AssociateSelectConfig, FormSelectConfig,} from "@/utils/FormSelectConfig";
 import {FormUploadConfig} from "@/utils/FormUploadConfig";
 import BaseUploadComponent from "@/components/public/Form/ChildComponet/BaseUploadComponent.vue";
 import BaseSelectComponent from "@/components/public/Form/ChildComponet/BaseSelectComponent.vue";
@@ -105,9 +102,9 @@ const createFormData = () => {
         }
       } else if (item instanceof FormSelectConfig) {
         if (item instanceof AssociateSelectConfig) {
-          if (item.multiple){
+          if (item.multiple) {
             acc[item.name] = [];
-          }else{
+          } else {
             acc[item.name] = '';
           }
         }
@@ -126,57 +123,42 @@ const formData = reactive<Record<string, any>>(createFormData());
 // 表单引用
 const formRef = ref<InstanceType<typeof ElForm> | null>(null);
 const handleSave = () => {
+  //默认为新增场景
+  let submitData: Record<string, any> = structuredClone(toRaw(formData))
+  let onSuccess = () => {}
+
   if (initData) {
-    //修改场景
     const changedData: Record<string, any> = {};
-    Object.keys(formData).forEach((key) => {
-      const newVal = formData[key];
+
+    Object.keys(submitData).forEach((key) => {
+      const newVal = submitData[key];
       const oldVal = initData[key];
+
       if (!isEqual(newVal, oldVal)) {
         changedData[key] = newVal;
       }
     });
-    if (Object.keys(changedData).length === 0) {
-      MyMessage.warning("新数据与原数据一致，无需修改");
-    } else {
-      // 有变更才校验和提交,同时附带上更新标识符，如id等字段
-      updateIdentityFields.forEach((key) => {
-        changedData[key] = formData[key];
-      });
-      validateAndSubmit(changedData);
-    }
 
-  } else {
-    // 新增场景直接校验提交
-    validateAndSubmit(formData);
-  }
-};
-const filterInvalidSubmitData = (dataToSubmit: Record<string, any>) => {
-  //不要把原来的formData暴露给外部，防止被错误更改导致ui异常或其他异常
-  const validSubmitData: Record<string, any> = {}
-  for (const key in dataToSubmit) {
-    if (dataToSubmit[key] === '' || dataToSubmit[key] === undefined) {
-      continue
+    if (Object.keys(changedData).length === 0) {
+      MyMessage.warning("新数据与原数据一致，无需修改")
+      return
     }
-    validSubmitData[key] = dataToSubmit[key];
+    // 加上 id 等标识字段
+    updateIdentityFields.forEach((key) => {
+      changedData[key] = submitData[key];
+    });
+
+    submitData = changedData
+    onSuccess = () => {
+      Object.keys(submitData).forEach((key) => {
+        initData[key] = submitData[key];
+      });
+    }
   }
-  return validSubmitData;
-}
-const validateAndSubmit = (dataToSubmit: Record<string, any>) => {
   formRef.value?.validate((valid) => {
-    if (valid) {
-      const validSubmitData = filterInvalidSubmitData(dataToSubmit);
-      if (initData) {
-        props.submitAction(validSubmitData, () => {
-          Object.keys(formData).forEach((key) => {
-            initData[key] = formData[key];
-          });
-        });
-      } else {
-        props.submitAction(validSubmitData, () => {});
-      }
-    }
-  });
+    if (!valid) return;
+    props.submitAction(submitData, onSuccess);
+  })
 };
 const onReset = () => {
   if (initData) {
