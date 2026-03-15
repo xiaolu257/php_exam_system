@@ -19,4 +19,9 @@ export const allAsyncRoutes = [
         name: 'ShortAnswerQuestionManagement',
         component: () => import("@/view/ShortAnswerQuestionManagement.vue"),
     },
+    {
+        path: 'ExamPaperManagement',
+        name: 'ExamPaperManagement',
+        component: () => import("@/view/ExamPaperManagement.vue"),
+    },
 ];

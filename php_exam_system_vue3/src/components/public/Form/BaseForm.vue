@@ -15,6 +15,9 @@
         <template v-else-if="item instanceof FormNumberInputConfig">
           <BaseNumberInputComponent :formData="formData" :item="item"/>
         </template>
+        <template v-else-if="item instanceof FormDatePickerConfig">
+          <BaseDatePickerComponent :formData="formData" :item="item"/>
+        </template>
       </el-form-item>
     </template>
     <el-row justify="center">
@@ -29,8 +32,7 @@
 
 
 <script lang="ts" setup>
-import type {FormRules} from 'element-plus';
-import {ElForm} from 'element-plus';
+import {dayjs, ElForm, type FormRules} from 'element-plus';
 import {computed, reactive, ref, toRaw} from 'vue';
 import {AbstractFormConfigItem, FormInputConfig, OptionsListInputConfig,} from "@/utils/FormInputConfig";
 import BaseInputComponent from "@/components/public/Form/ChildComponet/BaseInputComponent.vue";
@@ -40,9 +42,11 @@ import BaseUploadComponent from "@/components/public/Form/ChildComponet/BaseUplo
 import BaseSelectComponent from "@/components/public/Form/ChildComponet/BaseSelectComponent.vue";
 // 处理表单保存
 import BaseNumberInputComponent from "@/components/public/Form/ChildComponet/BaseNumberInputComponent.vue";
-import {FormNumberInputConfig} from "@/utils/FormNumberInputConfig";
+import {FormNumberInputConfig, IntegerInputConfig} from "@/utils/FormNumberInputConfig";
 import MyMessage from "@/utils/MyMessage";
 import {isEqual} from "lodash-es";
+import {DateTimeRangePickerConfig, FormDatePickerConfig} from "@/utils/FormDatePickerConfig";
+import BaseDatePickerComponent from "@/components/public/Form/ChildComponet/BaseDatePickerComponent.vue";
 
 interface Props {
   formConfig: AbstractFormConfigItem[];//表单配置项，决定有什么输入
@@ -109,7 +113,19 @@ const createFormData = () => {
           }
         }
       } else if (item instanceof FormNumberInputConfig) {
-        acc[item.name] = item.options.min ?? 0;
+        if (item instanceof IntegerInputConfig) {
+          acc[item.name] = item.min;
+        } else {
+          acc[item.name] = 0;
+        }
+      } else if (item instanceof FormDatePickerConfig) {
+        if (item instanceof DateTimeRangePickerConfig) {
+          const start = dayjs().format("YYYY-MM-DD HH:mm:ss");
+          const end = dayjs().add(24, "hour").format("YYYY-MM-DD HH:mm:ss");
+          acc[item.name] = [start, end];
+        } else {
+          acc[item.name] = dayjs().format("YYYY-MM-DD HH:mm:ss");
+        }
       } else if (item instanceof FormUploadConfig) {
         acc[item.name] = null;
       }

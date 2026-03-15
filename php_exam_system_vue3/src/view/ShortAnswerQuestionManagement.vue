@@ -15,7 +15,6 @@ import {TableCrudFactory} from "@/utils/TableCrudFactory";
 
 
 const ShortAnswerQuestionStandardCRUD = TableCrudFactory.creatStandardCrud('short-answer-question');
-const correctAnswerOptions = [{label: '正确', value: 1}, {label: '错误', value: 0}];
 const addDialogConfig: AddDialogConfig = {
   title: '新增简答题',
   width: 600,

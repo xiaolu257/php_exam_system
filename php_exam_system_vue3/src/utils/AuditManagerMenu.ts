@@ -26,6 +26,15 @@ export const AuditManagerMenuRoutes = [
         ]
     },
     {
+        name: '考试管理',
+        children: [
+            {
+                name: '试卷管理',
+                path: menuBaseUrl + '/ExamPaperManagement',
+            },
+        ]
+    },
+    {
         name: '个人资料',
         path: menuBaseUrl + '/Profile',
     },
