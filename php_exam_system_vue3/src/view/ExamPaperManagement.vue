@@ -25,10 +25,13 @@ const addDialogConfig: AddDialogConfig = {
     FormInputConfigFactory.createEditableTextInput('title', '试卷名称', 'title'),
     FormInputConfigFactory.createEditableTextAreaInput('description', '试卷说明', 'description'),
     FormNumberInputConfigFactory.createEditableIntegerInput('duration', '考试时长(分钟)', 'duration'),
-    FormNumberInputConfigFactory.createEditableIntegerInput('total_score', '总分', 'total_score'),
+    FormNumberInputConfigFactory.createEditableIntegerInput('single_count', '单选题数量(2分/题)', 'single_count', 1),
+    FormNumberInputConfigFactory.createEditableIntegerInput('multiple_count', '多选题数量(4分/题)', 'multiple_count', 1),
+    FormNumberInputConfigFactory.createEditableIntegerInput('true_false_count', '判断题数量(1分/题)', 'true_false_count', 1),
+    FormNumberInputConfigFactory.createEditableIntegerInput('short_answer_count', '简答题数量(5分/题)', 'short_count', 1),
     FormDatePickerConfigFactory.createEditableDateTimeRangerPicker('exam_time', '考试时间', '至',
         '开始时间', '结束时间'),
-    FormNumberInputConfigFactory.createEditableIntegerInput('max_attempts', '最大考试次数', 'max_attempts')
+    FormNumberInputConfigFactory.createEditableIntegerInput('max_attempts', '最大考试次数', 'max_attempts', 1)
   ],
   submitAction: (data: Record<string, any>, callback: () => void) => {
     const {exam_time, ...rest} = data;
@@ -54,7 +57,7 @@ const editDialogConfig: TableColumnEditDialogConfig = {
     FormNumberInputConfigFactory.createEditableIntegerInput('total_score', '总分', 'total_score'),
     FormDatePickerConfigFactory.createEditableDateTimeRangerPicker('exam_time', '考试时间', '至',
         '开始时间', '结束时间'),
-    FormNumberInputConfigFactory.createEditableIntegerInput('max_attempts', '最大考试次数', 'max_attempts')
+    FormNumberInputConfigFactory.createEditableIntegerInput('max_attempts', '最大考试次数', 'max_attempts', 1)
   ],
   submitAction: ExamPaperCRUDStandardCRUD.updateItem
 };

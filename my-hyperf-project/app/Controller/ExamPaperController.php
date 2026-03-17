@@ -6,7 +6,10 @@ namespace App\Controller;
 
 use App\Model\ExamPaper;
 use App\Request\ExamPaperRequest;
+use App\Service\ExamPaperService;
 use Hyperf\Database\Model\Builder;
+use Hyperf\DbConnection\Db;
+use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\DeleteMapping;
 use Hyperf\HttpServer\Annotation\GetMapping;
@@ -18,6 +21,9 @@ use Hyperf\Validation\Annotation\Scene;
 #[Controller(prefix: 'exam-paper')]
 class ExamPaperController
 {
+    #[Inject]
+    protected ExamPaperService $examPaperService;
+
     #[GetMapping('test')]
     public function test(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -51,20 +57,29 @@ class ExamPaperController
     {
         $validatedData = $request->validated();
 
-        $examPaper = new ExamPaper();
-        $examPaper->title = $validatedData['title'];
-        if (!empty($validatedData['description'])) {
-            $examPaper->description = $validatedData['description'];
-        }
-        $examPaper->duration = $validatedData['duration'];
-        $examPaper->total_score = $validatedData['total_score'];
-        $examPaper->start_time = $validatedData['start_time'];
-        $examPaper->end_time = $validatedData['end_time'];
-        if (!empty($validatedData['max_attempts'])) {
-            $examPaper->max_attempts = $validatedData['max_attempts'];
-        }
-        $examPaper->save();
 
+        Db::transaction(function () use ($validatedData, &$examPaper) {
+            $singleCount = $validatedData['single_count'];
+            $multipleCount = $validatedData['multiple_count'];
+            $trueFalseCount = $validatedData['true_false_count'];
+            $shortAnswerCount = $validatedData['short_answer_count'];
+            // 创建试卷
+            $examPaper = new ExamPaper();
+            $examPaper->title = $validatedData['title'];
+            if (!empty($validatedData['description'])) {
+                $examPaper->description = $validatedData['description'];
+            }
+            $examPaper->duration = $validatedData['duration'];
+            $examPaper->start_time = $validatedData['start_time'];
+            $examPaper->end_time = $validatedData['end_time'];
+            if (!empty($validatedData['max_attempts'])) {
+                $examPaper->max_attempts = $validatedData['max_attempts'];
+            }
+            $examPaper->total_score = $singleCount * 2 + $multipleCount * 4 + $trueFalseCount * 1 + $shortAnswerCount * 5;
+            $examPaper->save();
+
+            $this->examPaperService->generateRandomQuestions($examPaper->id, $singleCount, $multipleCount, $trueFalseCount, $shortAnswerCount);
+        });
         return $response->json(['msg' => '新增试卷成功']);
     }
 

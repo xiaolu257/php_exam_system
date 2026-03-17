@@ -18,6 +18,20 @@ const myAxios = axios.create({
     },
 });
 let firstTimeLoadFingerprint = true;
+
+function filterEmptyFields(data: Record<string, any>) {
+    const result: Record<string, any> = {};
+
+    Object.entries(data).forEach(([key, value]) => {
+        if (value === "" || value === null || value === undefined) {
+            return;
+        }
+        result[key] = value;
+    });
+
+    return result;
+}
+
 // 请求拦截器：附加 token
 myAxios.interceptors.request.use(
     async (config) => {
@@ -29,6 +43,15 @@ myAxios.interceptors.request.use(
         config.headers['Fingerprint'] = await useFingerprint(firstTimeLoadFingerprint);
         firstTimeLoadFingerprint = false;
 
+        // 过滤请求数据
+        if (config.data && typeof config.data === "object") {
+            config.data = filterEmptyFields(config.data);
+        }
+
+        // 如果有 GET 参数
+        if (config.params && typeof config.params === "object") {
+            config.params = filterEmptyFields(config.params);
+        }
         return config;
     },
     (error) => Promise.reject(error)
