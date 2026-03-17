@@ -38,7 +38,7 @@ class ExamPaperService
 
         foreach ($singleQuestions as $q) {
             $insertData[] = [
-                'paper_id' => $examPaperId,
+                'exam_paper_id' => $examPaperId,
                 'question_type' => 'single',
                 'question_id' => $q->id,
                 'score' => 2,
@@ -60,7 +60,7 @@ class ExamPaperService
 
         foreach ($multipleQuestions as $q) {
             $insertData[] = [
-                'paper_id' => $examPaperId,
+                'exam_paper_id' => $examPaperId,
                 'question_type' => 'multiple',
                 'question_id' => $q->id,
                 'score' => 4,
@@ -82,7 +82,7 @@ class ExamPaperService
 
         foreach ($trueFalseQuestions as $q) {
             $insertData[] = [
-                'paper_id' => $examPaperId,
+                'exam_paper_id' => $examPaperId,
                 'question_type' => 'true_false',
                 'question_id' => $q->id,
                 'score' => 1,
@@ -104,7 +104,7 @@ class ExamPaperService
 
         foreach ($shortQuestions as $q) {
             $insertData[] = [
-                'paper_id' => $examPaperId,
+                'exam_paper_id' => $examPaperId,
                 'question_type' => 'short_answer',
                 'question_id' => $q->id,
                 'score' => 5,

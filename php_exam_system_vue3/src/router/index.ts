@@ -36,10 +36,15 @@ const routes = [
         ]
     },
     {
+        name: 'BeforeExam',
+        path: '/exam/:id/before',
+        component: () => import("@/view/Exam/BeforeExam.vue"),
+    },
+    {
         name: 'NotFound',
         path: '/:pathMatch(.*)*', // Matches any path that hasn't been matched by other routes
         component: () => import("@/view/Public/NotFound.vue")
-    }
+    },
 ];
 
 const router = createRouter({

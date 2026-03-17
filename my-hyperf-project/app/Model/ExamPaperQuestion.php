@@ -36,7 +36,7 @@ class ExamPaperQuestion extends Model
      */
     protected array $casts = [
         'id' => 'integer',
-        'paper_id' => 'integer',
+        'exam_paper_id' => 'integer',
         'question_id' => 'integer',
         'score' => 'integer',
         'sort_order' => 'integer',

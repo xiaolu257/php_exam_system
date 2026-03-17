@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Model\ExamPaper;
+use App\Model\ExamPaperQuestion;
 use App\Request\ExamPaperRequest;
 use App\Service\ExamPaperService;
 use Hyperf\Database\Model\Builder;
@@ -15,6 +16,7 @@ use Hyperf\HttpServer\Annotation\DeleteMapping;
 use Hyperf\HttpServer\Annotation\GetMapping;
 use Hyperf\HttpServer\Annotation\PostMapping;
 use Hyperf\HttpServer\Annotation\PutMapping;
+use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Validation\Annotation\Scene;
 
@@ -51,12 +53,37 @@ class ExamPaperController
         return $response->json(['data' => $paginator->items(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()]);
     }
 
+    #[GetMapping('{id:\d+}')]
+    public function getOne(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $id = $request->route('id', 0);
+
+        $exam = ExamPaper::query()
+            ->where('id', $id)
+            ->first(['id', 'title', 'description', 'duration', 'total_score', 'start_time', 'end_time', 'max_attempts']);
+
+        if (!$exam) {
+            return $response->json(['message' => '考试不存在'])->withStatus(404);
+        }
+        $counts = ExamPaperQuestion::query()
+            ->where('exam_paper_id', $id)
+            ->selectRaw('question_type, COUNT(*) as count')
+            ->groupBy('question_type')
+            ->pluck('count', 'question_type');
+
+        $exam->single_count = $counts['single'] ?? 0;
+        $exam->multiple_count = $counts['multiple'] ?? 0;
+        $exam->true_false_count = $counts['true_false'] ?? 0;
+        $exam->short_answer_count = $counts['short_answer'] ?? 0;
+
+        return $response->json($exam);
+    }
+    
     #[PostMapping('')]
     #[Scene(ExamPaperRequest::SCENE_ADD)]
     public function add(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
-
 
         Db::transaction(function () use ($validatedData, &$examPaper) {
             $singleCount = $validatedData['single_count'];
