@@ -31,15 +31,23 @@
             <el-descriptions-item label="结束时间">{{ exam.end_time }}</el-descriptions-item>
           </el-descriptions>
 
-          <!-- 倒计时 -->
-          <div class="countdown" v-if="countdown > 0">
+          <!-- 状态提示 -->
+          <div class="countdown" v-if="examStatus === 'not_started'">
             距离开始还有：
             <span class="time">{{ formatTime(countdown) }}</span>
           </div>
 
+          <div class="countdown ongoing" v-else-if="examStatus === 'ongoing'">
+            🟢 考试进行中，可进入考试
+          </div>
+
+          <div class="countdown ended" v-else-if="examStatus === 'ended'">
+            🔴 考试已结束，无法进入
+          </div>
+
           <!-- 按钮 -->
           <div class="actions">
-            <el-button type="primary" size="large" :disabled="!canStart" @click="startExam">
+            <el-button type="primary" size="large" :disabled="examStatus !== 'ongoing'" @click="startExam">
               开始考试
             </el-button>
           </div>
@@ -47,7 +55,6 @@
       </el-card>
     </div>
   </div>
-
 </template>
 
 <script setup>
@@ -60,7 +67,7 @@ const route = useRoute()
 const router = useRouter()
 const examId = route.params.id
 
-// 考试数据（初始为空）
+// 考试数据
 const exam = ref(null)
 
 // 加载状态
@@ -70,15 +77,17 @@ const loading = ref(false)
 const countdown = ref(0)
 let timer = null
 
-// 是否可以开始考试
-const canStart = computed(() => {
-  if (!exam.value) return false
+// ✅ 考试状态（核心）
+const examStatus = computed(() => {
+  if (!exam.value) return 'loading'
 
   const now = dayjs()
   const start = dayjs(exam.value.start_time)
   const end = dayjs(exam.value.end_time)
 
-  return now.isAfter(start) && now.isBefore(end)
+  if (now.isBefore(start)) return 'not_started'
+  if (now.isAfter(end)) return 'ended'
+  return 'ongoing'
 })
 
 // 初始化倒计时
@@ -120,8 +129,13 @@ const fetchExam = async () => {
 
 // 开始考试
 const startExam = () => {
-  if (!canStart.value) {
-    ElMessage.warning('当前时间不可进入考试')
+  if (examStatus.value === 'not_started') {
+    ElMessage.warning('考试尚未开始')
+    return
+  }
+
+  if (examStatus.value === 'ended') {
+    ElMessage.error('考试已结束')
     return
   }
 
@@ -182,6 +196,16 @@ onBeforeUnmount(() => {
 
 .time {
   color: #409eff;
+  font-weight: bold;
+}
+
+.countdown.ongoing {
+  color: #67c23a;
+  font-weight: bold;
+}
+
+.countdown.ended {
+  color: #f56c6c;
   font-weight: bold;
 }
 
