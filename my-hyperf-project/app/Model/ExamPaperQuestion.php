@@ -14,7 +14,7 @@ use Hyperf\DbConnection\Model\Model;
  * @property int $question_id
  * @property int $score
  * @property int $sort_order
- * @property string $question_snapshot
+ * @property array $question_snapshot
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property string $deleted_at
