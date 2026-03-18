@@ -78,7 +78,49 @@ class ExamPaperController
 
         return $response->json($exam);
     }
-    
+
+    #[GetMapping('{id:\d+}/questions')]
+    public function getOneDetail(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $id = $request->route('id', 0);
+
+        $exam = ExamPaper::query()
+            ->where('id', $id)
+            ->first(['id', 'title', 'description', 'duration', 'total_score', 'start_time', 'end_time', 'max_attempts']);
+
+        if (!$exam) {
+            return $response->json(['message' => '考试不存在'])->withStatus(404);
+        }
+        $counts = ExamPaperQuestion::query()
+            ->where('exam_paper_id', $id)
+            ->selectRaw('question_type, COUNT(*) as count')
+            ->groupBy('question_type')
+            ->pluck('count', 'question_type');
+
+        $exam->single_count = $counts['single'] ?? 0;
+        $exam->multiple_count = $counts['multiple'] ?? 0;
+        $exam->true_false_count = $counts['true_false'] ?? 0;
+        $exam->short_answer_count = $counts['short_answer'] ?? 0;
+
+        $exam->questions = ExamPaperQuestion::query()
+            ->where('exam_paper_id', $id)
+            ->orderBy('sort_order')
+            ->get(['question_type', 'score', 'sort_order', 'question_snapshot']);
+        //移除正确答案，避免暴露在前端
+        foreach ($exam->questions as $question) {
+            $snapshot = $question->question_snapshot;
+
+            if (in_array($question->question_type, ['single', 'multiple', 'true_false'])) {
+                unset($snapshot['correct_answer']);
+            } else if ($question->question_type === 'short_answer') {
+                unset($snapshot['reference_answer']);
+            }
+
+            $question->question_snapshot = $snapshot;
+        }
+        return $response->json($exam);
+    }
+
     #[PostMapping('')]
     #[Scene(ExamPaperRequest::SCENE_ADD)]
     public function add(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface

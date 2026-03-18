@@ -41,6 +41,11 @@ const routes = [
         component: () => import("@/view/Exam/BeforeExam.vue"),
     },
     {
+        name: 'ExamStart',
+        path: '/exam/:id/start',
+        component: () => import('@/view/Exam/ExamStart.vue'),
+    },
+    {
         name: 'NotFound',
         path: '/:pathMatch(.*)*', // Matches any path that hasn't been matched by other routes
         component: () => import("@/view/Public/NotFound.vue")

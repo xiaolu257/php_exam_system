@@ -2,6 +2,9 @@
   <BaseTableManager :add-dialog-config="addDialogConfig"
                     :table-column-edit-dialog-config="editDialogConfig"
                     :table-config="tableConfig">
+    <template v-slot:operationButton="{row}">
+      <el-button size="small" type="success" @click="previewExamPaper(row.id)">预览</el-button>
+    </template>
   </BaseTableManager>
 </template>
 
@@ -15,6 +18,7 @@ import {TableCrudFactory} from "@/utils/TableCrudFactory";
 import {FormNumberInputConfigFactory} from "@/utils/FormNumberInputConfig";
 import {FormDatePickerConfigFactory} from "@/utils/FormDatePickerConfig";
 import {addItem} from "@/api/utils/BaseAPI";
+import router from "@/router";
 
 
 const ExamPaperCRUDStandardCRUD = TableCrudFactory.creatStandardCrud('exam-paper');
@@ -54,7 +58,6 @@ const editDialogConfig: TableColumnEditDialogConfig = {
     FormInputConfigFactory.createEditableTextInput('title', '试卷名称', 'title'),
     FormInputConfigFactory.createEditableTextAreaInput('description', '试卷说明', 'description'),
     FormNumberInputConfigFactory.createEditableIntegerInput('duration', '考试时长(分钟)', 'duration'),
-    FormNumberInputConfigFactory.createEditableIntegerInput('total_score', '总分', 'total_score'),
     FormDatePickerConfigFactory.createEditableDateTimeRangerPicker('exam_time', '考试时间', '至',
         '开始时间', '结束时间'),
     FormNumberInputConfigFactory.createEditableIntegerInput('max_attempts', '最大考试次数', 'max_attempts', 1)
@@ -78,6 +81,9 @@ const tableConfig: TableConfig = {
     new TextTableColumn(180, 'updated_at', '更新时间', true, false)
   ]
 };
+const previewExamPaper = (examPaperId: number) => {
+  router.push(`/exam/${examPaperId}/start`)
+}
 </script>
 
 <style scoped>

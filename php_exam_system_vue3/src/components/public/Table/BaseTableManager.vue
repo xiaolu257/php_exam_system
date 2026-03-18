@@ -30,6 +30,7 @@
     <BaseTableColumns :table-columns="tableConfig.tableColumns"/>
     <el-table-column align="center" fixed="right" label="操作" width="200">
       <template #default="{row}">
+        <slot name="operationButton" :row="row"></slot>
         <BaseEditFormDialog v-if="tableColumnEditDialogConfig"
                             :edit-dialog-config="createTableColumnEditDialogConfig(row)"
         />
