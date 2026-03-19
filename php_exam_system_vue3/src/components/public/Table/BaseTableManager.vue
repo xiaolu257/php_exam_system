@@ -114,16 +114,22 @@ const createAddDialogConfig = (): AddDialogConfig => {
 
 const createTableColumnEditDialogConfig = (scopeRow: Record<string, any>): EditDialogConfig => {
   const config = props.tableColumnEditDialogConfig!;
-  const filterFormDataToInitData = (): Record<string, any> => {
+  const mapRowToInitData = (): Record<string, any> => {
+    const row = structuredClone(toRaw(scopeRow)); // ✅ 完全隔离：先使用toRaw隔离响应式才能使用structuredClone隔离引用
     const filteredData: Record<string, any> = {};
+
     config.formConfig.forEach((item) => {
       const key = item.name;
       if (item instanceof OptionsListInputConfig) {
-        filteredData[key] = Object.values(scopeRow[key])
+        filteredData[key] = Object.values(row[key]);
       } else {
-        filteredData[key] = structuredClone(toRaw(scopeRow[key]))
+        filteredData[key] = row[key];
       }
-    })
+    });
+
+    if (config.afterMapRowToInitData) {
+      config.afterMapRowToInitData(filteredData, row);
+    }
     return filteredData;
   }
   return {
@@ -133,7 +139,7 @@ const createTableColumnEditDialogConfig = (scopeRow: Record<string, any>): EditD
     controlButtonName: config.controlButtonName,
     buttonSize: config.buttonSize,
     buttonType: config.buttonType,
-    initData: filterFormDataToInitData(),
+    initData: mapRowToInitData(),
     updateIdentityFields: config.updateIdentityFields,
     submitAction: (data: Record<string, any>, callback: () => void) => {
       config.submitAction(data, () => {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Exam;
 use App\Model\ExamPaper;
 use App\Model\ExamPaperQuestion;
 use App\Request\ExamPaperRequest;
@@ -159,51 +160,40 @@ class ExamPaperController
         $validatedData = $request->validated();
 
         $id = $validatedData['id'];
-        $content = $validatedData['content'] ?? null;
-        $options = $validatedData['options'] ?? null;
-        $correctAnswer = $validatedData['correct_answer'] ?? null;
 
-        $singleChoiceQuestion = ExamPaper::query()->find($id);
-        if (!$singleChoiceQuestion) {
-            return $response->json(['msg' => '单选题不存在'])->withStatus(404);
+        $examPaper = ExamPaper::query()->find($id, ['id']);
+        if (!$examPaper) {
+            return $response->json(['msg' => '试卷不存在'])->withStatus(404);
+        }
+        $exams = Exam::query()->where('exam_paper_id', $examPaper->id)->pluck('id')->toArray();
+        if (!empty($exams)) {
+            return $response->json(['msg' => '已有考生参加考试，不可更改试卷信息'])->withStatus(409);
+        }
+        if (!empty($validatedData['title'])) {
+            $examPaper->title = $validatedData['title'];
+        }
+        if (!empty($validatedData['description'])) {
+            $examPaper->description = $validatedData['description'];
+        }
+        if (!empty($validatedData['duration'])) {
+            $examPaper->duration = $validatedData['duration'];
+        }
+        if (!empty($validatedData['start_time'])) {
+            $examPaper->start_time = $validatedData['start_time'];
+        }
+        if (!empty($validatedData['end_time'])) {
+            $examPaper->end_time = $validatedData['end_time'];
+        }
+        if (!empty($validatedData['max_attempts'])) {
+            $examPaper->max_attempts = $validatedData['max_attempts'];
         }
 
-        if ($content) {
-            $singleChoiceQuestion->content = $content;
-        }
-
-        if ($options) {
-            // 将选项数组转换为 A,B,C,... 的键值对
-            $optionsMap = [];
-            foreach ($options as $index => $value) {
-                $optionsMap[$this->indexToOptionKey($index)] = $value;
-            }
-            if ($correctAnswer) {
-                if (!array_key_exists($correctAnswer, $optionsMap)) {
-                    return $response->json(['msg' => '新的正确答案不在新的选项中,请重新核对'])->withStatus(422);
-                }
-                $singleChoiceQuestion->correct_answer = $correctAnswer;
-            } else {
-                if (!array_key_exists($singleChoiceQuestion->correct_answer, $optionsMap)) {
-                    return $response->json(['msg' => '旧的正确答案不在新的选项中,请重新核对'])->withStatus(422);
-                }
-            }
-            $singleChoiceQuestion->options = $optionsMap;
-        } else {
-            if ($correctAnswer) {
-                if (!array_key_exists($correctAnswer, $singleChoiceQuestion->options)) {
-                    return $response->json(['msg' => '新的正确答案不在旧的选项中,请重新核对'])->withStatus(422);
-                }
-                $singleChoiceQuestion->correct_answer = $correctAnswer;
-            }
-        }
-
-        if (!$singleChoiceQuestion->isDirty()) {
+        if (!$examPaper->isDirty()) {
             return $response->json(['msg' => '未检测到任何有效修改']);
         }
-        $singleChoiceQuestion->save();
+        $examPaper->save();
 
-        return $response->json(['msg' => '修改单选题成功']);
+        return $response->json(['msg' => '修改试卷成功']);
     }
 
     #[DeleteMapping('')]
@@ -211,19 +201,47 @@ class ExamPaperController
     public function delete(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
-
         $ids = $validatedData['ids'];
 
+        //找到实际存在的试卷ID
         $existingIds = ExamPaper::query()
             ->whereIn('id', $ids)
             ->pluck('id')
             ->toArray();
 
-        $count = ExamPaper::query()->whereIn('id', $existingIds)->delete();
+        if (empty($existingIds)) {
+            return $response->json(['msg' => '所选试卷不存在'])->withStatus(404);
+        }
 
-        return $response->json([
-            'msg' => "成功删除 $count 条单选题数据"
-        ]);
+        //查出“已经被考试使用”的试卷ID
+        $usedPaperIds = Exam::query()
+            ->whereIn('exam_paper_id', $existingIds)
+            ->distinct()
+            ->pluck('exam_paper_id')
+            ->toArray();
+
+        //可删除的ID = 总ID - 已使用ID
+        $deletableIds = array_diff($existingIds, $usedPaperIds);
+
+        //执行删除
+        $count = 0;
+        if (!empty($deletableIds)) {
+            $count = ExamPaper::query()
+                ->whereIn('id', $deletableIds)
+                ->delete();
+        }
+
+        // 返回结果（重点：提示哪些不能删）
+        $blocked_ids = array_values($usedPaperIds);
+
+        $msg = "成功删除 $count 条试卷数据";
+
+        if (!empty($blocked_ids)) {
+            $idsStr = implode(',', $blocked_ids);
+            $msg = "成功删除 $count 条试卷数据，但以下试卷已被使用，无法删除：[$idsStr]";
+        }
+
+        return $response->json(['msg' => $msg]);
     }
 
 }

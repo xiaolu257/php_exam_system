@@ -15,13 +15,13 @@ import {computed} from "vue";
 // Props 定义
 const props = defineProps<{
   config: TextInputConfig;
-  text: string;
+  text: string | number;
 }>();
 const emit = defineEmits<{
-  (e: 'update:text', value: string): void
+  (e: 'update:text', value: string | number): void
 }>()
 const textModel = computed({
   get: () => props.text,
-  set: (val: string) => emit('update:text', val),
+  set: (val: string | number) => emit('update:text', val),
 })
 </script>

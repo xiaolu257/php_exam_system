@@ -62,6 +62,9 @@ const editDialogConfig: TableColumnEditDialogConfig = {
         '开始时间', '结束时间'),
     FormNumberInputConfigFactory.createEditableIntegerInput('max_attempts', '最大考试次数', 'max_attempts', 1)
   ],
+  afterMapRowToInitData: (filteredData: Record<string, any>, scopeRow: Record<string, any>) => {
+    filteredData['exam_time'] = [scopeRow['start_time'], scopeRow['end_time']]
+  },
   submitAction: ExamPaperCRUDStandardCRUD.updateItem
 };
 const tableConfig: TableConfig = {

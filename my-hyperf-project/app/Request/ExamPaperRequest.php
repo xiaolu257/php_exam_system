@@ -42,10 +42,12 @@ class ExamPaperRequest extends FormRequest
 
         self::SCENE_UPDATE => [
             'id' => 'required|integer:strict|gt:0',
-            'content' => 'string|filled|max:255',
-            'options' => 'array|min:2|max:10',
-            'options.*' => 'string|filled|max:50',
-            'correct_answer' => 'string|filled|regex:/^[A-J]$/',
+            'title' => 'filled|string|max:255',
+            'description' => 'filled|string|max:500',
+            'duration' => 'integer:strict|gt:0',
+            'start_time' => 'date_format:Y-m-d H:i:s',
+            'end_time' => 'date_format:Y-m-d H:i:s',
+            'max_attempts' => 'integer:strict|gt:0',
         ],
 
         self::SCENE_DELETE => [

@@ -29,4 +29,5 @@ export interface TableColumnEditDialogConfig {
     buttonSize?: 'large' | 'default' | 'small';
     buttonType?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'text' | 'default';
     updateIdentityFields?: string[];//针对修改时，必须包含的字段
+    afterMapRowToInitData?: (filteredData: Record<string, any>, tableRowData: Record<string, any>) => void
 }

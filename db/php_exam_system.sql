@@ -11,11 +11,70 @@
  Target Server Version : 80044 (8.0.44)
  File Encoding         : 65001
 
- Date: 15/03/2026 16:45:13
+ Date: 19/03/2026 09:23:14
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for exam_paper_questions
+-- ----------------------------
+DROP TABLE IF EXISTS `exam_paper_questions`;
+CREATE TABLE `exam_paper_questions`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '试卷题目ID',
+  `exam_paper_id` int UNSIGNED NOT NULL COMMENT '试卷ID',
+  `question_type` enum('single','multiple','true_false','short_answer') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题型',
+  `question_id` int UNSIGNED NOT NULL COMMENT '题目ID',
+  `score` int NOT NULL DEFAULT 1 COMMENT '该题分值',
+  `sort_order` int NOT NULL DEFAULT 0 COMMENT '题目顺序',
+  `question_snapshot` json NULL COMMENT '题目快照',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted_at` timestamp NULL DEFAULT NULL COMMENT '软删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_paper_question`(`exam_paper_id` ASC, `question_type` ASC, `question_id` ASC) USING BTREE,
+  INDEX `idx_paper_id`(`exam_paper_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 74 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '试卷题目表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for exam_papers
+-- ----------------------------
+DROP TABLE IF EXISTS `exam_papers`;
+CREATE TABLE `exam_papers`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '试卷ID',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '试卷名称',
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '试卷说明',
+  `duration` int NOT NULL COMMENT '考试时长(分钟)',
+  `total_score` int NOT NULL DEFAULT 100 COMMENT '总分',
+  `start_time` datetime NOT NULL COMMENT '考试开始时间',
+  `end_time` datetime NOT NULL COMMENT '考试截止时间',
+  `max_attempts` int NOT NULL DEFAULT 1 COMMENT '最大考试次数',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted_at` timestamp NULL DEFAULT NULL COMMENT '软删除时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '试卷表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for exams
+-- ----------------------------
+DROP TABLE IF EXISTS `exams`;
+CREATE TABLE `exams`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '考试记录ID',
+  `user_id` int UNSIGNED NOT NULL COMMENT '用户ID',
+  `exam_paper_id` int UNSIGNED NOT NULL COMMENT '试卷ID',
+  `start_time` datetime NOT NULL COMMENT '答题开始时间',
+  `submit_time` datetime NULL DEFAULT NULL COMMENT '提交时间',
+  `score` int NULL DEFAULT NULL COMMENT '考试总分',
+  `status` enum('ongoing','submitted','graded') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT 'ongoing' COMMENT '考试状态',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted_at` timestamp NULL DEFAULT NULL COMMENT '软删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_paper_id`(`exam_paper_id` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试记录表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for multiple_choice_questions
@@ -33,43 +92,6 @@ CREATE TABLE `multiple_choice_questions`  (
   CONSTRAINT `multiple_choice_questions_chk_correct_answer` CHECK (json_valid(`correct_answer`) and (json_type(`correct_answer`) = _utf8mb4'ARRAY') and (json_length(`correct_answer`) > 0)),
   CONSTRAINT `multiple_choice_questions_chk_options` CHECK (json_valid(`options`))
 ) ENGINE = InnoDB AUTO_INCREMENT = 107 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '多选题表，存储所有多选题的基本信息' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for paper_questions
--- ----------------------------
-DROP TABLE IF EXISTS `paper_questions`;
-CREATE TABLE `paper_questions`  (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '试卷题目ID',
-  `paper_id` int UNSIGNED NOT NULL COMMENT '试卷ID',
-  `question_type` enum('single','multiple','true_false','short') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题型',
-  `question_id` int UNSIGNED NOT NULL COMMENT '题目ID',
-  `score` int NOT NULL DEFAULT 1 COMMENT '该题分值',
-  `sort_order` int NOT NULL DEFAULT 0 COMMENT '题目顺序',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `deleted_at` timestamp NULL DEFAULT NULL COMMENT '软删除时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_paper_id`(`paper_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '试卷题目表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for papers
--- ----------------------------
-DROP TABLE IF EXISTS `papers`;
-CREATE TABLE `papers`  (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '试卷ID',
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '试卷名称',
-  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '试卷说明',
-  `duration` int NOT NULL COMMENT '考试时长(分钟)',
-  `total_score` int NOT NULL DEFAULT 100 COMMENT '总分',
-  `start_time` datetime NOT NULL COMMENT '考试开始时间',
-  `end_time` datetime NOT NULL COMMENT '考试截止时间',
-  `max_attempts` int NULL DEFAULT 1 COMMENT '最大考试次数',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `deleted_at` timestamp NULL DEFAULT NULL COMMENT '软删除时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '试卷表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for short_answer_questions
@@ -136,7 +158,7 @@ CREATE TABLE `user_tokens`  (
   INDEX `user_id`(`user_id` ASC) USING BTREE,
   INDEX `refresh_token`(`refresh_token` ASC) USING BTREE,
   CONSTRAINT `FK_user_tokens_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户登录Token记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 65 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户登录Token记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for users
