@@ -89,6 +89,8 @@
 import {computed, onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import {myGet, myPost} from "@/api/utils/axios";
+import MyMessageBox from "@/api/MyMessageBox";
+import MyMessage from "@/utils/MyMessage";
 
 const route = useRoute()
 const examId = route.params.id
@@ -213,9 +215,37 @@ const initAnswers = () => {
   })
 }
 
+const isEmptyAnswer = (q: any) => {
+  if (typeof q.answer === 'string') return q.answer === ''
+  if (Array.isArray(q.answer)) return q.answer.length === 0
+  if (typeof q.answer === 'number') return q.answer === -1
+  return true
+}
+
+const hasUnfinished = computed(() => {
+  const allAnswers = [
+    ...answers.value.single_questions,
+    ...answers.value.multiple_questions,
+    ...answers.value.true_false_questions,
+    ...answers.value.short_answer_questions
+  ]
+
+  return allAnswers.some(isEmptyAnswer)
+})
 // 提交
 const submitExam = async () => {
+  if (hasUnfinished.value) {
+    try {
+      await MyMessageBox.confirm('有未作答的题目，确认要交卷吗？')
+    } catch {
+      MyMessage.info('取消交卷')
+      return
+    }
+  }
+
   await myPost(`/exam-paper/${examId}/submit`, answers.value)
+  MyMessage.success('交卷成功')
+
 }
 
 onMounted(fetchExam)
