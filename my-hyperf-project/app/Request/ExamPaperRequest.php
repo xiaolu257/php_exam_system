@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Request;
 
+use App\Request\CustomerRules\SingleAnswerRule;
 use Hyperf\Validation\Request\FormRequest;
+
 
 class ExamPaperRequest extends FormRequest
 {
@@ -12,6 +14,8 @@ class ExamPaperRequest extends FormRequest
     public const SCENE_ADD = 'add';
     public const SCENE_UPDATE = 'update';
     public const SCENE_DELETE = 'delete';
+
+    public const SCENE_SUBMIT_EXAM_PAPER = 'submitExamPaper';
 
     public function authorize(): bool
     {
@@ -53,11 +57,45 @@ class ExamPaperRequest extends FormRequest
         self::SCENE_DELETE => [
             'ids' => 'required|array',
             'ids.*' => 'integer:strict|gt:0',
+        ],
+
+        self::SCENE_SUBMIT_EXAM_PAPER => [
+            'single_questions' => 'present|array',
+            'single_questions.*.id' => 'required|integer:strict|gt:0',
+            //single_questions.*.answer,  ""为未作答
+            'multiple_questions' => 'present|array',
+            'multiple_questions.*.id' => 'required|integer:strict|gt:0',
+            'multiple_questions.*.answer' => 'present|array',//[]为未作答
+            'multiple_questions.*.answer.*' => 'filled|regex:/^[A-J]$/',
+            'true_false_questions' => 'present|array',
+            'true_false_questions.*.id' => 'required|integer:strict|gt:0',
+            'true_false_questions.*.answer' => 'required|integer:strict|in:-1,0,1',//-1为未作答
+            'short_answer_questions' => 'present|array',
+            'short_answer_questions.*.id' => 'required|integer:strict|gt:0',
+            'short_answer_questions.*.answer' => 'present|string|max:1000',//""为未作答
         ]
     ];
 
     public function rules(): array
     {
+        if ($this->getScene() === self::SCENE_SUBMIT_EXAM_PAPER) {
+            return [
+                'single_questions.*.answer' => [
+                    'present',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        if ($value === '') {
+                            return;
+                        }
+
+                        if (!preg_match('/^[A-J]$/', $value)) {
+                            $fail('单选答案必须是 ""或A-J');
+                        }
+                    }
+                ],
+            ];
+
+        }
         return [
 
         ];

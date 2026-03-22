@@ -106,7 +106,7 @@ class ExamPaperController
         $exam->questions = ExamPaperQuestion::query()
             ->where('exam_paper_id', $id)
             ->orderBy('sort_order')
-            ->get(['question_type', 'score', 'sort_order', 'question_snapshot']);
+            ->get(['id', 'question_type', 'score', 'sort_order', 'question_snapshot']);
         //移除正确答案，避免暴露在前端
         foreach ($exam->questions as $question) {
             $snapshot = $question->question_snapshot;
@@ -120,6 +120,38 @@ class ExamPaperController
             $question->question_snapshot = $snapshot;
         }
         return $response->json($exam);
+    }
+
+    #[PostMapping('{id:\d+}/submit')]
+    #[Scene(ExamPaperRequest::SCENE_SUBMIT_EXAM_PAPER)]
+    public function submitExamPaper(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validatedData = $request->validated();
+        return $response->json(['msg' => $validatedData]);
+        Db::transaction(function () use ($validatedData, &$examPaper) {
+            $singleCount = $validatedData['single_count'];
+            $multipleCount = $validatedData['multiple_count'];
+            $trueFalseCount = $validatedData['true_false_count'];
+            $shortAnswerCount = $validatedData['short_answer_count'];
+            // 创建试卷
+            $examPaper = new ExamPaper();
+            $examPaper->title = $validatedData['title'];
+            if (!empty($validatedData['description'])) {
+                $examPaper->description = $validatedData['description'];
+            }
+            $examPaper->duration = $validatedData['duration'];
+            $examPaper->start_time = $validatedData['start_time'];
+            $examPaper->end_time = $validatedData['end_time'];
+            if (!empty($validatedData['max_attempts'])) {
+                $examPaper->max_attempts = $validatedData['max_attempts'];
+            }
+            $examPaper->total_score = $singleCount * 2 + $multipleCount * 4 + $trueFalseCount * 1 + $shortAnswerCount * 5;
+            $examPaper->save();
+
+            $this->examPaperService->generateRandomQuestions($examPaper->id, $singleCount, $multipleCount, $trueFalseCount, $shortAnswerCount);
+        });
+
+        return $response->json(['msg' => '新增试卷成功']);
     }
 
     #[PostMapping('')]

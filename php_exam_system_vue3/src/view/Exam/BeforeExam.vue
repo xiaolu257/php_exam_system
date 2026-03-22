@@ -47,7 +47,12 @@
 
           <!-- 按钮 -->
           <div class="actions">
-            <el-button type="primary" size="large" :disabled="examStatus !== 'ongoing'" @click="startExam">
+            <el-button
+                type="primary"
+                size="large"
+                :disabled="examStatus !== 'ongoing'"
+                @click="startExam"
+            >
               开始考试
             </el-button>
           </div>
@@ -57,28 +62,62 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
-import {dayjs, ElMessage} from 'element-plus'
+import dayjs from 'dayjs'
+import {ElMessage} from 'element-plus'
 import {useRoute, useRouter} from 'vue-router'
-import {myGet} from '@/api/utils/axios.ts'
+import {myGet} from '@/api/utils/axios'
+
+/** ✅ 考试数据类型 */
+interface Exam {
+  id: number
+  title: string
+  description: string | null
+  single_count: number
+  multiple_count: number
+  true_false_count: number
+  short_answer_count: number
+  duration: number
+  total_score: number
+  start_time: string
+  end_time: string
+}
+
+/** ✅ 状态类型 */
+type ExamStatus = 'loading' | 'not_started' | 'ongoing' | 'ended'
 
 const route = useRoute()
 const router = useRouter()
-const examId = route.params.id
+
+const examId = route.params.id as string
 
 // 考试数据
-const exam = ref(null)
+const exam = ref<Exam>({
+  id: 0,
+  title: '',
+  description: '',
+  single_count: 0,
+  multiple_count: 0,
+  true_false_count: 0,
+  short_answer_count: 0,
+  duration: 0,
+  total_score: 0,
+  start_time: '',
+  end_time: '',
+})
 
 // 加载状态
-const loading = ref(false)
+const loading = ref<boolean>(false)
 
 // 倒计时（秒）
-const countdown = ref(0)
-let timer = null
+const countdown = ref<number>(0)
 
-// ✅ 考试状态（核心）
-const examStatus = computed(() => {
+// 定时器
+let timer: ReturnType<typeof setInterval> | null = null
+
+// ✅ 考试状态
+const examStatus = computed<ExamStatus>(() => {
   if (!exam.value) return 'loading'
 
   const now = dayjs()
@@ -91,7 +130,7 @@ const examStatus = computed(() => {
 })
 
 // 初始化倒计时
-const initCountdown = () => {
+const initCountdown = (): void => {
   if (!exam.value) return
 
   const start = dayjs(exam.value.start_time)
@@ -105,7 +144,7 @@ const initCountdown = () => {
 }
 
 // 倒计时格式化
-const formatTime = (seconds) => {
+const formatTime = (seconds: number): string => {
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
   const s = seconds % 60
@@ -113,11 +152,12 @@ const formatTime = (seconds) => {
 }
 
 // 获取考试信息
-const fetchExam = async () => {
+const fetchExam = async (): Promise<void> => {
   try {
     loading.value = true
 
-    exam.value = await myGet(`exam-paper/${examId}`)
+    const res = await myGet(`exam-paper/${examId}`)
+    exam.value = res as Exam
 
     initCountdown()
   } catch (e) {
@@ -128,7 +168,7 @@ const fetchExam = async () => {
 }
 
 // 开始考试
-const startExam = () => {
+const startExam = (): void => {
   if (examStatus.value === 'not_started') {
     ElMessage.warning('考试尚未开始')
     return
@@ -154,7 +194,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  clearInterval(timer)
+  if (timer) clearInterval(timer)
 })
 </script>
 
