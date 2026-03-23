@@ -7,10 +7,8 @@ namespace App\Controller;
 use App\Model\Exam;
 use App\Model\ExamPaper;
 use App\Model\ExamPaperQuestion;
-use App\Model\ExamUserAnswer;
 use App\Request\ExamPaperRequest;
 use App\Service\ExamPaperService;
-use Carbon\Carbon;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
 use Hyperf\Di\Annotation\Inject;
@@ -22,7 +20,6 @@ use Hyperf\HttpServer\Annotation\PutMapping;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Validation\Annotation\Scene;
-use RuntimeException;
 
 #[Controller(prefix: 'exam-paper')]
 class ExamPaperController
@@ -136,100 +133,7 @@ class ExamPaperController
         $examId = $validatedData['exam_id'];
         $userSubmitAnswers = $validatedData['answers'];
         $userId = $request->getAttribute('user_id');
-
-        // 1. 查询考试信息并校验交卷权限
-        $exam = Exam::query()->find($examId);
-        if (!$exam) {
-            return $response->json(['msg' => '未找到相关考试信息'])->withStatus(404);
-        }
-        if ($exam->user_id !== $userId) {
-            return $response->json(['msg' => '检测到交卷者与考生信息不一致，请诚信考试，禁止替考！'])->withStatus(409);
-        }
-        if ($exam->status !== 'ongoing') {
-            return $response->json(['msg' => '考试不在“进行中”，禁止交卷'])->withStatus(409);
-        }
-
-        $examPaper = ExamPaper::query()->find($exam->exam_paper_id);
-        if (!$examPaper) {
-            return $response->json(['msg' => '未找到相关试卷'])->withStatus(404);
-        }
-
-        // 2. 校验考试时间
-        $now = Carbon::now();
-        $examStart = $exam->start_time;
-        $deadline = $examStart->copy()->addMinutes($examPaper->duration);
-        if (!$now->betweenExcluded($examStart, $deadline)) {
-            return $response->json(['msg' => '不在考试时间范围内，禁止交卷'])->withStatus(403);
-        }
-
-        // 3. 扁平化用户答案
-        $typeMap = [
-            'single_questions' => 'single',
-            'multiple_questions' => 'multiple',
-            'true_false_questions' => 'true_false',
-            'short_answer_questions' => 'short_answer',
-        ];
-
-        $SubmitAnswers = [];
-        foreach ($userSubmitAnswers as $key => $answers) {
-            $type = $typeMap[$key] ?? null;
-            if (!$type) continue;
-            foreach ($answers as $a) {
-                $a['question_type'] = $type;
-                $SubmitAnswers[] = $a;
-            }
-        }
-
-        // 4. 获取试卷题目信息
-        $questionIds = array_column($SubmitAnswers, 'id');
-        $questions = ExamPaperQuestion::query()
-            ->whereIn('id', $questionIds)
-            ->get()
-            ->keyBy('id');
-
-        // 5. 批改答案（纯 PHP 操作，不在事务内）
-        foreach ($SubmitAnswers as $index => $submitAnswer) {
-            $examPaperQuestion = $questions[$submitAnswer['id']] ?? null;
-            if (!$examPaperQuestion) {
-                return $response->json(['msg' => '未找到相关试卷题目'])->withStatus(404);
-            }
-            if ($submitAnswer['question_type'] !== $examPaperQuestion['question_type']) {
-                return $response->json(['msg' => '所提交的答案的题型与考试题目不一致'])->withStatus(422);
-            }
-
-            $correctAnswerName = $submitAnswer['question_type'] === 'short_answer'
-                ? 'reference_answer'
-                : 'correct_answer';
-
-            $SubmitAnswers[$index]['score'] = $this->examPaperService->judge(
-                $submitAnswer['question_type'],
-                $submitAnswer['answer'],
-                $examPaperQuestion->question_snapshot[$correctAnswerName]
-            );
-        }
-
-        // 6. 事务：检查重复交卷 + 插入答案
-        try {
-            Db::transaction(function () use ($SubmitAnswers, $examId) {
-                if (ExamUserAnswer::query()->where('exam_id', $examId)->exists()) {
-                    throw new RuntimeException('该场考试已存在交卷记录，禁止重复交卷');
-                }
-
-                $data = array_map(fn($item) => [
-                    'exam_id' => $examId,
-                    'exam_paper_question_id' => $item['id'],
-                    'question_type' => $item['question_type'],
-                    'answer' => json_encode($item['answer'], JSON_UNESCAPED_UNICODE),
-                    'score' => $item['score'],
-                ], $SubmitAnswers);
-
-                ExamUserAnswer::query()->insert($data);
-            });
-        } catch (RuntimeException $e) {
-            return $response->json(['msg' => $e->getMessage()])->withStatus(409);
-        }
-
-        return $response->json(['msg' => '交卷成功']);
+        return $this->examPaperService->submitExamPaper($examId, $userId, $userSubmitAnswers, $response);
     }
 
     #[PostMapping('')]
