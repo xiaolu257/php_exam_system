@@ -119,4 +119,22 @@ class ExamPaperService
         // 批量插入
         ExamPaperQuestion::query()->insert($insertData);
     }
+
+    public function judge(string $type, mixed $userAnswer, mixed $correctAnswer): int
+    {
+        return match ($type) {
+            'single' => $userAnswer === $correctAnswer ? 2 : 0,
+            'multiple' => self::judgeMultiple($userAnswer, $correctAnswer),
+            'true_false' => $userAnswer === $correctAnswer ? 1 : 0,
+            default => 0,
+        };
+    }
+
+    private function judgeMultiple($userAnswer, $correctAnswer): int
+    {
+        return count($correctAnswer) === count($userAnswer)
+        && empty(array_diff($correctAnswer, $userAnswer))
+        && empty(array_diff($userAnswer, $correctAnswer))
+            ? 4 : 0;
+    }
 }

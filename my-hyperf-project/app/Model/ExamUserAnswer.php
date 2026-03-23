@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Model;
 
 use Carbon\Carbon;
-use Hyperf\Database\Model\SoftDeletes;
 use Hyperf\DbConnection\Model\Model;
 
 /**
@@ -21,7 +20,6 @@ use Hyperf\DbConnection\Model\Model;
  */
 class ExamUserAnswer extends Model
 {
-    use SoftDeletes;
 
     /**
      * The table associated with the model.
