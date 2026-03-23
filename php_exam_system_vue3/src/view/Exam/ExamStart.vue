@@ -93,7 +93,7 @@ import MyMessageBox from "@/api/MyMessageBox";
 import MyMessage from "@/utils/MyMessage";
 
 const route = useRoute()
-const examId = route.params.id
+const examId = Number(route.params.id)
 
 const loading = ref(false)
 
@@ -243,7 +243,10 @@ const submitExam = async () => {
     }
   }
 
-  await myPost(`/exam-paper/${examId}/submit`, answers.value)
+  await myPost(`/exam-paper/${examId}/submit`, {
+    exam_id: examId,
+    answers: answers.value
+  })
   MyMessage.success('交卷成功')
 
 }

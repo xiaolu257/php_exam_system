@@ -60,19 +60,20 @@ class ExamPaperRequest extends FormRequest
         ],
 
         self::SCENE_SUBMIT_EXAM_PAPER => [
-            'single_questions' => 'present|array',
-            'single_questions.*.id' => 'required|integer:strict|gt:0',
+            'exam_id' => 'required|integer:strict|gt:0',
+            'answers.single_questions' => 'present|array',
+            'answers.single_questions.*.id' => 'required|integer:strict|gt:0',
             //single_questions.*.answer,  ""为未作答
-            'multiple_questions' => 'present|array',
-            'multiple_questions.*.id' => 'required|integer:strict|gt:0',
-            'multiple_questions.*.answer' => 'present|array',//[]为未作答
-            'multiple_questions.*.answer.*' => 'filled|regex:/^[A-J]$/',
-            'true_false_questions' => 'present|array',
-            'true_false_questions.*.id' => 'required|integer:strict|gt:0',
-            'true_false_questions.*.answer' => 'required|integer:strict|in:-1,0,1',//-1为未作答
-            'short_answer_questions' => 'present|array',
-            'short_answer_questions.*.id' => 'required|integer:strict|gt:0',
-            'short_answer_questions.*.answer' => 'present|string|max:1000',//""为未作答
+            'answers.multiple_questions' => 'present|array',
+            'answers.multiple_questions.*.id' => 'required|integer:strict|gt:0',
+            'answers.multiple_questions.*.answer' => 'present|array',//[]为未作答
+            'answers.multiple_questions.*.answer.*' => 'filled|regex:/^[A-J]$/',
+            'answers.true_false_questions' => 'present|array',
+            'answers.true_false_questions.*.id' => 'required|integer:strict|gt:0',
+            'answers.true_false_questions.*.answer' => 'required|integer:strict|in:-1,0,1',//-1为未作答
+            'answers.short_answer_questions' => 'present|array',
+            'answers.short_answer_questions.*.id' => 'required|integer:strict|gt:0',
+            'answers.short_answer_questions.*.answer' => 'present|string|max:1000',//""为未作答
         ]
     ];
 
@@ -80,7 +81,7 @@ class ExamPaperRequest extends FormRequest
     {
         if ($this->getScene() === self::SCENE_SUBMIT_EXAM_PAPER) {
             return [
-                'single_questions.*.answer' => [
+                'answers.single_questions.*.answer' => [
                     'present',
                     'string',
                     function ($attribute, $value, $fail) {

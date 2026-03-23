@@ -85,7 +85,7 @@ const tableConfig: TableConfig = {
   ]
 };
 const previewExamPaper = (examPaperId: number) => {
-  router.push(`/exam/${examPaperId}/start`)
+  router.push(`/exam/${examPaperId}/before`)
 }
 </script>
 

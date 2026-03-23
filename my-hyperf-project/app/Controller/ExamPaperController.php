@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Model\Exam;
 use App\Model\ExamPaper;
 use App\Model\ExamPaperQuestion;
+use App\Model\ExamUserAnswer;
 use App\Request\ExamPaperRequest;
 use App\Service\ExamPaperService;
 use Hyperf\Database\Model\Builder;
@@ -85,30 +86,33 @@ class ExamPaperController
     {
         $id = $request->route('id', 0);
 
-        $exam = ExamPaper::query()
-            ->where('id', $id)
-            ->first(['id', 'title', 'description', 'duration', 'total_score', 'start_time', 'end_time', 'max_attempts']);
-
+        $exam = Exam::query()->find($id);
         if (!$exam) {
-            return $response->json(['message' => '考试不存在'])->withStatus(404);
+            return $response->json(['message' => '未找到相关考试信息'])->withStatus(404);
+        }
+        $examPaper = ExamPaper::query()
+            ->find($exam->exam_paper_id, ['id', 'title', 'description', 'duration', 'total_score', 'start_time', 'end_time', 'max_attempts']);
+
+        if (!$examPaper) {
+            return $response->json(['message' => '未找到相关试卷'])->withStatus(404);
         }
         $counts = ExamPaperQuestion::query()
-            ->where('exam_paper_id', $id)
+            ->where('exam_paper_id', $examPaper->id)
             ->selectRaw('question_type, COUNT(*) as count')
             ->groupBy('question_type')
             ->pluck('count', 'question_type');
 
-        $exam->single_count = $counts['single'] ?? 0;
-        $exam->multiple_count = $counts['multiple'] ?? 0;
-        $exam->true_false_count = $counts['true_false'] ?? 0;
-        $exam->short_answer_count = $counts['short_answer'] ?? 0;
+        $examPaper->single_count = $counts['single'] ?? 0;
+        $examPaper->multiple_count = $counts['multiple'] ?? 0;
+        $examPaper->true_false_count = $counts['true_false'] ?? 0;
+        $examPaper->short_answer_count = $counts['short_answer'] ?? 0;
 
-        $exam->questions = ExamPaperQuestion::query()
-            ->where('exam_paper_id', $id)
+        $examPaper->questions = ExamPaperQuestion::query()
+            ->where('exam_paper_id', $examPaper->id)
             ->orderBy('sort_order')
             ->get(['id', 'question_type', 'score', 'sort_order', 'question_snapshot']);
         //移除正确答案，避免暴露在前端
-        foreach ($exam->questions as $question) {
+        foreach ($examPaper->questions as $question) {
             $snapshot = $question->question_snapshot;
 
             if (in_array($question->question_type, ['single', 'multiple', 'true_false'])) {
@@ -119,7 +123,7 @@ class ExamPaperController
 
             $question->question_snapshot = $snapshot;
         }
-        return $response->json($exam);
+        return $response->json($examPaper);
     }
 
     #[PostMapping('{id:\d+}/submit')]
@@ -127,31 +131,99 @@ class ExamPaperController
     public function submitExamPaper(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
-        return $response->json(['msg' => $validatedData]);
-        Db::transaction(function () use ($validatedData, &$examPaper) {
-            $singleCount = $validatedData['single_count'];
-            $multipleCount = $validatedData['multiple_count'];
-            $trueFalseCount = $validatedData['true_false_count'];
-            $shortAnswerCount = $validatedData['short_answer_count'];
-            // 创建试卷
-            $examPaper = new ExamPaper();
-            $examPaper->title = $validatedData['title'];
-            if (!empty($validatedData['description'])) {
-                $examPaper->description = $validatedData['description'];
-            }
-            $examPaper->duration = $validatedData['duration'];
-            $examPaper->start_time = $validatedData['start_time'];
-            $examPaper->end_time = $validatedData['end_time'];
-            if (!empty($validatedData['max_attempts'])) {
-                $examPaper->max_attempts = $validatedData['max_attempts'];
-            }
-            $examPaper->total_score = $singleCount * 2 + $multipleCount * 4 + $trueFalseCount * 1 + $shortAnswerCount * 5;
-            $examPaper->save();
+        $examId = $validatedData['exam_id'];
+        $userSubmitAnswers = $validatedData['answers'];
+        $userId = $request->getAttribute('user_id');
+        //1.先确定用户考试次数是否用尽
+        $exam = Exam::query()->find($examId);
+        if (!$exam) {
+            return $response->json(['msg' => '未找到相关考试信息'])->withStatus(404);
+        }
+        $examPaper = ExamPaper::query()->where('id', $exam->exam_paper_id)->first();
+        if (!$examPaper) {
+            return $response->json(['msg' => '未找到相关试卷'])->withStatus(404);
+        }
+        $examCount = Exam::query()->where('user_id', $userId)->where('exam_paper_id', $exam->exam_paper_id)->count();
+        if ($examCount >= $examPaper->max_attempts) {
+            return $response->json(['msg' => '参考次数已达上限，无法再次交卷'])->withStatus(409);
+        }
+        //2.获取试卷的详细信息
 
-            $this->examPaperService->generateRandomQuestions($examPaper->id, $singleCount, $multipleCount, $trueFalseCount, $shortAnswerCount);
+        //3.自动批改客观题
+        $SubmitAnswers = [];
+        foreach ($userSubmitAnswers as $index => $userSubmitAnswer) {
+            if ($index === 'single_questions') {
+                foreach ($userSubmitAnswer as $u) {
+                    $u['question_type'] = 'single';
+                    $SubmitAnswers[] = $u;
+                }
+            } else if ($index === 'multiple_questions') {
+                foreach ($userSubmitAnswer as $u) {
+                    $u['question_type'] = 'multiple';
+                    $SubmitAnswers[] = $u;
+                }
+            } else if ($index === 'true_false_questions') {
+                foreach ($userSubmitAnswer as $u) {
+                    $u['question_type'] = 'true_false';
+                    $SubmitAnswers[] = $u;
+                }
+            } else if ($index === 'short_answer_questions') {
+                foreach ($userSubmitAnswer as $u) {
+                    $u['question_type'] = 'short_answer';
+                    $SubmitAnswers[] = $u;
+                }
+            }
+        }
+        $questionIds = array_column($SubmitAnswers, 'id');
+
+        $questions = ExamPaperQuestion::query()
+            ->whereIn('id', $questionIds)
+            ->get()
+            ->keyBy('id');
+        foreach ($SubmitAnswers as $index => $submitAnswer) {
+            $examPaperQuestion = $questions[$submitAnswer['id']] ?? null;
+            if (!$examPaperQuestion) {
+                return $response->json(['msg' => '未找到相关试卷题目'])->withStatus(404);
+            }
+            if ($submitAnswer['question_type'] === 'single') {
+                if ($submitAnswer['answer'] === $examPaperQuestion->question_snapshot['correct_answer']) {
+                    $SubmitAnswers[$index]['score'] = 2;
+                } else {
+                    $SubmitAnswers[$index]['score'] = 0;
+                }
+            } else if ($submitAnswer['question_type'] === 'multiple') {
+                $correct_answer = $examPaperQuestion->question_snapshot['correct_answer'];
+                $answer = $submitAnswer['answer'];
+                if (
+                    count($correct_answer) === count($answer) &&
+                    empty(array_diff($correct_answer, $answer)) &&
+                    empty(array_diff($answer, $correct_answer))
+                ) {
+                    $SubmitAnswers[$index]['score'] = 4;
+                } else {
+                    $SubmitAnswers[$index]['score'] = 0;
+                }
+            } else if ($submitAnswer['question_type'] === 'true_false') {
+                if ($submitAnswer['answer'] === $examPaperQuestion->question_snapshot['correct_answer']) {
+                    $SubmitAnswers[$index]['score'] = 1;
+                } else {
+                    $SubmitAnswers[$index]['score'] = 0;
+                }
+            } else {
+                $SubmitAnswers[$index]['score'] = 0;
+            }
+        }
+        //4.录入考试答案
+        Db::transaction(function () use ($SubmitAnswers, $examId) {
+            foreach ($SubmitAnswers as $index => $submitAnswer) {
+                $SubmitAnswers[$index]['exam_id'] = $examId;
+                $SubmitAnswers[$index]['exam_paper_question_id'] = $SubmitAnswers[$index]['id'];
+                $SubmitAnswers[$index]['answer'] = json_encode($submitAnswer['answer'], JSON_UNESCAPED_UNICODE);
+                unset($SubmitAnswers[$index]['id']);
+            }
+            ExamUserAnswer::query()->insert($SubmitAnswers);
         });
-
-        return $response->json(['msg' => '新增试卷成功']);
+        return $response->json(['msg' => '交卷成功']);
     }
 
     #[PostMapping('')]

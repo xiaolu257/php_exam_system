@@ -90,7 +90,7 @@ type ExamStatus = 'loading' | 'not_started' | 'ongoing' | 'ended'
 const route = useRoute()
 const router = useRouter()
 
-const examId = route.params.id as string
+const examPaperId = route.params.id as string
 
 // 考试数据
 const exam = ref<Exam>({
@@ -156,7 +156,7 @@ const fetchExam = async (): Promise<void> => {
   try {
     loading.value = true
 
-    const res = await myGet(`exam-paper/${examId}`)
+    const res = await myGet(`exam-paper/${examPaperId}`)
     exam.value = res as Exam
 
     initCountdown()
@@ -178,7 +178,8 @@ const startExam = (): void => {
     ElMessage.error('考试已结束')
     return
   }
-
+  //模拟开始考试
+  const examId = 1;
   router.push(`/exam/${examId}/start`)
 }
 
