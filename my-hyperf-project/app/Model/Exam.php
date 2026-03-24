@@ -16,6 +16,7 @@ use Hyperf\DbConnection\Model\Model;
  * @property string $submit_time
  * @property int $score
  * @property string $status
+ * @property int $attempt_no
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property string $deleted_at
@@ -42,6 +43,7 @@ class Exam extends Model
         'exam_paper_id' => 'integer',
         'start_time' => 'datetime',
         'score' => 'integer',
+        'attempt_no' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'];
 }

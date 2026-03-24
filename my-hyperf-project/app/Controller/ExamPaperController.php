@@ -125,6 +125,16 @@ class ExamPaperController
         return $response->json($examPaper);
     }
 
+    #[PostMapping('{id:\d+}/start')]
+    #[Scene(ExamPaperRequest::SCENE_SUBMIT_EXAM_PAPER)]
+    public function startExam(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validatedData = $request->validated();
+        $userId = $request->getAttribute('user_id');
+        $examPaperId = $validatedData['exam_paper_id'];
+        return $this->examPaperService->startExam($examPaperId, $userId, $response);
+    }
+
     #[PostMapping('{id:\d+}/submit')]
     #[Scene(ExamPaperRequest::SCENE_SUBMIT_EXAM_PAPER)]
     public function submitExamPaper(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface

@@ -17,6 +17,7 @@ use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Throwable;
 
 class ExamPaperService
 {
@@ -243,5 +244,53 @@ class ExamPaperService
             return $response->json(['msg' => $e->getMessage()])->withStatus(409);
         }
         return $response->json(['msg' => '交卷成功']);
+    }
+
+    public function startExam(int $userId, int $examPaperId, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        // 1. 查询试卷
+        $examPaper = ExamPaper::query()->find($examPaperId);
+        if (!$examPaper) {
+            return $response->json(['msg' => '未找到相关试卷'])->withStatus(404);
+        }
+
+        // 2. 时间校验
+        $now = Carbon::now();
+        if (!$now->betweenExcluded($examPaper->start_time, $examPaper->end_time)) {
+            return $response->json(['msg' => '不在考试时间范围内'])->withStatus(403);
+        }
+
+        try {
+            // 3. 获取当前最大 attempt_no（不加锁）
+            $maxAttempt = Exam::query()
+                ->where('user_id', $userId)
+                ->where('exam_paper_id', $examPaperId)
+                ->max('attempt_no') ?? 0;
+
+            $nextAttempt = $maxAttempt + 1;
+
+            // 4. 次数限制
+            if ($nextAttempt > $examPaper->max_attempts) {
+                return $response->json(['msg' => '考试次数已达上限'])->withStatus(409);
+            }
+
+            // 5. 直接插入（唯一索引兜底）
+            $exam = new Exam();
+            $exam->user_id = $userId;
+            $exam->exam_paper_id = $examPaperId;
+            $exam->attempt_no = $nextAttempt;
+            $exam->start_time = $now;
+            $exam->status = 'ongoing';
+            $exam->save();
+
+        } catch (Throwable) {
+            // 唯一索引冲突（极端并发）
+            return $response->json(['msg' => '请求过于频繁，请重试'])->withStatus(409);
+        }
+
+        return $response->json([
+            'msg' => '考试开始成功',
+            'exam_id' => $exam->id
+        ]);
     }
 }

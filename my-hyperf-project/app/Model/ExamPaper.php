@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use Carbon\Carbon;
 use Hyperf\DbConnection\Model\Model;
 
 /**
@@ -15,8 +16,8 @@ use Hyperf\DbConnection\Model\Model;
  * @property string $start_time
  * @property string $end_time
  * @property int $max_attempts
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property string $deleted_at
  */
 class ExamPaper extends Model
@@ -34,5 +35,12 @@ class ExamPaper extends Model
     /**
      * The attributes that should be cast to native types.
      */
-    protected array $casts = ['id' => 'integer', 'duration' => 'integer', 'total_score' => 'integer', 'max_attempts' => 'integer', 'created_at' => 'datetime', 'updated_at' => 'datetime'];
+    protected array $casts = [
+        'id' => 'integer',
+        'duration' => 'integer',
+        'total_score' => 'integer',
+        'max_attempts' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 }
