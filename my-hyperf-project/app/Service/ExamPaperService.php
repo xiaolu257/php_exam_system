@@ -18,6 +18,7 @@ use Hyperf\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
+use function Hyperf\Support\now;
 
 class ExamPaperService
 {
@@ -260,12 +261,29 @@ class ExamPaperService
             return $response->json(['msg' => '不在考试时间范围内'])->withStatus(403);
         }
 
+        $exam = Exam::query()
+            ->where('user_id', $userId)
+            ->where('exam_paper_id', $examPaperId)
+            ->where('status', 'ongoing')
+            ->orderBy('attempt_no', 'desc')
+            ->first();
+        if ($exam) {
+            if (now()->betweenExcluded($exam->start_time, $exam->start_time->copy()->addMinutes($examPaper->duration))) {
+                return $response->json([
+                    'msg' => '继续进行上次未完成的考试',
+                    'exam_id' => $exam->id
+                ]);
+            } else {
+                $exam->status = 'expired';
+                $exam->save();
+            }
+        }
         try {
             // 3. 获取当前最大 attempt_no（不加锁）
             $maxAttempt = Exam::query()
                 ->where('user_id', $userId)
                 ->where('exam_paper_id', $examPaperId)
-                ->max('attempt_no') ?? 0;
+                ->max('attempt_no') ?? 1;
 
             $nextAttempt = $maxAttempt + 1;
 
@@ -289,7 +307,7 @@ class ExamPaperService
         }
 
         return $response->json([
-            'msg' => '考试开始成功',
+            'msg' => '考试正式开始',
             'exam_id' => $exam->id
         ]);
     }

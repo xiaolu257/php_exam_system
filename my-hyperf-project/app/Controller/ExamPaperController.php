@@ -125,22 +125,20 @@ class ExamPaperController
         return $response->json($examPaper);
     }
 
-    #[PostMapping('{id:\d+}/start')]
-    #[Scene(ExamPaperRequest::SCENE_SUBMIT_EXAM_PAPER)]
+    #[PostMapping('{exam_paper_id:\d+}/start')]
     public function startExam(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
-        $validatedData = $request->validated();
         $userId = $request->getAttribute('user_id');
-        $examPaperId = $validatedData['exam_paper_id'];
-        return $this->examPaperService->startExam($examPaperId, $userId, $response);
+        $examPaperId = (int)$request->route('exam_paper_id', 0);
+        return $this->examPaperService->startExam($userId, $examPaperId, $response);
     }
 
-    #[PostMapping('{id:\d+}/submit')]
+    #[PostMapping('{exam_id:\d+}/submit')]
     #[Scene(ExamPaperRequest::SCENE_SUBMIT_EXAM_PAPER)]
     public function submitExamPaper(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
-        $examId = $validatedData['exam_id'];
+        $examId = (int)$request->route('exam_id', 0);
         $userSubmitAnswers = $validatedData['answers'];
         $userId = $request->getAttribute('user_id');
         return $this->examPaperService->submitExamPaper($examId, $userId, $userSubmitAnswers, $response);

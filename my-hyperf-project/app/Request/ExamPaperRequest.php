@@ -14,8 +14,6 @@ class ExamPaperRequest extends FormRequest
     public const SCENE_ADD = 'add';
     public const SCENE_UPDATE = 'update';
     public const SCENE_DELETE = 'delete';
-
-    public const SCENE_START_EXAM = 'startExam';
     public const SCENE_SUBMIT_EXAM_PAPER = 'submitExamPaper';
 
     public function authorize(): bool
@@ -59,11 +57,7 @@ class ExamPaperRequest extends FormRequest
             'ids' => 'required|array',
             'ids.*' => 'integer:strict|gt:0',
         ],
-        self::SCENE_START_EXAM => [
-            'exam_paper_id' => 'required|integer:strict|gt:0',
-        ],
         self::SCENE_SUBMIT_EXAM_PAPER => [
-            'exam_id' => 'required|integer:strict|gt:0',
             'answers.single_questions' => 'present|array',
             'answers.single_questions.*.id' => 'required|integer:strict|gt:0',
             //single_questions.*.answer,  ""为未作答

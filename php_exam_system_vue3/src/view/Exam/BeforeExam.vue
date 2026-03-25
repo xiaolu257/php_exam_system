@@ -11,24 +11,16 @@
         <div class="exam-content">
           <el-descriptions :column="1" border>
             <el-descriptions-item label="考试名称">{{ exam.title }}</el-descriptions-item>
-
             <el-descriptions-item label="考试说明">{{ exam.description || '暂无说明' }}</el-descriptions-item>
-
             <el-descriptions-item label="单选题">{{ exam.single_count }} 道</el-descriptions-item>
-
             <el-descriptions-item label="多选题">{{ exam.multiple_count }} 道</el-descriptions-item>
-
             <el-descriptions-item label="判断题">{{ exam.true_false_count }} 道</el-descriptions-item>
-
             <el-descriptions-item label="简答题">{{ exam.short_answer_count }} 道</el-descriptions-item>
-
             <el-descriptions-item label="考试时长">{{ exam.duration }} 分钟</el-descriptions-item>
-
             <el-descriptions-item label="总分">{{ exam.total_score }} 分</el-descriptions-item>
-
             <el-descriptions-item label="开始时间">{{ exam.start_time }}</el-descriptions-item>
-
             <el-descriptions-item label="结束时间">{{ exam.end_time }}</el-descriptions-item>
+            <el-descriptions-item label="最大考试次数">{{ exam.max_attempts }}</el-descriptions-item>
           </el-descriptions>
 
           <!-- 状态提示 -->
@@ -36,11 +28,9 @@
             距离开始还有：
             <span class="time">{{ formatTime(countdown) }}</span>
           </div>
-
           <div class="countdown ongoing" v-else-if="examStatus === 'ongoing'">
             🟢 考试进行中，可进入考试
           </div>
-
           <div class="countdown ended" v-else-if="examStatus === 'ended'">
             🔴 考试已结束，无法进入
           </div>
@@ -64,12 +54,12 @@
 
 <script lang="ts" setup>
 import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import dayjs from 'dayjs'
 import {ElMessage} from 'element-plus'
-import {useRoute, useRouter} from 'vue-router'
-import {myGet} from '@/api/utils/axios'
+import {myGet, myPost} from '@/api/utils/axios'
+import myMessage from "@/utils/MyMessage";
 
-/** ✅ 考试数据类型 */
 interface Exam {
   id: number
   title: string
@@ -82,17 +72,15 @@ interface Exam {
   total_score: number
   start_time: string
   end_time: string
+  max_attempts: number
 }
 
-/** ✅ 状态类型 */
 type ExamStatus = 'loading' | 'not_started' | 'ongoing' | 'ended'
 
 const route = useRoute()
 const router = useRouter()
-
 const examPaperId = route.params.id as string
 
-// 考试数据
 const exam = ref<Exam>({
   id: 0,
   title: '',
@@ -105,45 +93,29 @@ const exam = ref<Exam>({
   total_score: 0,
   start_time: '',
   end_time: '',
+  max_attempts: 0,
 })
 
-// 加载状态
-const loading = ref<boolean>(false)
-
-// 倒计时（秒）
-const countdown = ref<number>(0)
-
-// 定时器
+const loading = ref(false)
+const countdown = ref(0)
 let timer: ReturnType<typeof setInterval> | null = null
 
-// ✅ 考试状态
 const examStatus = computed<ExamStatus>(() => {
   if (!exam.value) return 'loading'
-
   const now = dayjs()
   const start = dayjs(exam.value.start_time)
   const end = dayjs(exam.value.end_time)
-
   if (now.isBefore(start)) return 'not_started'
   if (now.isAfter(end)) return 'ended'
   return 'ongoing'
 })
 
-// 初始化倒计时
 const initCountdown = (): void => {
-  if (!exam.value) return
-
   const start = dayjs(exam.value.start_time)
   const now = dayjs()
-
-  if (now.isBefore(start)) {
-    countdown.value = start.diff(now, 'second')
-  } else {
-    countdown.value = 0
-  }
+  countdown.value = now.isBefore(start) ? start.diff(now, 'second') : 0
 }
 
-// 倒计时格式化
 const formatTime = (seconds: number): string => {
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
@@ -151,46 +123,34 @@ const formatTime = (seconds: number): string => {
   return `${h}小时 ${m}分 ${s}秒`
 }
 
-// 获取考试信息
 const fetchExam = async (): Promise<void> => {
   try {
     loading.value = true
-
     const res = await myGet(`exam-paper/${examPaperId}`)
     exam.value = res as Exam
-
     initCountdown()
-  } catch (e) {
+  } catch {
     ElMessage.error('获取考试信息失败')
   } finally {
     loading.value = false
   }
 }
 
-// 开始考试
 const startExam = (): void => {
-  if (examStatus.value === 'not_started') {
-    ElMessage.warning('考试尚未开始')
-    return
-  }
-
-  if (examStatus.value === 'ended') {
-    ElMessage.error('考试已结束')
-    return
-  }
-  //模拟开始考试
-  const examId = 1;
-  router.push(`/exam/${examId}/start`)
+  if (examStatus.value === 'not_started') myMessage.warning('考试尚未开始')
+  if (examStatus.value === 'ended') myMessage.error('考试已结束')
+  myPost(`exam-paper/${examPaperId}/start`).then(
+      ({exam_id, msg}) => {
+        myMessage.success(msg)
+        router.push(`/exam/${exam_id}/start`)
+      }
+  )
 }
 
-// 生命周期
 onMounted(() => {
   fetchExam()
-
   timer = setInterval(() => {
-    if (countdown.value > 0) {
-      countdown.value--
-    }
+    if (countdown.value > 0) countdown.value--
   }, 1000)
 })
 
