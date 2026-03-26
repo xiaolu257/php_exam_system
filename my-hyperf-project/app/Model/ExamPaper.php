@@ -13,8 +13,8 @@ use Hyperf\DbConnection\Model\Model;
  * @property string $description
  * @property int $duration
  * @property int $total_score
- * @property string $start_time
- * @property string $end_time
+ * @property Carbon $start_time
+ * @property Carbon $end_time
  * @property int $max_attempts
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -40,6 +40,8 @@ class ExamPaper extends Model
         'duration' => 'integer',
         'total_score' => 'integer',
         'max_attempts' => 'integer',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];

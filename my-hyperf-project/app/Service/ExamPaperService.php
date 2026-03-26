@@ -171,13 +171,16 @@ class ExamPaperService
         }
 
         // 2. 校验考试时间
+        $graceSeconds = 15;//缓冲时间15s，防止网络延迟问题导致自动或临期交卷失败
         $now = Carbon::now();
         $examStart = $exam->start_time;
         $deadline = $examStart->copy()->addMinutes($examPaper->duration);
-        if (!$now->betweenExcluded($examStart, $deadline)) {
+        $deadlineWithGrace = $deadline->copy()->addSeconds($graceSeconds);
+
+        //早于考试开始 or 超过缓冲时间
+        if (!$now->between($examStart, $deadlineWithGrace)) {
             return $response->json(['msg' => '不在考试时间范围内，禁止交卷'])->withStatus(403);
         }
-
         // 3. 扁平化用户答案
         $typeMap = [
             'single_questions' => 'single',
@@ -226,7 +229,7 @@ class ExamPaperService
 
         // 6. 事务：检查重复交卷 + 插入答案
         try {
-            Db::transaction(function () use ($SubmitAnswers, $examId) {
+            Db::transaction(function () use ($SubmitAnswers, $examId, $exam, $now, $deadline) {
                 if (ExamUserAnswer::query()->where('exam_id', $examId)->exists()) {
                     throw new RuntimeException('该场考试已存在交卷记录，禁止重复交卷');
                 }
@@ -240,8 +243,11 @@ class ExamPaperService
                 ], $SubmitAnswers);
 
                 ExamUserAnswer::query()->insert($data);
+                $exam->status = 'submitted';
+                $exam->submit_time = $now;
+                $exam->save();
             });
-        } catch (RuntimeException $e) {
+        } catch (Throwable $e) {
             return $response->json(['msg' => $e->getMessage()])->withStatus(409);
         }
         return $response->json(['msg' => '交卷成功']);
@@ -256,8 +262,9 @@ class ExamPaperService
         }
 
         // 2. 时间校验
+        $graceSeconds = 3;//3s缓冲时间，防止因网络延迟，临期不能开始考试
         $now = Carbon::now();
-        if (!$now->betweenExcluded($examPaper->start_time, $examPaper->end_time)) {
+        if (!$now->between($examPaper->start_time, $examPaper->end_time->copy()->addSeconds($graceSeconds))) {
             return $response->json(['msg' => '不在考试时间范围内'])->withStatus(403);
         }
 
@@ -268,7 +275,7 @@ class ExamPaperService
             ->orderBy('attempt_no', 'desc')
             ->first();
         if ($exam) {
-            if (now()->betweenExcluded($exam->start_time, $exam->start_time->copy()->addMinutes($examPaper->duration))) {
+            if (now()->between($exam->start_time, $exam->start_time->copy()->addMinutes($examPaper->duration))) {
                 return $response->json([
                     'msg' => '继续进行上次未完成的考试',
                     'exam_id' => $exam->id
@@ -283,7 +290,7 @@ class ExamPaperService
             $maxAttempt = Exam::query()
                 ->where('user_id', $userId)
                 ->where('exam_paper_id', $examPaperId)
-                ->max('attempt_no') ?? 1;
+                ->max('attempt_no') ?? 0;
 
             $nextAttempt = $maxAttempt + 1;
 

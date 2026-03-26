@@ -13,7 +13,7 @@ use Hyperf\DbConnection\Model\Model;
  * @property int $user_id
  * @property int $exam_paper_id
  * @property Carbon $start_time
- * @property string $submit_time
+ * @property Carbon|null $submit_time
  * @property int $score
  * @property string $status
  * @property int $attempt_no
@@ -42,6 +42,7 @@ class Exam extends Model
         'user_id' => 'integer',
         'exam_paper_id' => 'integer',
         'start_time' => 'datetime',
+        'submit_time' => 'datetime',
         'score' => 'integer',
         'attempt_no' => 'integer',
         'created_at' => 'datetime',

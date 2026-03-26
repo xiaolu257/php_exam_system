@@ -80,31 +80,21 @@ class ExamPaperController
         return $response->json($exam);
     }
 
-    #[GetMapping('{id:\d+}/questions')]
+    #[GetMapping('{exam_id:\d+}/questions')]
     public function getOneDetail(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
-        $id = $request->route('id', 0);
+        $id = (int)$request->route('exam_id', 0);
 
-        $exam = Exam::query()->find($id);
+        $exam = Exam::query()->find($id, ['id', 'exam_paper_id', 'start_time', 'attempt_no']);
         if (!$exam) {
             return $response->json(['message' => '未找到相关考试信息'])->withStatus(404);
         }
         $examPaper = ExamPaper::query()
-            ->find($exam->exam_paper_id, ['id', 'title', 'description', 'duration', 'total_score', 'start_time', 'end_time', 'max_attempts']);
+            ->find($exam->exam_paper_id, ['id', 'title', 'duration', 'total_score']);
 
         if (!$examPaper) {
             return $response->json(['message' => '未找到相关试卷'])->withStatus(404);
         }
-        $counts = ExamPaperQuestion::query()
-            ->where('exam_paper_id', $examPaper->id)
-            ->selectRaw('question_type, COUNT(*) as count')
-            ->groupBy('question_type')
-            ->pluck('count', 'question_type');
-
-        $examPaper->single_count = $counts['single'] ?? 0;
-        $examPaper->multiple_count = $counts['multiple'] ?? 0;
-        $examPaper->true_false_count = $counts['true_false'] ?? 0;
-        $examPaper->short_answer_count = $counts['short_answer'] ?? 0;
 
         $examPaper->questions = ExamPaperQuestion::query()
             ->where('exam_paper_id', $examPaper->id)
@@ -122,7 +112,14 @@ class ExamPaperController
 
             $question->question_snapshot = $snapshot;
         }
-        return $response->json($examPaper);
+        return $response->json([
+            'title' => $examPaper->title,
+            'start_time' => $exam->start_time,
+            'attempt_no' => $exam->attempt_no,
+            'duration' => $examPaper->duration,
+            'total_score' => $examPaper->total_score,
+            'questions' => $examPaper->questions,
+        ]);
     }
 
     #[PostMapping('{exam_paper_id:\d+}/start')]

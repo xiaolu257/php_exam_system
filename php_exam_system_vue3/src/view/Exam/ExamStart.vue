@@ -5,9 +5,13 @@
       <template #header>
         <div class="header">
           <h2>{{ exam.title }}</h2>
-          <div class="meta">
-            <span>时长：{{ exam.duration }} 分钟</span>
-            <span>总分：{{ exam.total_score }}</span>
+          <div>
+            <el-tag style="margin-right: 10px" type="primary" effect="dark">时长：{{ exam.duration }} 分钟</el-tag>
+            <el-tag style="margin-right: 10px" type="primary" effect="dark">总分：{{ exam.total_score }}</el-tag>
+            <el-tag style="margin-right: 10px" type="success" effect="dark">剩余时间：{{
+                formatTime(remainingTime)
+              }}
+            </el-tag>
           </div>
         </div>
       </template>
@@ -86,9 +90,9 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, onUnmounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
-import {myGet, myPost} from "@/api/utils/axios";
+import {type ApiError, myGet, myPost} from "@/api/utils/axios";
 import MyMessageBox from "@/api/MyMessageBox";
 import MyMessage from "@/utils/MyMessage";
 
@@ -97,6 +101,53 @@ const examId = Number(route.params.id)
 
 const loading = ref(false)
 
+const remainingTime = ref(0) // 秒
+let timer: number | null = null
+
+const updateRemaining = (end: number) => {
+  const now = Date.now()
+  const diff = Math.floor((end - now) / 1000)
+
+  remainingTime.value = diff > 0 ? diff : 0
+
+  // ⏰ 时间到自动交卷
+  if (diff <= 0) {
+    clearInterval(timer!)
+    myPost(`/exam-paper/${examId}/submit`, {
+      exam_id: examId,
+      answers: answers.value
+    }, true, {silent: true})
+        .then(() => {
+          MyMessageBox.alert('考试时间已到，已自动交卷')
+        })
+        .catch((err: ApiError) => {
+          MyMessageBox.alert('自动交卷失败，原因：' + err.msg, '错误')
+        })
+  }
+}
+
+const formatTime = (seconds: number) => {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m.toString().padStart(2, '0')}分${s.toString().padStart(2, '0')}秒`
+}
+
+const initTimer = () => {
+  const start = new Date(exam.value.start_time).getTime()
+  const end = start + exam.value.duration * 60 * 1000
+
+  // ✅ 如果一进来就已经超时
+  const now = Date.now()
+  if (now >= end) {
+    updateRemaining(end)
+    return
+  }
+  updateRemaining(end)
+
+  timer = window.setInterval(() => {
+    updateRemaining(end)
+  }, 1000)
+}
 type QuestionType = 'single' | 'multiple' | 'true_false' | 'short_answer'
 
 interface Question {
@@ -111,31 +162,19 @@ interface Question {
 
 interface Exam {
   title: string
-  description: string
+  start_time: string
+  attempt_no: number
   duration: number
   total_score: number
-  start_time: string
-  end_time: string
-  max_attempts: number
-  single_count: number
-  multiple_count: number
-  true_false_count: number
-  short_answer_count: number
   questions: Question[]
 }
 
 const exam = ref<Exam>({
   title: '',
-  description: '',
+  start_time: '',
+  attempt_no: 0,
   duration: 0,
   total_score: 0,
-  start_time: '',
-  end_time: '',
-  max_attempts: 0,
-  single_count: 0,
-  multiple_count: 0,
-  true_false_count: 0,
-  short_answer_count: 0,
   questions: []
 })
 
@@ -159,8 +198,8 @@ const fetchExam = async () => {
   loading.value = true
   try {
     exam.value = await myGet(`/exam-paper/${examId}/questions`)
-    // 初始化答案结构
     initAnswers()
+    initTimer() // ✅ 启动倒计时
   } finally {
     loading.value = false
   }
@@ -252,6 +291,12 @@ const submitExam = async () => {
 }
 
 onMounted(fetchExam)
+
+onUnmounted(() => {
+  if (timer) {
+    clearInterval(timer)
+  }
+})
 </script>
 
 <style scoped>
@@ -264,11 +309,6 @@ onMounted(fetchExam)
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.meta span {
-  margin-left: 15px;
-  color: #666;
 }
 
 .question {

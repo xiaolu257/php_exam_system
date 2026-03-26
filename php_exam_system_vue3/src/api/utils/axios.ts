@@ -1,5 +1,5 @@
 // utils/myAxios.ts
-import axios from 'axios';
+import axios, {type AxiosError, type AxiosRequestConfig} from 'axios';
 import {ElLoading, ElMessage} from 'element-plus';
 import {useFingerprint} from "@/utils/fingerprint";
 import {quitLogin} from "@/api/Admin";
@@ -57,16 +57,33 @@ myAxios.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+interface MyAxiosExtraConfig extends AxiosRequestConfig {
+    silent?: boolean
+}
+
+export interface ApiError {
+    msg: string,
+    data?: any
+    code?: number
+}
+
 // 响应拦截器：不处理结构，保留完整 response，方便后面统一判断状态
 myAxios.interceptors.response.use(
     (response) => response,
-    (error) => {
-        const msg = error.response?.data?.msg || '请求失败';
-        ElMessage.error(msg);
-        if (error.response.status === 401) {
+    (error: AxiosError<ApiError>) => {
+        const config = error.config as MyAxiosExtraConfig
+
+        const msg = error.response?.data.msg || '请求失败';
+
+        if (!config?.silent) {
+            ElMessage.error(msg);
+        }
+
+        if (error.response?.status === 401) {
             quitLogin()
         }
-        return Promise.reject(error);
+
+        return Promise.reject(error.response?.data);
     }
 );
 
@@ -76,7 +93,7 @@ const myRequest = async (
     url: string,
     data: any = {},
     showLoading = true,
-    extraConfig: any = {} // ✅ 新增：接收额外配置
+    extraConfig: MyAxiosExtraConfig = {} // ✅ 新增：接收额外配置
 ): Promise<any> => {
     if (showLoading) {
         loadingInstance = ElLoading.service({
@@ -111,10 +128,9 @@ const myRequest = async (
 
 // 快捷请求方法
 const myGet = (url: string, data = {}, showLoading = true) => myRequest('GET', url, data, showLoading);
-const myPost = (url: string, data = {}, showLoading = true, extraConfig = {}) => myRequest('POST', url, data, showLoading, extraConfig);
+const myPost = (url: string, data = {}, showLoading = true, extraConfig: MyAxiosExtraConfig = {}) => myRequest('POST', url, data, showLoading, extraConfig);
 const myPut = (url: string, data = {}, showLoading = true) => myRequest('PUT', url, data, showLoading);
 const myDel = (url: string, data = {}, showLoading = true) => myRequest('DELETE', url, data, showLoading);
 
 // 默认导出 + 命名导出
-export default myAxios;
 export {myAxios, myRequest, myGet, myPost, myPut, myDel};
