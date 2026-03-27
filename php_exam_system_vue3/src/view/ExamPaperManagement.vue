@@ -4,6 +4,7 @@
                     :table-config="tableConfig">
     <template v-slot:operationButton="{row}">
       <el-button size="small" type="success" @click="previewExamPaper(row.id)">预览</el-button>
+      <el-button size="small" type="success" @click="startExamPaper(row.id)">考试</el-button>
     </template>
   </BaseTableManager>
 </template>
@@ -68,6 +69,7 @@ const editDialogConfig: TableColumnEditDialogConfig = {
   submitAction: ExamPaperCRUDStandardCRUD.updateItem
 };
 const tableConfig: TableConfig = {
+  operationWidth: 300,
   deleteRows: ExamPaperCRUDStandardCRUD.deleteRows,
   getOnePageData: ExamPaperCRUDStandardCRUD.getOnePageData,
   searchData: ExamPaperCRUDStandardCRUD.searchOnePageData,
@@ -85,6 +87,9 @@ const tableConfig: TableConfig = {
   ]
 };
 const previewExamPaper = (examPaperId: number) => {
+  router.push(`/exam/${examPaperId}/preview`)
+}
+const startExamPaper = (examPaperId: number) => {
   router.push(`/exam/${examPaperId}/before`)
 }
 </script>

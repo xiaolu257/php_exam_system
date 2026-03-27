@@ -81,45 +81,19 @@ class ExamPaperController
     }
 
     #[GetMapping('{exam_id:\d+}/questions')]
-    public function getOneDetail(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    public function getExamDetail(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
-        $id = (int)$request->route('exam_id', 0);
+        $exam_id = (int)$request->route('exam_id', 0);
 
-        $exam = Exam::query()->find($id, ['id', 'exam_paper_id', 'start_time', 'attempt_no']);
-        if (!$exam) {
-            return $response->json(['message' => '未找到相关考试信息'])->withStatus(404);
-        }
-        $examPaper = ExamPaper::query()
-            ->find($exam->exam_paper_id, ['id', 'title', 'duration', 'total_score']);
+        return $this->examPaperService->getExamDetail($exam_id, $response);
+    }
 
-        if (!$examPaper) {
-            return $response->json(['message' => '未找到相关试卷'])->withStatus(404);
-        }
+    #[GetMapping('{exam_paper_id:\d+}/preview')]
+    public function getExamPaperDetailWithAnswer(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $exam_paper_id = (int)$request->route('exam_paper_id', 0);
 
-        $examPaper->questions = ExamPaperQuestion::query()
-            ->where('exam_paper_id', $examPaper->id)
-            ->orderBy('sort_order')
-            ->get(['id', 'question_type', 'score', 'sort_order', 'question_snapshot']);
-        //移除正确答案，避免暴露在前端
-        foreach ($examPaper->questions as $question) {
-            $snapshot = $question->question_snapshot;
-
-            if (in_array($question->question_type, ['single', 'multiple', 'true_false'])) {
-                unset($snapshot['correct_answer']);
-            } else if ($question->question_type === 'short_answer') {
-                unset($snapshot['reference_answer']);
-            }
-
-            $question->question_snapshot = $snapshot;
-        }
-        return $response->json([
-            'title' => $examPaper->title,
-            'start_time' => $exam->start_time,
-            'attempt_no' => $exam->attempt_no,
-            'duration' => $examPaper->duration,
-            'total_score' => $examPaper->total_score,
-            'questions' => $examPaper->questions,
-        ]);
+        return $this->examPaperService->getExamPaperDetail($exam_paper_id, $response);
     }
 
     #[PostMapping('{exam_paper_id:\d+}/start')]

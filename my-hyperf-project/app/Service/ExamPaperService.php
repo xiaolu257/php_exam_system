@@ -147,6 +147,69 @@ class ExamPaperService
             ? 4 : 0;
     }
 
+    public function getExamDetail(int $examId, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $exam = Exam::query()->find($examId, ['id', 'exam_paper_id', 'start_time', 'attempt_no']);
+        if (!$exam) {
+            return $response->json(['message' => '未找到相关考试信息'])->withStatus(404);
+        }
+
+        $examPaper = ExamPaper::query()
+            ->find($exam->exam_paper_id, ['id', 'title', 'duration', 'total_score']);
+
+        if (!$examPaper) {
+            return $response->json(['message' => '未找到相关试卷'])->withStatus(404);
+        }
+
+        $examPaper->questions = ExamPaperQuestion::query()
+            ->where('exam_paper_id', $examPaper->id)
+            ->orderBy('sort_order')
+            ->get(['id', 'question_type', 'score', 'sort_order', 'question_snapshot']);
+        //移除正确答案，避免暴露在前端
+        foreach ($examPaper->questions as $question) {
+            $snapshot = $question->question_snapshot;
+            if (in_array($question->question_type, ['single', 'multiple', 'true_false'])) {
+                unset($snapshot['correct_answer']);
+            } else if ($question->question_type === 'short_answer') {
+                unset($snapshot['reference_answer']);
+            }
+            $question->question_snapshot = $snapshot;
+        }
+        return $response->json([
+            'title' => $examPaper->title,
+            'start_time' => $exam->start_time,
+            'attempt_no' => $exam->attempt_no,
+            'duration' => $examPaper->duration,
+            'total_score' => $examPaper->total_score,
+            'questions' => $examPaper->questions,
+        ]);
+    }
+
+    public function getExamPaperDetail(int $examPaperId, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $examPaper = ExamPaper::query()
+            ->find($examPaperId, ['id', 'title', 'duration', 'total_score']);
+
+        if (!$examPaper) {
+            return $response->json(['message' => '未找到相关试卷'])->withStatus(404);
+        }
+
+        $examPaper->questions = ExamPaperQuestion::query()
+            ->where('exam_paper_id', $examPaper->id)
+            ->orderBy('sort_order')
+            ->get(['id', 'question_type', 'score', 'sort_order', 'question_snapshot']);
+        //移除正确答案，避免暴露在前端
+        foreach ($examPaper->questions as $question) {
+            $snapshot = $question->question_snapshot;
+            $question->question_snapshot = $snapshot;
+        }
+        return $response->json([
+            'title' => $examPaper->title,
+            'duration' => $examPaper->duration,
+            'total_score' => $examPaper->total_score,
+            'questions' => $examPaper->questions,
+        ]);
+    }
 
     public function submitExamPaper(int               $examId,
                                     int               $userId,

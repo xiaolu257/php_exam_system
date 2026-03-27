@@ -87,5 +87,6 @@ export interface TableConfig {
     getOnePageData: GetOnePageDataFunction,
     searchData: SearchOnePageDataFunction,
     deleteRows?: DeleteRowsFunction,
+    operationWidth?: number,
 }
 

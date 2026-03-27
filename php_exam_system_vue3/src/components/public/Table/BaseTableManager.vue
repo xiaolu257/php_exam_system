@@ -28,7 +28,7 @@
   >
     <el-table-column align="center" fixed="left" type="selection" width="40" :reserve-selection="true"/>
     <BaseTableColumns :table-columns="tableConfig.tableColumns"/>
-    <el-table-column align="center" fixed="right" label="操作" width="200">
+    <el-table-column align="center" fixed="right" label="操作" :width="tableConfig.operationWidth||200">
       <template #default="{row}">
         <slot name="operationButton" :row="row"></slot>
         <BaseEditFormDialog v-if="tableColumnEditDialogConfig"
