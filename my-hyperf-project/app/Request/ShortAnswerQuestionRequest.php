@@ -8,10 +8,10 @@ use Hyperf\Validation\Request\FormRequest;
 
 class ShortAnswerQuestionRequest extends FormRequest
 {
-    public const SCENE_GET_ONE_PAGE_SHORT_ANSWER_QUESTIONS = 'getOnePageShortAnswerQuestions';
-    public const SCENE_ADD_SHORT_ANSWER_QUESTIONS = 'addShortAnswerQuestions';
-    public const SCENE_UPDATE_SHORT_ANSWER_QUESTIONS = 'updateShortAnswerQuestions';
-    public const SCENE_DELETE_SHORT_ANSWER_QUESTIONS = 'deleteShortAnswerQuestions';
+    public const SCENE_GET_ONE = 'getOnePage';
+    public const SCENE_ADD = 'add';
+    public const SCENE_UPDATE = 'update';
+    public const SCENE_DELETE = 'delete';
 
     public function authorize(): bool
     {
@@ -19,7 +19,7 @@ class ShortAnswerQuestionRequest extends FormRequest
     }
 
     protected array $scenes = [
-        self::SCENE_GET_ONE_PAGE_SHORT_ANSWER_QUESTIONS => [
+        self::SCENE_GET_ONE => [
             'page' => 'required|integer|gt:0',
             'orderBy' => 'string|in:id,content,created_at',
             'orderDirection' => 'string|in:asc,desc',
@@ -27,18 +27,18 @@ class ShortAnswerQuestionRequest extends FormRequest
             'searchValue' => 'required_with:searchField|string|max:100'
         ],
 
-        self::SCENE_ADD_SHORT_ANSWER_QUESTIONS => [
+        self::SCENE_ADD => [
             'content' => 'required|string|max:500',
             'reference_answer' => 'required|string|max:1000',
         ],
 
-        self::SCENE_UPDATE_SHORT_ANSWER_QUESTIONS => [
+        self::SCENE_UPDATE => [
             'id' => 'required|integer:strict|gt:0',
             'content' => 'string|filled|max:500',
             'reference_answer' => 'string|filled|max:1000',
         ],
 
-        self::SCENE_DELETE_SHORT_ANSWER_QUESTIONS => [
+        self::SCENE_DELETE => [
             'ids' => 'required|array',
             'ids.*' => 'integer:strict|gt:0',
         ]

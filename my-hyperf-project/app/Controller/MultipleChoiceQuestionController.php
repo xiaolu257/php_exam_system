@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Annotation\Permission;
 use App\Model\MultipleChoiceQuestion;
 use App\Request\MultipleChoiceQuestionRequest;
 use Hyperf\Database\Model\Builder;
@@ -29,8 +30,9 @@ class MultipleChoiceQuestionController
     }
 
     #[GetMapping('')]
-    #[Scene(MultipleChoiceQuestionRequest::SCENE_GET_ONE_PAGE_MULTIPLE_CHOICE_QUESTIONS)]
-    public function getOnePageMultipleChoiceQuestions(MultipleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('multipleChoiceQuestions:paginate', '获取多选题分页数据，支持模糊查询')]
+    #[Scene(MultipleChoiceQuestionRequest::SCENE_GET_ONE_PAGE)]
+    public function paginate(MultipleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
 
@@ -50,8 +52,9 @@ class MultipleChoiceQuestionController
     }
 
     #[PostMapping('')]
-    #[Scene(MultipleChoiceQuestionRequest::SCENE_ADD_MULTIPLE_CHOICE_QUESTIONS)]
-    public function addMultipleChoiceQuestions(MultipleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('multipleChoiceQuestions:add', '新增多选题')]
+    #[Scene(MultipleChoiceQuestionRequest::SCENE_ADD)]
+    public function add(MultipleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
         $content = $validatedData['content'];
@@ -80,8 +83,9 @@ class MultipleChoiceQuestionController
     }
 
     #[PutMapping('')]
-    #[Scene(MultipleChoiceQuestionRequest::SCENE_UPDATE_MULTIPLE_CHOICE_QUESTIONS)]
-    public function updateMultipleChoiceQuestions(MultipleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('multipleChoiceQuestions:update', '更新多选题')]
+    #[Scene(MultipleChoiceQuestionRequest::SCENE_UPDATE)]
+    public function update(MultipleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
 
@@ -150,8 +154,9 @@ class MultipleChoiceQuestionController
     }
 
     #[DeleteMapping('')]
-    #[Scene(MultipleChoiceQuestionRequest::SCENE_DELETE_MULTIPLE_CHOICE_QUESTIONS)]
-    public function deleteMultipleChoiceQuestions(MultipleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('multipleChoiceQuestions:delete', '(批量)删除多选题')]
+    #[Scene(MultipleChoiceQuestionRequest::SCENE_DELETE)]
+    public function delete(MultipleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
 

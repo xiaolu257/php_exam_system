@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Annotation\Permission;
 use App\Model\TrueFalseQuestion;
 use App\Request\TrueFalseQuestionRequest;
 use Hyperf\Database\Model\Builder;
@@ -19,8 +20,9 @@ use Hyperf\Validation\Annotation\Scene;
 class TrueFalseQuestionController
 {
     #[GetMapping('')]
-    #[Scene(TrueFalseQuestionRequest::SCENE_GET_ONE_PAGE_TRUE_FALSE_QUESTIONS)]
-    public function getOnePageTrueFalseQuestions(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('trueFalseQuestion:paginate', '获取判断题题分页数据，支持模糊查询')]
+    #[Scene(TrueFalseQuestionRequest::SCENE_GET_ONE)]
+    public function paginate(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
 
@@ -40,8 +42,9 @@ class TrueFalseQuestionController
     }
 
     #[PostMapping('')]
-    #[Scene(TrueFalseQuestionRequest::SCENE_ADD_TRUE_FALSE_QUESTIONS)]
-    public function addTrueFalseQuestions(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('trueFalseQuestion:add', '新增判断题')]
+    #[Scene(TrueFalseQuestionRequest::SCENE_ADD)]
+    public function add(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
         $content = $validatedData['content'];
@@ -57,8 +60,9 @@ class TrueFalseQuestionController
     }
 
     #[PutMapping('')]
-    #[Scene(TrueFalseQuestionRequest::SCENE_UPDATE_TRUE_FALSE_QUESTIONS)]
-    public function updateTrueFalseQuestions(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('trueFalseQuestion:update', '修改判断题')]
+    #[Scene(TrueFalseQuestionRequest::SCENE_UPDATE)]
+    public function update(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
 
@@ -88,13 +92,14 @@ class TrueFalseQuestionController
     }
 
     #[DeleteMapping('')]
-    #[Scene(TrueFalseQuestionRequest::SCENE_DELETE_TRUE_FALSE_QUESTIONS)]
-    public function deleteTrueFalseQuestions(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('trueFalseQuestion:delete', '(批量)删除判断题题')]
+    #[Scene(TrueFalseQuestionRequest::SCENE_DELETE)]
+    public function delete(TrueFalseQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
 
         $ids = $validatedData['ids'];
-        
+
         $existingIds = TrueFalseQuestion::query()
             ->whereIn('id', $ids)
             ->pluck('id')

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Annotation\Permission;
 use App\Model\SingleChoiceQuestion;
 use App\Request\SingleChoiceQuestionRequest;
 use Hyperf\Database\Model\Builder;
@@ -28,15 +29,10 @@ class SingleChoiceQuestionController
         return chr(ord('A') + $index);
     }
 
-    #[GetMapping('test')]
-    public function test(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
-    {
-        return $response->json(['data' => '']);
-    }
-
     #[GetMapping('')]
-    #[Scene(SingleChoiceQuestionRequest::SCENE_GET_ONE_PAGE_SINGLE_CHOICE_QUESTIONS)]
-    public function getOnePageSingleChoiceQuestions(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('singleChoiceQuestion:paginate', '获取单选题分页数据，支持模糊查询')]
+    #[Scene(SingleChoiceQuestionRequest::SCENE_GET_ONE)]
+    public function paginate(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
 
@@ -56,8 +52,9 @@ class SingleChoiceQuestionController
     }
 
     #[PostMapping('')]
-    #[Scene(SingleChoiceQuestionRequest::SCENE_ADD_SINGLE_CHOICE_QUESTIONS)]
-    public function addSingleChoiceQuestions(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('singleChoiceQuestion:add', '新增单选题')]
+    #[Scene(SingleChoiceQuestionRequest::SCENE_ADD)]
+    public function add(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
         $content = $validatedData['content'];
@@ -84,8 +81,9 @@ class SingleChoiceQuestionController
     }
 
     #[PutMapping('')]
-    #[Scene(SingleChoiceQuestionRequest::SCENE_UPDATE_SINGLE_CHOICE_QUESTIONS)]
-    public function updateSingleChoiceQuestions(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('singleChoiceQuestion:update', '更新单选题')]
+    #[Scene(SingleChoiceQuestionRequest::SCENE_UPDATE)]
+    public function update(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
 
@@ -138,8 +136,9 @@ class SingleChoiceQuestionController
     }
 
     #[DeleteMapping('')]
-    #[Scene(SingleChoiceQuestionRequest::SCENE_DELETE_SINGLE_CHOICE_QUESTIONS)]
-    public function deleteSingleChoiceQuestions(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('singleChoiceQuestion:delete', '(批量)删除单选题')]
+    #[Scene(SingleChoiceQuestionRequest::SCENE_DELETE)]
+    public function delete(SingleChoiceQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
 

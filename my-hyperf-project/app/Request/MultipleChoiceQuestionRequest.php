@@ -8,11 +8,11 @@ use Hyperf\Validation\Request\FormRequest;
 
 class MultipleChoiceQuestionRequest extends FormRequest
 {
-    public const SCENE_GET_ONE_PAGE_MULTIPLE_CHOICE_QUESTIONS = 'getOnePageMultipleChoiceQuestions';
+    public const SCENE_GET_ONE_PAGE = 'getOnePage';
 
-    public const SCENE_ADD_MULTIPLE_CHOICE_QUESTIONS = 'addMultipleChoiceQuestions';
-    public const SCENE_UPDATE_MULTIPLE_CHOICE_QUESTIONS = 'updateMultipleChoiceQuestions';
-    public const SCENE_DELETE_MULTIPLE_CHOICE_QUESTIONS = 'deleteMultipleChoiceQuestions';
+    public const SCENE_ADD = 'add';
+    public const SCENE_UPDATE = 'update';
+    public const SCENE_DELETE = 'delete';
 
     public function authorize(): bool
     {
@@ -20,7 +20,7 @@ class MultipleChoiceQuestionRequest extends FormRequest
     }
 
     protected array $scenes = [
-        self::SCENE_GET_ONE_PAGE_MULTIPLE_CHOICE_QUESTIONS => [
+        self::SCENE_GET_ONE_PAGE => [
             'page' => 'required|integer|gt:0',
             'orderBy' => 'string|in:id,content,created_at',
             'orderDirection' => 'string|in:asc,desc',
@@ -28,7 +28,7 @@ class MultipleChoiceQuestionRequest extends FormRequest
             'searchValue' => 'required_with:searchField|string|max:100'
         ],
 
-        self::SCENE_ADD_MULTIPLE_CHOICE_QUESTIONS => [
+        self::SCENE_ADD => [
             'content' => 'required|string|max:255',
             'options' => 'required|array|min:2|max:10',
             'options.*' => 'string|filled|max:50',
@@ -36,7 +36,7 @@ class MultipleChoiceQuestionRequest extends FormRequest
             'correct_answer.*' => 'filled|regex:/^[A-J]$/',
         ],
 
-        self::SCENE_UPDATE_MULTIPLE_CHOICE_QUESTIONS => [
+        self::SCENE_UPDATE => [
             'id' => 'required|integer:strict|gt:0',
             'content' => 'string|filled|max:255',
             'options' => 'array|min:2|max:10',
@@ -45,7 +45,7 @@ class MultipleChoiceQuestionRequest extends FormRequest
             'correct_answer.*' => 'string|filled|regex:/^[A-J]$/|distinct',
         ],
 
-        self::SCENE_DELETE_MULTIPLE_CHOICE_QUESTIONS => [
+        self::SCENE_DELETE => [
             'ids' => 'required|array',
             'ids.*' => 'integer:strict|gt:0',
         ]

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Annotation\Permission;
 use App\Middleware\Helper\MiddlewareContext;
 use App\Model\Exam;
 use App\Model\ExamPaper;
@@ -30,15 +31,10 @@ class ExamPaperController
     #[Inject]
     protected MiddlewareContext $middlewareContext;
 
-    #[GetMapping('test')]
-    public function test(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
-    {
-        return $response->json(['data' => '']);
-    }
-
     #[GetMapping('')]
+    #[Permission('examPaper:paginate', '获取试卷分页数据，支持模糊查询')]
     #[Scene(ExamPaperRequest::SCENE_GET_ONE_PAGE)]
-    public function getOnePage(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    public function paginate(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
 
@@ -58,6 +54,7 @@ class ExamPaperController
     }
 
     #[GetMapping('{id:\d+}')]
+    #[Permission('examPaper:getOne', '考生考试前，获取考试的简要信息')]
     public function getOne(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $id = $request->route('id', 0);
@@ -84,6 +81,7 @@ class ExamPaperController
     }
 
     #[GetMapping('{exam_id:\d+}/questions')]
+    #[Permission('exam:getExamDetail', '考生获取考试信息，包括试题')]
     public function getExamDetail(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $exam_id = (int)$request->route('exam_id', 0);
@@ -92,6 +90,7 @@ class ExamPaperController
     }
 
     #[GetMapping('{exam_paper_id:\d+}/preview')]
+    #[Permission('examPaper:getExamPaperDetailWithAnswer', '获取试卷信息+答案')]
     public function getExamPaperDetailWithAnswer(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $exam_paper_id = (int)$request->route('exam_paper_id', 0);
@@ -100,6 +99,7 @@ class ExamPaperController
     }
 
     #[PostMapping('{exam_paper_id:\d+}/start')]
+    #[Permission('exam:start', '考生开始考试，创建考试信息')]
     public function startExam(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $userId = $this->middlewareContext->getUserId();
@@ -108,6 +108,7 @@ class ExamPaperController
     }
 
     #[PostMapping('{exam_id:\d+}/submit')]
+    #[Permission('exam:submit', '考生交卷，创建交卷信息')]
     #[Scene(ExamPaperRequest::SCENE_SUBMIT_EXAM_PAPER)]
     public function submitExamPaper(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -119,6 +120,7 @@ class ExamPaperController
     }
 
     #[PostMapping('')]
+    #[Permission('examPaper:add', '新增试卷')]
     #[Scene(ExamPaperRequest::SCENE_ADD)]
     public function add(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -150,6 +152,7 @@ class ExamPaperController
     }
 
     #[PutMapping('')]
+    #[Permission('examPaper:update', '修改试卷')]
     #[Scene(ExamPaperRequest::SCENE_UPDATE)]
     public function update(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -193,6 +196,7 @@ class ExamPaperController
     }
 
     #[DeleteMapping('')]
+    #[Permission('examPaper:delete', '(批量)删除试卷')]
     #[Scene(ExamPaperRequest::SCENE_DELETE)]
     public function delete(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {

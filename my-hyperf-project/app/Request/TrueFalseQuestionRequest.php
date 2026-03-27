@@ -8,10 +8,10 @@ use Hyperf\Validation\Request\FormRequest;
 
 class TrueFalseQuestionRequest extends FormRequest
 {
-    public const SCENE_GET_ONE_PAGE_TRUE_FALSE_QUESTIONS = 'getOnePageTrueFalseQuestions';
-    public const SCENE_ADD_TRUE_FALSE_QUESTIONS = 'addTrueFalseQuestions';
-    public const SCENE_UPDATE_TRUE_FALSE_QUESTIONS = 'updateTrueFalseQuestions';
-    public const SCENE_DELETE_TRUE_FALSE_QUESTIONS = 'deleteTrueFalseQuestions';
+    public const SCENE_GET_ONE = 'getOnePage';
+    public const SCENE_ADD = 'add';
+    public const SCENE_UPDATE = 'update';
+    public const SCENE_DELETE = 'delete';
 
     public function authorize(): bool
     {
@@ -19,7 +19,7 @@ class TrueFalseQuestionRequest extends FormRequest
     }
 
     protected array $scenes = [
-        self::SCENE_GET_ONE_PAGE_TRUE_FALSE_QUESTIONS => [
+        self::SCENE_GET_ONE => [
             'page' => 'required|integer|gt:0',
             'orderBy' => 'string|in:id,content,created_at',
             'orderDirection' => 'string|in:asc,desc',
@@ -27,18 +27,18 @@ class TrueFalseQuestionRequest extends FormRequest
             'searchValue' => 'required_with:searchField|string|max:100'
         ],
 
-        self::SCENE_ADD_TRUE_FALSE_QUESTIONS => [
+        self::SCENE_ADD => [
             'content' => 'required|string|max:255',
             'correct_answer' => 'required|integer:strict|in:0,1',
         ],
 
-        self::SCENE_UPDATE_TRUE_FALSE_QUESTIONS => [
+        self::SCENE_UPDATE => [
             'id' => 'required|integer:strict|gt:0',
             'content' => 'string|filled|max:255',
             'correct_answer' => 'integer:strict|in:0,1',
         ],
 
-        self::SCENE_DELETE_TRUE_FALSE_QUESTIONS => [
+        self::SCENE_DELETE => [
             'ids' => 'required|array',
             'ids.*' => 'integer:strict|gt:0',
         ]

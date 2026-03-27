@@ -8,10 +8,10 @@ use Hyperf\Validation\Request\FormRequest;
 
 class SingleChoiceQuestionRequest extends FormRequest
 {
-    public const SCENE_GET_ONE_PAGE_SINGLE_CHOICE_QUESTIONS = 'getOnePageSingleChoiceQuestions';
-    public const SCENE_ADD_SINGLE_CHOICE_QUESTIONS = 'addSingleChoiceQuestions';
-    public const SCENE_UPDATE_SINGLE_CHOICE_QUESTIONS = 'updateSingleChoiceQuestions';
-    public const SCENE_DELETE_SINGLE_CHOICE_QUESTIONS = 'deleteSingleChoiceQuestions';
+    public const SCENE_GET_ONE = 'getOnePageSingleChoiceQuestions';
+    public const SCENE_ADD = 'add';
+    public const SCENE_UPDATE = 'update';
+    public const SCENE_DELETE = 'delete';
 
     public function authorize(): bool
     {
@@ -19,7 +19,7 @@ class SingleChoiceQuestionRequest extends FormRequest
     }
 
     protected array $scenes = [
-        self::SCENE_GET_ONE_PAGE_SINGLE_CHOICE_QUESTIONS => [
+        self::SCENE_GET_ONE => [
             'page' => 'required|integer|gt:0',
             'orderBy' => 'string|in:id,content,created_at',
             'orderDirection' => 'string|in:asc,desc',
@@ -27,14 +27,14 @@ class SingleChoiceQuestionRequest extends FormRequest
             'searchValue' => 'required_with:searchField|string|max:100'
         ],
 
-        self::SCENE_ADD_SINGLE_CHOICE_QUESTIONS => [
+        self::SCENE_ADD => [
             'content' => 'required|string|max:255',
             'options' => 'required|array|min:2|max:10',
             'options.*' => 'string|filled|max:50',
             'correct_answer' => 'required|regex:/^[A-J]$/',
         ],
 
-        self::SCENE_UPDATE_SINGLE_CHOICE_QUESTIONS => [
+        self::SCENE_UPDATE => [
             'id' => 'required|integer:strict|gt:0',
             'content' => 'string|filled|max:255',
             'options' => 'array|min:2|max:10',
@@ -42,7 +42,7 @@ class SingleChoiceQuestionRequest extends FormRequest
             'correct_answer' => 'string|filled|regex:/^[A-J]$/',
         ],
 
-        self::SCENE_DELETE_SINGLE_CHOICE_QUESTIONS => [
+        self::SCENE_DELETE => [
             'ids' => 'required|array',
             'ids.*' => 'integer:strict|gt:0',
         ]

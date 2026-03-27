@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Annotation\Permission;
 use App\Middleware\Helper\MiddlewareContext;
 use App\Model\User;
 use App\Model\UserToken;
@@ -29,19 +30,8 @@ class UserController
     #[Inject]
     protected MiddlewareContext $middlewareContext;
 
-    #[GetMapping('index')]
-    public function index(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
-    {
-        return $response->raw('Hello Hyperf!');
-    }
-
-    #[GetMapping('test')]
-    public function test(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
-    {
-        return $response->json($request->all());
-    }
-
     #[PostMapping('register')]
+    #[Permission('user:register', '用户注册')]
     #[Scene(UserRequest::SCENE_REGISTER)]
     public function register(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -67,6 +57,7 @@ class UserController
     }
 
     #[PostMapping('login')]
+    #[Permission('user:login', '用户登录')]
     #[Scene(UserRequest::SCENE_LOGIN)]
     public function login(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -103,6 +94,7 @@ class UserController
     }
 
     #[PostMapping('validate-admin-token')]
+    #[Permission('user:validateAdminToken', '验证用户token，返回用户信息')]
     public function validateAdminToken(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         try {
@@ -166,6 +158,7 @@ class UserController
     }
 
     #[GetMapping('get-user-avatar-thumb')]
+    #[Permission('user:getUserAvatarThumb', '获取用户头像缩略图')]
     #[Scene(UserRequest::SCENE_GET_USER_AVATAR_THUMB)]
     public function getUserAvatarThumb(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -179,6 +172,7 @@ class UserController
     }
 
     #[GetMapping('get-user-avatar')]
+    #[Permission('user:getUserAvatar', '获取用户头像')]
     #[Scene(UserRequest::SCENE_GET_USER_AVATAR)]
     public function getUserAvatar(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -192,6 +186,7 @@ class UserController
     }
 
     #[PostMapping('update-profile')]
+    #[Permission('user:updateProfile', '获取用户信息')]
     #[Scene(UserRequest::SCENE_UPDATE_PROFILE)]
     public function updateProfile(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -222,6 +217,7 @@ class UserController
     }
 
     #[PostMapping('change-password')]
+    #[Permission('user:changePassword', '用户修改密码')]
     #[Scene(UserRequest::SCENE_CHANGE_PASSWORD)]
     public function changePassword(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {

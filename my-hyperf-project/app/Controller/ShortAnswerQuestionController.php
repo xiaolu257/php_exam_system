@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Annotation\Permission;
 use App\Model\ShortAnswerQuestion;
 use App\Request\ShortAnswerQuestionRequest;
 use Hyperf\Database\Model\Builder;
@@ -19,8 +20,9 @@ use Hyperf\Validation\Annotation\Scene;
 class ShortAnswerQuestionController
 {
     #[GetMapping('')]
-    #[Scene(ShortAnswerQuestionRequest::SCENE_GET_ONE_PAGE_SHORT_ANSWER_QUESTIONS)]
-    public function getOnePageShortAnswerQuestions(ShortAnswerQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('shortAnswerQuestion:paginate', '获取简答题分页数据，支持模糊查询')]
+    #[Scene(ShortAnswerQuestionRequest::SCENE_GET_ONE)]
+    public function paginate(ShortAnswerQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
 
@@ -40,8 +42,9 @@ class ShortAnswerQuestionController
     }
 
     #[PostMapping('')]
-    #[Scene(ShortAnswerQuestionRequest::SCENE_ADD_SHORT_ANSWER_QUESTIONS)]
-    public function addShortAnswerQuestions(ShortAnswerQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('shortAnswerQuestion:add', '新增简答题')]
+    #[Scene(ShortAnswerQuestionRequest::SCENE_ADD)]
+    public function add(ShortAnswerQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
         $content = $validatedData['content'];
@@ -57,8 +60,9 @@ class ShortAnswerQuestionController
     }
 
     #[PutMapping('')]
-    #[Scene(ShortAnswerQuestionRequest::SCENE_UPDATE_SHORT_ANSWER_QUESTIONS)]
-    public function updateShortAnswerQuestions(ShortAnswerQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('shortAnswerQuestion:update', '更新简答题')]
+    #[Scene(ShortAnswerQuestionRequest::SCENE_UPDATE)]
+    public function update(ShortAnswerQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
 
@@ -88,8 +92,9 @@ class ShortAnswerQuestionController
     }
 
     #[DeleteMapping('')]
-    #[Scene(ShortAnswerQuestionRequest::SCENE_DELETE_SHORT_ANSWER_QUESTIONS)]
-    public function deleteShortAnswerQuestions(ShortAnswerQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Permission('shortAnswerQuestion:delete', '(批量)删除简答题')]
+    #[Scene(ShortAnswerQuestionRequest::SCENE_DELETE)]
+    public function delete(ShortAnswerQuestionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
 
