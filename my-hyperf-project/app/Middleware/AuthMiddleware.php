@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Middleware\Helper\MiddlewareContext;
 use App\Model\User;
 use App\Model\UserToken;
 use App\Util\TokenUtil;
 use Firebase\JWT\ExpiredException;
+use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -19,12 +21,10 @@ use function Hyperf\Config\config;
  */
 class AuthMiddleware implements MiddlewareInterface
 {
+    #[Inject]
     protected ResponseInterface $response;
-
-    public function __construct(ResponseInterface $response)
-    {
-        $this->response = $response;
-    }
+    #[Inject]
+    protected MiddlewareContext $authContext;
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): \Psr\Http\Message\ResponseInterface
     {
@@ -76,7 +76,16 @@ class AuthMiddleware implements MiddlewareInterface
                 return $this->response->json(['success' => false, 'error' => '用户不存在']);
             }
 
-            $request = $request->withAttribute('user_id', $user->id);
+            $this->authContext->setUserId($user->id);
+            $permissions = User::leftJoin('user_roles as ur', 'users.id', '=', 'ur.user_id')
+                ->leftJoin('roles as r', 'ur.role_id', '=', 'r.id')
+                ->leftJoin('role_permissions as rp', 'r.id', '=', 'rp.role_id')
+                ->leftJoin('permissions as p', 'rp.permission_id', '=', 'p.id')
+                ->where('users.id', $userId)
+                ->distinct()
+                ->pluck('p.name')
+                ->toArray();
+            $this->authContext->setPermissions($permissions);
             return $handler->handle($request);
         } catch (ExpiredException $e) {
             return $this->response->json(['msg' => 'Token 已过期'])->withStatus(401);

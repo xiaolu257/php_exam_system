@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Middleware\Helper\MiddlewareContext;
 use App\Model\Exam;
 use App\Model\ExamPaper;
 use App\Model\ExamPaperQuestion;
@@ -26,6 +27,8 @@ class ExamPaperController
 {
     #[Inject]
     protected ExamPaperService $examPaperService;
+    #[Inject]
+    protected MiddlewareContext $middlewareContext;
 
     #[GetMapping('test')]
     public function test(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
@@ -99,7 +102,7 @@ class ExamPaperController
     #[PostMapping('{exam_paper_id:\d+}/start')]
     public function startExam(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
-        $userId = $request->getAttribute('user_id');
+        $userId = $this->middlewareContext->getUserId();
         $examPaperId = (int)$request->route('exam_paper_id', 0);
         return $this->examPaperService->startExam($userId, $examPaperId, $response);
     }
@@ -111,7 +114,7 @@ class ExamPaperController
         $validatedData = $request->validated();
         $examId = (int)$request->route('exam_id', 0);
         $userSubmitAnswers = $validatedData['answers'];
-        $userId = $request->getAttribute('user_id');
+        $userId = $this->middlewareContext->getUserId();
         return $this->examPaperService->submitExamPaper($examId, $userId, $userSubmitAnswers, $response);
     }
 

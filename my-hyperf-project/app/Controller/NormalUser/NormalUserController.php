@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller\NormalUser;
+
+use App\Annotation\Permission;
+use App\Middleware\Helper\MiddlewareContext;
+use App\Service\ImageService;
+use Hyperf\Di\Annotation\Inject;
+use Hyperf\HttpServer\Annotation\Controller;
+use Hyperf\HttpServer\Annotation\GetMapping;
+use Hyperf\HttpServer\Contract\RequestInterface;
+use Hyperf\HttpServer\Contract\ResponseInterface;
+
+#[Controller(prefix: 'test')]
+class NormalUserController
+{
+    #[Inject]
+    protected ImageService $imageService;
+    #[Inject]
+    protected MiddlewareContext $authContext;
+
+    #[GetMapping('index')]
+    #[Permission('e')]
+    public function index(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        var_dump($this->authContext->getUserId());
+        return $response->raw('Hello Hyperf!');
+    }
+}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Middleware\Helper\MiddlewareContext;
 use App\Model\User;
 use App\Model\UserToken;
 use App\Request\UserRequest;
@@ -25,6 +26,8 @@ class UserController
 {
     #[Inject]
     protected ImageService $imageService;
+    #[Inject]
+    protected MiddlewareContext $middlewareContext;
 
     #[GetMapping('index')]
     public function index(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
@@ -193,7 +196,7 @@ class UserController
     public function updateProfile(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
-        $user_id = $request->getAttribute('user_id');
+        $user_id = $this->middlewareContext->getUserId();
         $model = User::query()->select(['id', 'username', 'nickname', 'avatar_url'])->find($user_id);
         $image = $request->file('avatar');
         $oldAvatarUrl = $model->avatar_url;
@@ -223,7 +226,7 @@ class UserController
     public function changePassword(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
-        $user_id = $request->getAttribute('user_id');
+        $user_id = $this->middlewareContext->getUserId();
         $user = User::query()->select(['id', 'password'])->find($user_id);
         if (!password_verify($validated['oldPassword'], $user->password)) {
             return $response->json(['msg' => '旧密码错误，请重新尝试'])->withStatus(422);
