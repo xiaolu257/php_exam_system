@@ -58,4 +58,22 @@ return [
             ],
         ],
     ],
+    'permission_logs' => [
+        'handler' => [
+            'class' => Monolog\Handler\StreamHandler::class,
+            'constructor' => [
+                'stream' => BASE_PATH . '/runtime/logs/permission_logs.log',
+                'level' => Monolog\Logger::DEBUG,
+            ],
+        ],
+        'formatter' => [
+            'class' => Monolog\Formatter\LineFormatter::class,
+            'constructor' => [
+                'format' => "[%datetime%] %channel%.%level_name%: %message% %context%\n",
+                'dateFormat' => 'Y-m-d H:i:s',
+                'allowInlineLineBreaks' => true,
+                'ignoreEmptyContextAndExtra' => false, // ✅ 关键
+            ],
+        ],
+    ],
 ];

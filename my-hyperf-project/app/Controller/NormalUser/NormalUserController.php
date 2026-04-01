@@ -21,9 +21,17 @@ class NormalUserController
     #[Inject]
     protected MiddlewareContext $authContext;
 
-    #[GetMapping('index')]
-    #[Permission('e11', '测试3')]
-    public function index(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[GetMapping('index1')]
+    #[Permission('e11', '测试1')]
+    public function index1(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        var_dump($this->authContext->getUserId());
+        return $response->raw('Hello Hyperf!');
+    }
+
+    #[GetMapping('index2')]
+    #[Permission('e123', '测试12')]
+    public function index2(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         var_dump($this->authContext->getUserId());
         return $response->raw('Hello Hyperf!');
