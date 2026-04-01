@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Model;
 
 use Carbon\Carbon;
+use Hyperf\Database\Model\SoftDeletes;
 use Hyperf\DbConnection\Model\Model;
 
 /**
@@ -19,6 +20,8 @@ use Hyperf\DbConnection\Model\Model;
  */
 class Permission extends Model
 {
+    use SoftDeletes;
+
     /**
      * The table associated with the model.
      */
@@ -27,7 +30,7 @@ class Permission extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected array $fillable = [];
+    protected array $fillable = ['name', 'description', 'method', 'path'];
 
     /**
      * The attributes that should be cast to native types.

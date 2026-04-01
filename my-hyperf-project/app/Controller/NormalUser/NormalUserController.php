@@ -22,7 +22,7 @@ class NormalUserController
     protected MiddlewareContext $authContext;
 
     #[GetMapping('index')]
-    #[Permission('e')]
+    #[Permission('e11', '测试3')]
     public function index(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         var_dump($this->authContext->getUserId());

@@ -8,7 +8,7 @@ use Hyperf\Di\Annotation\AbstractAnnotation;
 #[Attribute(Attribute::TARGET_METHOD)]
 class Permission extends AbstractAnnotation
 {
-    public function __construct(public string $code, public string $description = '')
+    public function __construct(public string $name, public string $description)
     {
     }
 }

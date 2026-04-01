@@ -32,10 +32,10 @@ class PermissionMiddleware implements MiddlewareInterface
         if (!$permission) {
             return $handler->handle($request);
         }
-        $code = $permission->code;
+        $name = $permission->name;
 
         $userPermission = $this->authContext->getPermissions();
-        if (!in_array($code, $userPermission)) {
+        if (!in_array($name, $userPermission)) {
             return $this->response->json(['msg' => '您的权限不足，无法使用本接口'])->withStatus(403);
         }
         return $handler->handle($request);
