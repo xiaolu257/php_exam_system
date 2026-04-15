@@ -1,15 +1,18 @@
 // router/index.js
 import {createRouter, createWebHistory} from 'vue-router';
 import {myPost} from "@/api/utils/axios";
-import {loadAdminData, quitLogin} from "@/api/Admin";
-import {extractAllowedPathsFromMenu, setupDynamicRoutes} from "@/router/permission";
-import {getMenuByUserType} from "@/utils/AuditManagerMenu";
-import {useGlobalStore} from "@/stores/counter";
+import {loadAdminData} from "@/api/Admin";
+import {setupDynamicRoutes} from "@/router/routes";
 
 const routes = [
     {
-        name: 'Login',
+        name: 'index',
         path: '/',
+        redirect: '/Login',
+    },
+    {
+        name: 'Login',
+        path: '/Login',
         component: () => import("@/view/Public/Login.vue"),
     },
     {
@@ -36,21 +39,6 @@ const routes = [
         ]
     },
     {
-        name: 'BeforeExam',
-        path: '/exam/:id/before',
-        component: () => import("@/view/Exam/BeforeExam.vue"),
-    },
-    {
-        name: 'ExamStart',
-        path: '/exam/:id/start',
-        component: () => import('@/view/Exam/ExamStart.vue'),
-    },
-    {
-        name: 'ExamPreview',
-        path: '/exam/:id/preview',
-        component: () => import('@/view/Exam/ExamPreview.vue'),
-    },
-    {
         name: 'NotFound',
         path: '/:pathMatch(.*)*', // Matches any path that hasn't been matched by other routes
         component: () => import("@/view/Public/NotFound.vue")
@@ -61,48 +49,36 @@ const router = createRouter({
     history: createWebHistory(),
     routes
 });
-let lastRegisteredUserType = -1;
-// 全局前置守卫
+
+let isTokenValidated = false;
+const whitePath = [
+    '/Login',
+    '/Register'
+]
 router.beforeEach(async (to) => {
-    const isLogin = await checkIsLogin();
-    if ((to.path === '/' || to.path === '/Register') && isLogin) {
-        return '/Manager';
+    const token = localStorage.getItem('access_token');
+    if (token && !isTokenValidated) {
+        try {
+            const response = await myPost('user/validate-admin-token', {}, false);
+            const {userData, menus} = response;
+            loadAdminData(userData);
+            setupDynamicRoutes(menus);
+            isTokenValidated = true;
+            //重定向一次，避免当前去往的路由刚被动态添加而进入NotFound页面
+            return {path: to.fullPath, replace: true};
+        } catch {
+            localStorage.clear();
+            return '/Login';
+        }
     }
-    if ((to.path !== '/' && to.path !== '/Register') && !isLogin) {
-        return '/';
+    // 未登录拦截
+    if (!token && !whitePath.includes(to.path)) {
+        return '/Login';
     }
-    const {userType} = useGlobalStore();
-    if (userType !== lastRegisteredUserType) {
-        const menu = getMenuByUserType(userType);
-        const allowedPaths = extractAllowedPathsFromMenu(menu);
-        setupDynamicRoutes(allowedPaths);
-        lastRegisteredUserType = userType;
-        return {path: to.fullPath, replace: true};
+    // ⭐新增：已登录访问登录/注册页 → 跳首页
+    if (token && (whitePath.includes(to.path))) {
+        return '/Manager/Home';
     }
     return true;
 });
-
-let isTokenValidated = false;
-
-async function checkIsLogin() {
-    const access_token = localStorage.getItem('access_token');
-    if (!access_token) return false;
-
-    // 刷新页面才验证一次
-    if (!isTokenValidated) {
-        try {
-            const {userData} = await myPost('user/validate-admin-token', {}, false);
-            loadAdminData(userData);
-            isTokenValidated = true;
-            return true;
-        } catch {
-            quitLogin();
-            return false;
-        }
-    }
-
-    return true; // 内存状态已有，不必每次路由跳转都请求
-}
-
-
 export default router;

@@ -1,21 +1,29 @@
-import {computed, ref} from 'vue'
+import {ref} from 'vue'
 import {defineStore} from 'pinia'
+import {type SidebarMenu} from "@/router/menu";
 
-defineStore('counter', () => {
-    const count = ref(0)
-    const doubleCount = computed(() => count.value * 2)
+export const useGlobalStore = defineStore('global', () => {
+    // UI状态
+    const isFolded = ref(false)
+    // 用户信息
+    const username = ref('')
+    const userNickName = ref('')
+    const userAvatarUrl = ref('')
+    const userType = ref(0)
 
-    function increment() {
-        count.value++
+    const sidebarMenus = ref<any[]>([]);
+
+    function setSidebarMenus(rawMenus: SidebarMenu[]) {
+        sidebarMenus.value = rawMenus;
     }
 
-    return {count, doubleCount, increment}
-});
-export const useGlobalStore = defineStore('global', () => {
-    const isFolded = ref(false);
-    const username = ref('');
-    const userType = ref(0);
-    const userNickName = ref('');
-    const userAvatarUrl = ref('');
-    return {isFolded, username, userType, userNickName, userAvatarUrl};
+    return {
+        isFolded,
+        username,
+        userType,
+        userNickName,
+        userAvatarUrl,
+        sidebarMenus,
+        setSidebarMenus,
+    }
 })

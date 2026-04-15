@@ -6,8 +6,8 @@
       router
       unique-opened
   >
-    <template v-for="(item, index) in menu_routes" :key="item.path">
-      <el-menu-item v-if="!item.children" :index="item.path">
+    <template v-for="(item, index) in sidebarMenus" :key="item.path">
+      <el-menu-item v-if="!item.children|| item.children.length === 0" :index="item.code">
         <el-icon>
           <HomeFilled/>
         </el-icon>
@@ -20,7 +20,7 @@
           </el-icon>
           <span>{{ item.name }}</span>
         </template>
-        <el-menu-item v-for="it in item.children" :key="it.path" :index="it.path">
+        <el-menu-item v-for="it in item.children" :key="it.path" :index="it.code">
           <el-icon>
             <IconMenu/>
           </el-icon>
@@ -37,16 +37,15 @@ import {storeToRefs} from "pinia";
 import {useGlobalStore} from "@/stores/counter";
 import {useRoute} from "vue-router";
 import {computed} from "vue";
-import {getMenuByUserType} from "@/utils/AuditManagerMenu";
 
-const {userType, isFolded} = storeToRefs(useGlobalStore());
+const {sidebarMenus, isFolded} = storeToRefs(useGlobalStore());
 const route = useRoute();
 
 // 让 activeMenu 响应式地绑定当前路由路径
 const activeMenu = computed(() => {
-  return route.path
+  return route.name
 });
-const menu_routes = computed(() => getMenuByUserType(userType.value));
+
 </script>
 
 <style scoped>

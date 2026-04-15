@@ -24,7 +24,7 @@ import {adminAccountRules} from "@/utils/FormCheckRules";
 import {FormUploadConfigFactory} from "@/utils/FormUploadConfig";
 import {storeToRefs} from "pinia";
 import {useGlobalStore} from "@/stores/counter";
-import {getAdminType, quitLogin} from "@/api/Admin";
+import {quitLogin} from "@/api/Admin";
 import BaseEditFormDialog from "@/components/public/Dialog/BaseEditFormDialog.vue";
 import {myPost} from "@/api/utils/axios";
 import MyMessage from "@/utils/MyMessage";
@@ -42,7 +42,7 @@ const getThumbImageURL = (url: string): string => {
 const {username: globalUsername, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
 const initData: Record<string, any> = {
   username: globalUsername.value,
-  type: getAdminType(userType.value),
+  type: '未知',
   nickname: userNickName.value,
   avatar: userAvatarUrl.value
 };

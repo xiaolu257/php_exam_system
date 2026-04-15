@@ -70,7 +70,7 @@ export interface ApiError {
 // 响应拦截器：不处理结构，保留完整 response，方便后面统一判断状态
 myAxios.interceptors.response.use(
     (response) => response,
-    (error: AxiosError<ApiError>) => {
+    async (error: AxiosError<ApiError>) => {
         const config = error.config as MyAxiosExtraConfig
 
         const msg = error.response?.data.msg || '请求失败';
@@ -80,7 +80,7 @@ myAxios.interceptors.response.use(
         }
 
         if (error.response?.status === 401) {
-            quitLogin()
+            await quitLogin()
         }
 
         return Promise.reject(error.response?.data);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Annotation\Permission;
 use App\Middleware\Helper\MiddlewareContext;
+use App\Model\Menu;
 use App\Model\User;
 use App\Model\UserToken;
 use App\Request\UserRequest;
@@ -30,8 +30,87 @@ class UserController
     #[Inject]
     protected MiddlewareContext $middlewareContext;
 
+    private function getUserMenus($userId): array
+    {
+        // 1. 查用户拥有的菜单（叶子节点）
+        $menus = Menu::join('role_menus', 'menus.id', '=', 'role_menus.menu_id')
+            ->join('user_roles', 'role_menus.role_id', '=', 'user_roles.role_id')
+            ->where('user_roles.user_id', $userId)
+            ->groupBy('menus.id')
+            ->orderBy('menus.sort')
+            ->select(['menus.id', 'menus.parent_id', 'menus.name', 'menus.code', 'menus.sort'])
+            ->get()
+            ->toArray();
+
+        if (empty($menus)) {
+            return [];
+        }
+
+        // 2. 查全量菜单（用于补父级）
+        $allMenus = Menu::select(['id', 'parent_id', 'name', 'code', 'sort'])
+            ->orderBy('sort')
+            ->get()
+            ->toArray();
+
+        // 3. 构建 map（方便查父节点）
+        $menuMap = [];
+        foreach ($allMenus as $m) {
+            $menuMap[$m['id']] = $m;
+        }
+
+        // 4. 补全父级菜单
+        $fullMenus = [];
+        foreach ($menus as $menu) {
+            $current = $menu;
+
+            while ($current) {
+                $fullMenus[$current['id']] = $current;
+
+                if ($current['parent_id'] == 0) {
+                    break;
+                }
+
+                $current = $menuMap[$current['parent_id']] ?? null;
+            }
+        }
+
+        // 5. 排序（否则树会乱）
+        $fullMenus = array_values($fullMenus);
+        usort($fullMenus, function ($a, $b) {
+            return $a['sort'] <=> $b['sort'];
+        });
+
+        // 6. 构建树
+        return $this->buildMenuTree($fullMenus, 0);
+    }
+
+    private function buildMenuTree(array $menus, $parentId = 0): array
+    {
+        $tree = [];
+
+        foreach ($menus as $menu) {
+            if ($menu['parent_id'] == $parentId) {
+
+                $children = $this->buildMenuTree($menus, $menu['id']);
+
+                $node = [
+                    'id' => $menu['id'],
+                    'name' => $menu['name'],
+                    'code' => $menu['code'],
+                ];
+
+                if (!empty($children)) {
+                    $node['children'] = $children;
+                }
+
+                $tree[] = $node;
+            }
+        }
+
+        return $tree;
+    }
+
     #[PostMapping('register')]
-    #[Permission('user:register', '用户注册')]
     #[Scene(UserRequest::SCENE_REGISTER)]
     public function register(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -57,7 +136,6 @@ class UserController
     }
 
     #[PostMapping('login')]
-    #[Permission('user:login', '用户登录')]
     #[Scene(UserRequest::SCENE_LOGIN)]
     public function login(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -94,7 +172,6 @@ class UserController
     }
 
     #[PostMapping('validate-admin-token')]
-    #[Permission('user:validateAdminToken', '验证用户token，返回用户信息')]
     public function validateAdminToken(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         try {
@@ -148,7 +225,8 @@ class UserController
                     'nickname' => $admin->nickname,
                     'role' => $admin->role,
                     'avatar_url' => $admin->avatar_url,
-                ]
+                ],
+                'menus' => $this->getUserMenus($admin->id)
             ]);
         } catch (ExpiredException $e) {
             return $response->json(['msg' => 'Token 已过期'])->withStatus(401);
@@ -158,7 +236,6 @@ class UserController
     }
 
     #[GetMapping('get-user-avatar-thumb')]
-    #[Permission('user:getUserAvatarThumb', '获取用户头像缩略图')]
     #[Scene(UserRequest::SCENE_GET_USER_AVATAR_THUMB)]
     public function getUserAvatarThumb(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -172,7 +249,6 @@ class UserController
     }
 
     #[GetMapping('get-user-avatar')]
-    #[Permission('user:getUserAvatar', '获取用户头像')]
     #[Scene(UserRequest::SCENE_GET_USER_AVATAR)]
     public function getUserAvatar(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -186,7 +262,6 @@ class UserController
     }
 
     #[PostMapping('update-profile')]
-    #[Permission('user:updateProfile', '获取用户信息')]
     #[Scene(UserRequest::SCENE_UPDATE_PROFILE)]
     public function updateProfile(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -217,7 +292,6 @@ class UserController
     }
 
     #[PostMapping('change-password')]
-    #[Permission('user:changePassword', '用户修改密码')]
     #[Scene(UserRequest::SCENE_CHANGE_PASSWORD)]
     public function changePassword(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {

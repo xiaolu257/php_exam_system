@@ -12,6 +12,7 @@ use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Redis\Redis;
 
 #[Controller(prefix: 'test')]
 class NormalUserController
@@ -20,12 +21,15 @@ class NormalUserController
     protected ImageService $imageService;
     #[Inject]
     protected MiddlewareContext $authContext;
+    #[Inject]
+    protected Redis $redis;
 
     #[GetMapping('index1')]
-    #[Permission('e11', '测试1')]
+//    #[Permission('e11', '测试1')]
     public function index1(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
-        var_dump($this->authContext->getUserId());
+        $this->redis->set('e111', time(), ['EX' => 60]);
+        //$this->redis->hMSet($key, $hashData);
         return $response->raw('Hello Hyperf!');
     }
 

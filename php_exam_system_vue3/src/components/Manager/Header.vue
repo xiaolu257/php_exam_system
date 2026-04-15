@@ -22,7 +22,7 @@
         <div>
           <p><strong>账号：</strong>{{ username }}</p>
           <p><strong>昵称：</strong>{{ userNickName }}</p>
-          <p><strong>角色：</strong>{{ getAdminType(userType) }}</p>
+          <p><strong>角色：</strong>{{ '未知' }}</p>
           <el-row justify="center">
             <el-button type="primary" @click="goToProfile">修改</el-button>
           </el-row>
@@ -40,7 +40,7 @@ import router from "@/router/index";
 import {useGlobalStore} from "@/stores/counter";
 import {storeToRefs} from "pinia";
 import {AvatarThumbBaseURL} from "@/utils/global";
-import {getAdminType, quitLogin} from "@/api/Admin";
+import {quitLogin} from "@/api/Admin";
 
 const {isFolded, username, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
 
