@@ -13,9 +13,9 @@
 
 <script lang="ts" setup>
 import {login} from "@/api/Admin";
-import {AbstractFormConfigItem, FormInputConfigFactory,} from "@/utils/FormInputConfig";
-import {adminAccountRules} from "@/utils/FormCheckRules";
-import TableBaseForm from "@/components/public/Form/BaseForm.vue";
+import {AbstractFormConfigItem, FormInputConfigFactory,} from "@/utils/formInputConfig";
+import {adminAccountRules} from "@/utils/formCheckRules";
+import TableBaseForm from "@/components/public/form/BaseForm.vue";
 import router from "@/router";
 // 导入 Element Plus 的 FormInstance 类型
 const formConfig: AbstractFormConfigItem[] = [

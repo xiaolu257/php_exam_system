@@ -58,7 +58,7 @@ import {useRoute, useRouter} from 'vue-router'
 import dayjs from 'dayjs'
 import {ElMessage} from 'element-plus'
 import {myGet, myPost} from '@/api/utils/axios'
-import myMessage from "@/utils/MyMessage";
+import myMessage from "@/utils/myMessage";
 
 interface Exam {
   id: number

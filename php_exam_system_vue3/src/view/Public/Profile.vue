@@ -18,19 +18,19 @@
 </template>
 
 <script lang="ts" setup>
-import TableBaseForm from "@/components/public/Form/BaseForm.vue";
-import {AbstractFormConfigItem, FormInputConfigFactory} from "@/utils/FormInputConfig";
-import {adminAccountRules} from "@/utils/FormCheckRules";
-import {FormUploadConfigFactory} from "@/utils/FormUploadConfig";
+import TableBaseForm from "@/components/public/form/BaseForm.vue";
+import {AbstractFormConfigItem, FormInputConfigFactory} from "@/utils/formInputConfig";
+import {adminAccountRules} from "@/utils/formCheckRules";
+import {FormUploadConfigFactory} from "@/utils/formUploadConfig";
 import {storeToRefs} from "pinia";
-import {useGlobalStore} from "@/stores/counter";
+import {useGlobalStore} from "@/stores/global";
 import {quitLogin} from "@/api/Admin";
 import BaseEditFormDialog from "@/components/public/Dialog/BaseEditFormDialog.vue";
 import {myPost} from "@/api/utils/axios";
-import MyMessage from "@/utils/MyMessage";
+import MyMessage from "@/utils/myMessage";
 import {buildFormData} from "@/api/utils/FormData";
 import {AvatarBaseURL, AvatarThumbBaseURL} from "@/utils/global";
-import type {EditDialogConfig} from "@/components/public/Form/FormTypes";
+import type {EditDialogConfig} from "@/components/public/form/formTypes";
 
 const getOriginImageURL = (url: string): string => {
   return `${AvatarBaseURL}${url}`;

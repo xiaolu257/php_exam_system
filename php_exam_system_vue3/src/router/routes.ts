@@ -1,47 +1,47 @@
 import router from "@/router/index";
-import {useGlobalStore} from "@/stores/counter";
+import {useGlobalStore} from "@/stores/global";
 import {buildMenu} from "@/router/menu";
 
 const allAsyncRoutes = [
     {
         path: 'SingleChoiceQuestionManagement',
         name: 'SingleChoiceQuestionManagement',
-        component: () => import("@/view/SingleChoiceQuestionManagement.vue"),
+        component: () => import("@/view/question/SingleChoiceQuestionManagement.vue"),
     },
     {
         path: 'MultipleChoiceQuestionManagement',
         name: 'MultipleChoiceQuestionManagement',
-        component: () => import("@/view/MultipleChoiceQuestionManagement.vue"),
+        component: () => import("@/view/question/MultipleChoiceQuestionManagement.vue"),
     },
     {
         path: 'TrueFalseQuestionManagement',
         name: 'TrueFalseQuestionManagement',
-        component: () => import("@/view/TrueFalseQuestionManagement.vue"),
+        component: () => import("@/view/question/TrueFalseQuestionManagement.vue"),
     },
     {
         path: 'ShortAnswerQuestionManagement',
         name: 'ShortAnswerQuestionManagement',
-        component: () => import("@/view/ShortAnswerQuestionManagement.vue"),
+        component: () => import("@/view/question/ShortAnswerQuestionManagement.vue"),
     },
     {
         path: 'ExamPaperManagement',
         name: 'ExamPaperManagement',
-        component: () => import("@/view/ExamPaperManagement.vue"),
+        component: () => import("@/view/exam/ExamPaperManagement.vue"),
     },
     {
         name: 'BeforeExam',
         path: '/exam/:id/before',
-        component: () => import("@/view/Exam/BeforeExam.vue"),
+        component: () => import("@/view/exam/BeforeExam.vue"),
     },
     {
         name: 'ExamStart',
         path: '/exam/:id/start',
-        component: () => import('@/view/Exam/ExamStart.vue'),
+        component: () => import('@/view/exam/ExamStart.vue'),
     },
     {
         name: 'ExamPreview',
         path: '/exam/:id/preview',
-        component: () => import('@/view/Exam/ExamPreview.vue'),
+        component: () => import('@/view/exam/ExamPreview.vue'),
     },
 ];
 

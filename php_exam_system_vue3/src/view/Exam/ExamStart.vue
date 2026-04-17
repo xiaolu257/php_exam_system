@@ -9,7 +9,7 @@
             <el-tag style="margin-right: 10px" type="primary" effect="dark">时长：{{ exam.duration }} 分钟</el-tag>
             <el-tag style="margin-right: 10px" type="primary" effect="dark">总分：{{ exam.total_score }}</el-tag>
             <el-tag style="margin-right: 10px" type="success" effect="dark">剩余时间：{{
-                formatTime(remainingTime)
+              formatTime(remainingTime)
               }}
             </el-tag>
           </div>
@@ -94,7 +94,7 @@ import {computed, onMounted, onUnmounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import {type ApiError, myGet, myPost} from "@/api/utils/axios";
 import MyMessageBox from "@/api/MyMessageBox";
-import MyMessage from "@/utils/MyMessage";
+import MyMessage from "@/utils/myMessage";
 
 const route = useRoute()
 const examId = Number(route.params.id)

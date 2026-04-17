@@ -37,10 +37,10 @@
 <script lang="ts" setup>
 import {Expand, Fold} from "@element-plus/icons-vue";
 import router from "@/router/index";
-import {useGlobalStore} from "@/stores/counter";
+import {useGlobalStore} from "@/stores/global";
 import {storeToRefs} from "pinia";
 import {AvatarThumbBaseURL} from "@/utils/global";
-import {quitLogin} from "@/api/Admin";
+import {quitLogin} from "@/api/admin";
 
 const {isFolded, username, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
 

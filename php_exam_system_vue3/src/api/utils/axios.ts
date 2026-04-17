@@ -2,8 +2,8 @@
 import axios, {type AxiosError, type AxiosRequestConfig} from 'axios';
 import {ElLoading, ElMessage} from 'element-plus';
 import {useFingerprint} from "@/utils/fingerprint";
-import {quitLogin} from "@/api/Admin";
-import MyMessage from "@/utils/MyMessage";
+import {quitLogin} from "@/api/admin";
+import MyMessage from "@/utils/myMessage";
 
 let loadingInstance: any = null;
 

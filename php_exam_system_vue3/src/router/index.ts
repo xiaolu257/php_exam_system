@@ -1,7 +1,7 @@
 // router/index.js
 import {createRouter, createWebHistory} from 'vue-router';
 import {myPost} from "@/api/utils/axios";
-import {loadAdminData} from "@/api/Admin";
+import {loadAdminData} from "@/api/admin";
 import {setupDynamicRoutes} from "@/router/routes";
 
 const routes = [
@@ -13,35 +13,40 @@ const routes = [
     {
         name: 'Login',
         path: '/Login',
-        component: () => import("@/view/Public/Login.vue"),
+        component: () => import("@/view/public/Login.vue"),
     },
     {
         name: 'Register',
         path: '/Register',
-        component: () => import("@/view/Public/Register.vue"),
+        component: () => import("@/view/public/Register.vue"),
+    },
+    {
+        name: 'Test',
+        path: '/test',
+        component: () => import('@/view/public/Test.vue'),
     },
     {
         name: 'Manager',
         path: '/Manager',
         redirect: '/Manager/Home',
-        component: () => import("@/view/Public/Manager.vue"),
+        component: () => import("@/view/public/Manager.vue"),
         children: [
             {
                 path: 'Home',
                 name: 'Home',
-                component: () => import("@/view/Public/Home.vue"),
+                component: () => import("@/view/public/Home.vue"),
             },
             {
                 path: 'Profile',
                 name: 'Profile',
-                component: () => import("@/view/Public/Profile.vue"),
+                component: () => import("@/view/public/Profile.vue"),
             },
         ]
     },
     {
         name: 'NotFound',
         path: '/:pathMatch(.*)*', // Matches any path that hasn't been matched by other routes
-        component: () => import("@/view/Public/NotFound.vue")
+        component: () => import("@/view/public/NotFound.vue")
     },
 ];
 

@@ -13,8 +13,8 @@
 
 <script lang="ts" setup>
 import {ref} from 'vue';
-import BaseForm from "@/components/public/Form/BaseForm.vue";
-import type {AddDialogConfig} from "@/components/public/Form/FormTypes";
+import BaseForm from "@/components/public/form/BaseForm.vue";
+import type {AddDialogConfig} from "@/components/public/form/formTypes";
 
 // 定义 Props 的接口
 interface Props {

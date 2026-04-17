@@ -21,12 +21,12 @@
 </template>
 
 <script lang="ts" setup>
-import BaseForm from "@/components/public/Form/BaseForm.vue";
-import {AbstractFormConfigItem, FormInputConfigFactory} from "@/utils/FormInputConfig";
-import {adminAccountRules} from "@/utils/FormCheckRules";
-import {FormUploadConfigFactory} from "@/utils/FormUploadConfig";
+import BaseForm from "@/components/public/form/BaseForm.vue";
+import {AbstractFormConfigItem, FormInputConfigFactory} from "@/utils/formInputConfig";
+import {adminAccountRules} from "@/utils/formCheckRules";
+import {FormUploadConfigFactory} from "@/utils/formUploadConfig";
 import {myPost} from "@/api/utils/axios";
-import MyMessage from "@/utils/MyMessage";
+import MyMessage from "@/utils/myMessage";
 import {buildFormData} from "@/api/utils/FormData";
 import router from "@/router";
 

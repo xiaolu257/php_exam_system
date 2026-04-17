@@ -34,7 +34,7 @@
 <script lang="ts" setup>
 import {HomeFilled, Location, Menu as IconMenu} from '@element-plus/icons-vue'
 import {storeToRefs} from "pinia";
-import {useGlobalStore} from "@/stores/counter";
+import {useGlobalStore} from "@/stores/global";
 import {useRoute} from "vue-router";
 import {computed} from "vue";
 
