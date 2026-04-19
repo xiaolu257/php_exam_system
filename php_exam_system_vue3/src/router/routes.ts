@@ -48,6 +48,11 @@ const allAsyncRoutes = [
         path: 'MenuManager',
         component: () => import('@/view/permission/MenuManager.vue'),
     },
+    {
+        name: 'RoleManager',
+        path: 'RoleManager',
+        component: () => import('@/view/permission/RoleManager.vue'),
+    },
 ];
 
 function generateRoutesFromMenus(menus: any[]) {
