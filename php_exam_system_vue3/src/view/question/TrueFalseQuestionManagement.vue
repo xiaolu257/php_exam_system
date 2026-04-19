@@ -6,13 +6,13 @@
 </template>
 
 <script lang="ts" setup>
-import BaseTableManager from "@/components/public/table/BaseTableManager.vue";
 import type {TableConfig} from "@/components/public/table/tableTypes";
 import {TextTableColumn} from "@/components/public/table/tableTypes";
 import {FormInputConfigFactory} from "@/utils/formInputConfig";
 import {FormSelectConfigFactory} from "@/utils/formSelectConfig";
 import type {AddDialogConfig, TableColumnEditDialogConfig} from "@/components/public/form/formTypes";
 import {TableCrudFactory} from "@/utils/tableCrudFactory";
+import BaseTableManager from "@/components/public/table/BaseTableManager.vue";
 
 
 const TrueFalseQuestionStandardCRUD = TableCrudFactory.creatStandardCrud('true-false-question');

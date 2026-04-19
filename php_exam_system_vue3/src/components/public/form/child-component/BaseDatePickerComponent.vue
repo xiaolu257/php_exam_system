@@ -5,9 +5,9 @@
 </template>
 
 <script lang="ts" setup>
+import {DateTimeRangePickerConfig, FormDatePickerConfig} from "@/utils/formDatePickerConfig";
 import DateTimeRangePicker
   from "@/components/public/form/child-component/date-picker-component/DateTimeRangePicker.vue";
-import {DateTimeRangePickerConfig, FormDatePickerConfig} from "@/utils/formDatePickerConfig";
 
 
 // Props 定义

@@ -43,6 +43,11 @@ const allAsyncRoutes = [
         path: '/exam/:id/preview',
         component: () => import('@/view/exam/ExamPreview.vue'),
     },
+    {
+        name: 'MenuManager',
+        path: 'MenuManager',
+        component: () => import('@/view/permission/MenuManager.vue'),
+    },
 ];
 
 function generateRoutesFromMenus(menus: any[]) {

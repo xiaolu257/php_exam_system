@@ -10,7 +10,6 @@
 </template>
 
 <script lang="ts" setup>
-import BaseTableManager from "@/components/public/table/BaseTableManager.vue";
 import type {TableConfig} from "@/components/public/table/tableTypes";
 import {TextTableColumn} from "@/components/public/table/tableTypes";
 import {FormInputConfigFactory} from "@/utils/formInputConfig";
@@ -20,6 +19,7 @@ import {FormNumberInputConfigFactory} from "@/utils/formNumberInputConfig";
 import {FormDatePickerConfigFactory} from "@/utils/formDatePickerConfig";
 import {addItem} from "@/api/utils/baseAPI";
 import router from "@/router";
+import BaseTableManager from "@/components/public/table/BaseTableManager.vue";
 
 
 const ExamPaperCRUDStandardCRUD = TableCrudFactory.creatStandardCrud('exam-paper');

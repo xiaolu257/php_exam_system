@@ -1,8 +1,3 @@
-<script setup>
-import Menu from "@/components/Manager/Menu.vue";
-import Header from "@/components/Manager/Header.vue";
-</script>
-
 <template>
   <el-container style="height: 100vh;">
     <el-aside class="aside">
@@ -21,6 +16,11 @@ import Header from "@/components/Manager/Header.vue";
   </el-container>
 </template>
 
+<script lang="ts" setup>
+
+import Header from "@/components/manager/Header.vue";
+import Menu from "@/components/manager/Menu.vue";
+</script>
 <style scoped>
 .aside {
   width: auto;

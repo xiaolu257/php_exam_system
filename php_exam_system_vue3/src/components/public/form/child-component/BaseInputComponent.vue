@@ -21,10 +21,10 @@ import {
   TextAreaInputConfig,
   TextInputConfig
 } from "@/utils/formInputConfig";
-import OptionListInput from "@/components/public/form/child-component/input-component/OptionListInput.vue";
-import PasswordInput from "@/components/public/form/child-component/input-component/PasswordInput.vue";
-import TextInput from "@/components/public/form/child-component/input-component/TextInput.vue";
 import TextAreaInput from "@/components/public/form/child-component/input-component/TextAreaInput.vue";
+import TextInput from "@/components/public/form/child-component/input-component/TextInput.vue";
+import PasswordInput from "@/components/public/form/child-component/input-component/PasswordInput.vue";
+import OptionListInput from "@/components/public/form/child-component/input-component/OptionListInput.vue";
 
 
 // Props 定义

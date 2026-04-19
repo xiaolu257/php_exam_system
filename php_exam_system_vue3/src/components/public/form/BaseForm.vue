@@ -35,18 +35,18 @@
 import {dayjs, ElForm, type FormRules} from 'element-plus';
 import {computed, reactive, ref, toRaw} from 'vue';
 import {AbstractFormConfigItem, FormInputConfig, OptionsListInputConfig,} from "@/utils/formInputConfig";
-import BaseInputComponent from "@/components/public/form/child-component/BaseInputComponent.vue";
+
 import {AssociateSelectConfig, FormSelectConfig,} from "@/utils/formSelectConfig";
 import {FormUploadConfig} from "@/utils/formUploadConfig";
-import BaseUploadComponent from "@/components/public/form/child-component/BaseUploadComponent.vue";
-import BaseSelectComponent from "@/components/public/form/child-component/BaseSelectComponent.vue";
-// 处理表单保存
-import BaseNumberInputComponent from "@/components/public/form/child-component/BaseNumberInputComponent.vue";
 import {FormNumberInputConfig, IntegerInputConfig} from "@/utils/formNumberInputConfig";
 import MyMessage from "@/utils/myMessage";
 import {isEqual} from "lodash-es";
 import {DateTimeRangePickerConfig, FormDatePickerConfig} from "@/utils/formDatePickerConfig";
 import BaseDatePickerComponent from "@/components/public/form/child-component/BaseDatePickerComponent.vue";
+import BaseNumberInputComponent from "@/components/public/form/child-component/BaseNumberInputComponent.vue";
+import BaseUploadComponent from "@/components/public/form/child-component/BaseUploadComponent.vue";
+import BaseSelectComponent from "@/components/public/form/child-component/BaseSelectComponent.vue";
+import BaseInputComponent from "@/components/public/form/child-component/BaseInputComponent.vue";
 
 interface Props {
   formConfig: AbstractFormConfigItem[];//表单配置项，决定有什么输入

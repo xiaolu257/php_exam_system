@@ -3,6 +3,13 @@
                    :prop="item.prop" :sortable="item.sortable" align="center">
     <template #default="scope">
       <el-text v-if="item instanceof TextTableColumn" :type="item.textType">{{ scope.row[item.prop] }}</el-text>
+      <el-text v-else-if="item instanceof SelectTextColumn">{{
+          item.options.find((i) => i.value === scope.row[item.prop])?.label
+        }}
+      </el-text>
+      <el-text v-else-if="item instanceof TreeSelectTextColumn">
+        {{ findTreeLabel(item.treeData, scope.row[item.prop]) }}
+      </el-text>
       <el-image
           v-else-if="item instanceof ImageTableColumn"
           :fit="item.fit"
@@ -17,13 +24,32 @@
 </template>
 <script lang="ts" setup>
 // 定义 Props 的接口
-import {ImageTableColumn, TableColumn, TextTableColumn} from "@/components/public/table/tableTypes";
+import {
+  ImageTableColumn,
+  SelectTextColumn,
+  TableColumn,
+  TextTableColumn,
+  TreeSelectTextColumn
+} from "@/components/public/table/tableTypes";
+import type {TreeSelectOption} from "@/utils/formSelectConfig";
 
 interface Props {
   tableColumns: TableColumn[];
 }
 
 defineProps<Props>();
+
+function findTreeLabel(options: TreeSelectOption[], value: any): string | undefined {
+  for (const item of options) {
+    if (item.value === value) return item.label;
+
+    if (item.children?.length) {
+      const res = findTreeLabel(item.children, value);
+      if (res) return res;
+    }
+  }
+  return undefined;
+}
 </script>
 <style>
 </style>

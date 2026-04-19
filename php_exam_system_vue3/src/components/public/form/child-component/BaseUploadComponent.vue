@@ -52,8 +52,8 @@
 <script lang="ts" setup>
 import {type FormUploadConfig, MultipleImageUploadOption, SingleImageUploadOption,} from "@/utils/formUploadConfig";
 import {computed, ref, watch} from "vue";
-import type {UploadFile} from "element-plus";
-import {ElMessage} from "element-plus";
+import {ElMessage, type UploadFile} from "element-plus";
+
 import {Delete, Plus} from "@element-plus/icons-vue";
 
 // Props 定义

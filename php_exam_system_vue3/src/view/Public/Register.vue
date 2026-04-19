@@ -21,14 +21,14 @@
 </template>
 
 <script lang="ts" setup>
-import BaseForm from "@/components/public/form/BaseForm.vue";
 import {AbstractFormConfigItem, FormInputConfigFactory} from "@/utils/formInputConfig";
 import {adminAccountRules} from "@/utils/formCheckRules";
 import {FormUploadConfigFactory} from "@/utils/formUploadConfig";
 import {myPost} from "@/api/utils/axios";
 import MyMessage from "@/utils/myMessage";
-import {buildFormData} from "@/api/utils/FormData";
+import {buildFormData} from "@/api/utils/formData";
 import router from "@/router";
+import BaseForm from "@/components/public/form/BaseForm.vue";
 
 const formConfig: AbstractFormConfigItem[] = [
   FormInputConfigFactory.createEditableTextInput("nickname", "昵称", "nickname", adminAccountRules.nickname),

@@ -21,8 +21,12 @@ class PermissionMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): \Psr\Http\Message\ResponseInterface
     {
-        /** @var Dispatched $dispatched */
+        /** @var Dispatched|null $dispatched */
         $dispatched = $request->getAttribute(Dispatched::class);
+        // 路由没匹配统一404处理
+        if (!$dispatched || !$dispatched->handler || !isset($dispatched->handler->callback)) {
+            return $this->response->json(['msg' => '访问的接口不存在'])->withStatus(404);
+        }
         [$class, $method] = $dispatched->handler->callback;
         // 获取注解
         $annotations = AnnotationCollector::getClassMethodAnnotation($class, $method);

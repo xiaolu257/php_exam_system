@@ -52,18 +52,27 @@ class UserController
             ->get()
             ->toArray();
 
-        // 3. 构建 map（方便查父节点）
+        // 3. 构建 map（id => menu）
         $menuMap = [];
         foreach ($allMenus as $m) {
             $menuMap[$m['id']] = $m;
         }
 
-        // 4. 补全父级菜单
+        // 4. 补全父级菜单（带防环）
         $fullMenus = [];
+
         foreach ($menus as $menu) {
             $current = $menu;
+            $visited = [];
 
             while ($current) {
+
+                // 🚨 防环（关键）
+                if (isset($visited[$current['id']])) {
+                    break;
+                }
+                $visited[$current['id']] = true;
+
                 $fullMenus[$current['id']] = $current;
 
                 if ($current['parent_id'] == 0) {
@@ -74,36 +83,39 @@ class UserController
             }
         }
 
-        // 5. 排序（否则树会乱）
-        $fullMenus = array_values($fullMenus);
-        usort($fullMenus, function ($a, $b) {
-            return $a['sort'] <=> $b['sort'];
-        });
-
-        // 6. 构建树
-        return $this->buildMenuTree($fullMenus, 0);
+        // 5. O(n) 构建树（非递归）
+        return $this->buildMenuTreeFast(array_values($fullMenus));
     }
 
-    private function buildMenuTree(array $menus, $parentId = 0): array
+    private function buildMenuTreeFast(array $menus): array
     {
         $tree = [];
+        $map = [];
 
+        // 1. 构建 map，并初始化 children
         foreach ($menus as $menu) {
-            if ($menu['parent_id'] == $parentId) {
+            $menu['children'] = [];
+            $map[$menu['id']] = $menu;
+        }
 
-                $children = $this->buildMenuTree($menus, $menu['id']);
+        // 2. 组装树（一次循环 O(n)）
+        foreach ($map as $id => &$node) {
 
-                $node = [
-                    'id' => $menu['id'],
-                    'name' => $menu['name'],
-                    'code' => $menu['code'],
-                ];
+            // 🚨 防自环（只需要一次）
+            if ($node['parent_id'] == $id) {
+                continue;
+            }
 
-                if (!empty($children)) {
-                    $node['children'] = $children;
+            if ($node['parent_id'] == 0) {
+                $tree[] = &$node;
+            } else {
+
+                if (isset($map[$node['parent_id']])) {
+                    $map[$node['parent_id']]['children'][] = &$node;
+                } else {
+                    // 父不存在 → 当顶级
+                    $tree[] = &$node;
                 }
-
-                $tree[] = $node;
             }
         }
 

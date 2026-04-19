@@ -23,10 +23,20 @@
                              :item="config"/>
     </template>
   </template>
+  <template v-else-if="config instanceof TreeSelectConfig">
+    <TreeSingleSelect v-model:currentSelect="formData[config.name]" :item="config"/>
+  </template>
+
 </template>
 
 <script lang="ts" setup>
-import {AssociateSelectConfig, CommonSelectConfig, type FormSelectConfig} from "@/utils/formSelectConfig";
+import {
+  AssociateSelectConfig,
+  CommonSelectConfig,
+  type FormSelectConfig,
+  TreeSelectConfig
+} from "@/utils/formSelectConfig";
+import TreeSingleSelect from "@/components/public/form/child-component/select-component/TreeSingleSelect.vue";
 import AssociateSingleSelect from "@/components/public/form/child-component/select-component/AssociateSingleSelect.vue";
 import AssociateMultipleSelect
   from "@/components/public/form/child-component/select-component/AssociateMultipleSelect.vue";
@@ -38,7 +48,3 @@ defineProps<{
   formData: Record<string, any>;
 }>();
 </script>
-
-<style scoped>
-/* 自定义样式（如果需要） */
-</style>

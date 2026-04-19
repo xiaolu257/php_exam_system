@@ -16,17 +16,39 @@
         />
       </template>
     </el-select>
-
-    <el-input v-model="searchValueModel" :disabled="isSearch" clearable
+    <el-select v-if="currentSearchColumn instanceof SelectTextColumn"
+               v-model="searchValueModel"
+               :disabled="isSearch"
+               style="width: 200px;margin: 0 15px">
+      <el-option
+          v-for="opt in currentSearchColumn.options"
+          :key="opt.value"
+          :label="opt.label"
+          :value="opt.value"
+      />
+    </el-select>
+    <el-tree-select
+        v-else-if="currentSearchColumn instanceof TreeSelectTextColumn"
+        v-model="searchValueModel"
+        :data="currentSearchColumn.treeData"
+        show-checkbox
+        check-strictly
+        :render-after-expand="false"
+        :disabled="isSearch"
+        style="width: 200px;margin: 0 15px"
+    />
+    <el-input v-else v-model="searchValueModel" clearable
+              :disabled="isSearch"
               placeholder="请输入要搜索的关键字" style="width: 200px;margin: 0 15px"></el-input>
     <el-button type="primary" @click="onSearch">查询</el-button>
   </el-col>
 </template>
 
 <script lang="ts" setup>
-import type {TableColumn} from "@/components/public/table/tableTypes";
-import {computed} from "vue";
+import {SelectTextColumn, type TableColumn, TreeSelectTextColumn} from "@/components/public/table/tableTypes";
+import {computed, watch} from "vue";
 import MyMessage from "@/utils/myMessage";
+import {ElTreeSelect} from "element-plus";
 
 interface Props {
   isSearch: boolean
@@ -50,7 +72,9 @@ const searchValueModel = computed({
   get: () => props.searchValue,
   set: (val: string) => emit('update:searchValue', val),
 })
-
+const currentSearchColumn = computed(() => {
+  return props.tableColumns.find(t => t.prop === searchKeyModel.value)
+})
 const onSearch = () => {
   if (!searchKeyModel.value) {
     MyMessage.error('请选择搜索依据')
@@ -62,10 +86,11 @@ const onSearch = () => {
 }
 
 const onReset = () => {
-  emit('update:searchKey', '')
-  emit('update:searchValue', '')
   emit('update:isSearch', false)
 }
+watch(searchKeyModel, () => {
+  emit('update:searchValue', '')
+})
 </script>
 <style>
 </style>

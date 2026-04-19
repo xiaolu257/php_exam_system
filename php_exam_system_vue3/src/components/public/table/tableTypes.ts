@@ -1,4 +1,6 @@
 import {type PageCallback} from "@/api/utils/baseAPI";
+import {type SelectOption, type TreeSelectOption} from "../../../utils/formSelectConfig";
+
 
 type myTextType = 'primary' | 'danger' | 'success' | 'info';
 type ImageObjectFitType = '' | 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
@@ -46,6 +48,39 @@ export class TextTableColumn extends TableColumn {
     }
 }
 
+export class SelectTextColumn extends TableColumn {
+    options: SelectOption[]
+
+    constructor(
+        min_width: string | number = 100,
+        prop: string,
+        label: string,
+        options: SelectOption[],
+        sortable: boolean | 'custom' = false,
+        searchable: boolean = true,
+        fixed: 'left' | 'right' | false = false
+    ) {
+        super(min_width, prop, label, sortable, searchable, fixed);
+        this.options = options;
+    }
+}
+
+export class TreeSelectTextColumn extends TableColumn {
+    treeData: TreeSelectOption[]
+
+    constructor(
+        min_width: string | number = 100,
+        prop: string,
+        label: string,
+        options: TreeSelectOption[],
+        sortable: boolean | 'custom' = false,
+        searchable: boolean = true,
+        fixed: 'left' | 'right' | false = false
+    ) {
+        super(min_width, prop, label, sortable, searchable, fixed);
+        this.treeData = options;
+    }
+}
 
 type ImageURLGetter = (url: string) => string;
 

@@ -2,7 +2,7 @@
   <div class="main_panel">
     <div class="login_panel">
       <el-text class="brand-logo">骁鹿PHP笔试系统</el-text>
-      <TableBaseForm :form-config="formConfig" :submit-action="login" :width="240" submit-action-title="登录"/>
+      <BaseForm :form-config="formConfig" :submit-action="login" :width="240" submit-action-title="登录"/>
       <div class="register-link">
         还没有账号？
         <el-link type="primary" underline @click="goRegister">注册</el-link>
@@ -12,11 +12,12 @@
 </template>
 
 <script lang="ts" setup>
-import {login} from "@/api/Admin";
+
 import {AbstractFormConfigItem, FormInputConfigFactory,} from "@/utils/formInputConfig";
 import {adminAccountRules} from "@/utils/formCheckRules";
-import TableBaseForm from "@/components/public/form/BaseForm.vue";
 import router from "@/router";
+import {login} from "@/api/admin";
+import BaseForm from "@/components/public/form/BaseForm.vue";
 // 导入 Element Plus 的 FormInstance 类型
 const formConfig: AbstractFormConfigItem[] = [
   FormInputConfigFactory.createEditableTextInput('username', '账号', 'Username', adminAccountRules.username),

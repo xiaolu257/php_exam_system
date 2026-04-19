@@ -1,26 +1,24 @@
 <template>
-  <el-select
+  <el-tree-select
       v-model="currentSelectModel"
+      :data="item.treeData"
+      show-checkbox
+      check-strictly
+      :render-after-expand="false"
       :disabled="item.disabled"
       :clearable="item.clearable"
       :placeholder="item.placeholder"
-  >
-    <el-option
-        v-for="option in item.options"
-        :key="option.value"
-        :label="option.label"
-        :value="option.value"
-    />
-  </el-select>
+  />
 </template>
 
 <script lang="ts" setup>
-import {CommonSelectConfig,} from "@/utils/formSelectConfig";
+import {TreeSelectConfig,} from "@/utils/formSelectConfig";
 import {computed} from "vue";
+import {ElTreeSelect} from "element-plus";
 
 // Props 定义
 const props = defineProps<{
-  item: CommonSelectConfig;
+  item: TreeSelectConfig;
   currentSelect: any;
 }>();
 

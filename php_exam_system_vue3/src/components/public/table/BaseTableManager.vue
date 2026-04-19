@@ -61,18 +61,18 @@
 
 <script lang="ts" setup>
 import {computed, ref, shallowRef, toRaw, watch} from "vue";
-import BaseTableColumns from "@/components/public/table/child-component/BaseTableColumns.vue";
 
 import MyMessage from "@/utils/myMessage";
 import type {AddDialogConfig, EditDialogConfig, TableColumnEditDialogConfig} from "@/components/public/form/formTypes";
 import {OptionsListInputConfig} from "@/utils/formInputConfig";
-import TableSummaryBar from "@/components/public/table/child-component/TableSummaryBar.vue";
-import SearchBar from "@/components/public/table/child-component/SearchBar.vue";
-import BottomPagination from "@/components/public/table/child-component/BottomPagination.vue";
 import type {TableInstance} from "element-plus/es/components/table";
 import type {TableConfig} from "@/components/public/table/tableTypes";
 import type {PageCallback} from "@/api/utils/baseAPI";
+import BottomPagination from "@/components/public/table/child-component/BottomPagination.vue";
 import BaseEditFormDialog from "@/components/public/dialog/BaseEditFormDialog.vue";
+import BaseTableColumns from "@/components/public/table/child-component/BaseTableColumns.vue";
+import SearchBar from "@/components/public/table/child-component/SearchBar.vue";
+import TableSummaryBar from "@/components/public/table/child-component/TableSummaryBar.vue";
 import BaseAddFormDialog from "@/components/public/dialog/BaseAddFormDialog.vue";
 
 interface Props {

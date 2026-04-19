@@ -6,31 +6,31 @@
       </div>
     </template>
     <el-row justify="center">
-      <TableBaseForm :form-config="formConfig" :init-data="initData"
-                     :submitAction="updateProfile">
+      <BaseForm :form-config="formConfig" :init-data="initData"
+                :submitAction="updateProfile">
         <template v-slot:otherButtons>
           <BaseEditFormDialog :edit-dialog-config="editDialogConfig"/>
         </template>
-      </TableBaseForm>
+      </BaseForm>
     </el-row>
 
   </el-card>
 </template>
 
 <script lang="ts" setup>
-import TableBaseForm from "@/components/public/form/BaseForm.vue";
 import {AbstractFormConfigItem, FormInputConfigFactory} from "@/utils/formInputConfig";
 import {adminAccountRules} from "@/utils/formCheckRules";
 import {FormUploadConfigFactory} from "@/utils/formUploadConfig";
 import {storeToRefs} from "pinia";
 import {useGlobalStore} from "@/stores/global";
-import {quitLogin} from "@/api/Admin";
-import BaseEditFormDialog from "@/components/public/Dialog/BaseEditFormDialog.vue";
+import {quitLogin} from "@/api/admin";
 import {myPost} from "@/api/utils/axios";
 import MyMessage from "@/utils/myMessage";
-import {buildFormData} from "@/api/utils/FormData";
+import {buildFormData} from "@/api/utils/formData";
 import {AvatarBaseURL, AvatarThumbBaseURL} from "@/utils/global";
 import type {EditDialogConfig} from "@/components/public/form/formTypes";
+import BaseEditFormDialog from "@/components/public/dialog/BaseEditFormDialog.vue";
+import BaseForm from "@/components/public/form/BaseForm.vue";
 
 const getOriginImageURL = (url: string): string => {
   return `${AvatarBaseURL}${url}`;
