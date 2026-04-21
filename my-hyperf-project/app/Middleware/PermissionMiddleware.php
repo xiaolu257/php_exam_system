@@ -3,6 +3,7 @@
 namespace App\Middleware;
 
 use App\Annotation\Permission;
+use App\Annotation\PublicAPI;
 use App\Middleware\Helper\MiddlewareContext;
 use Hyperf\Di\Annotation\AnnotationCollector;
 use Hyperf\Di\Annotation\Inject;
@@ -30,11 +31,17 @@ class PermissionMiddleware implements MiddlewareInterface
         [$class, $method] = $dispatched->handler->callback;
         // 获取注解
         $annotations = AnnotationCollector::getClassMethodAnnotation($class, $method);
+        //检查是否有公开接口注解,若有直接放行
+        /** @var PublicAPI|null $publicAPI */
+        $publicAPI = $annotations[PublicAPI::class] ?? null;
+        if ($publicAPI) {
+            return $handler->handle($request);
+        }
         /** @var Permission|null $permission */
         $permission = $annotations[Permission::class] ?? null;
-        // 没写权限注解 → 放行
+        // 没写权限注解（且没有PublicAPI注解） → 直接拦截
         if (!$permission) {
-            return $handler->handle($request);
+            return $this->response->json(['msg' => '您的权限不足，无法使用本接口'])->withStatus(403);
         }
         $name = $permission->name;
 

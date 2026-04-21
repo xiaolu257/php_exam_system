@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Annotation\PublicAPI;
 use App\Middleware\Helper\MiddlewareContext;
 use App\Model\Menu;
 use App\Model\User;
@@ -123,6 +124,7 @@ class UserController
     }
 
     #[PostMapping('register')]
+    #[PublicAPI]
     #[Scene(UserRequest::SCENE_REGISTER)]
     public function register(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -148,6 +150,7 @@ class UserController
     }
 
     #[PostMapping('login')]
+    #[PublicAPI]
     #[Scene(UserRequest::SCENE_LOGIN)]
     public function login(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -184,6 +187,7 @@ class UserController
     }
 
     #[PostMapping('validate-admin-token')]
+    #[PublicAPI]
     public function validateAdminToken(RequestInterface $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         try {
@@ -248,6 +252,7 @@ class UserController
     }
 
     #[GetMapping('get-user-avatar-thumb')]
+    #[PublicAPI]
     #[Scene(UserRequest::SCENE_GET_USER_AVATAR_THUMB)]
     public function getUserAvatarThumb(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -261,6 +266,7 @@ class UserController
     }
 
     #[GetMapping('get-user-avatar')]
+    #[PublicAPI]
     #[Scene(UserRequest::SCENE_GET_USER_AVATAR)]
     public function getUserAvatar(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {

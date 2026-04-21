@@ -28,7 +28,8 @@
   >
     <el-table-column align="center" fixed="left" type="selection" width="40" :reserve-selection="true"/>
     <BaseTableColumns :table-columns="tableConfig.tableColumns"/>
-    <el-table-column align="center" fixed="right" label="操作" :width="tableConfig.operationWidth||200">
+    <el-table-column v-if="showOperationColumn" align="center" fixed="right" label="操作"
+                     :width="tableConfig.operationWidth||200">
       <template #default="{row}">
         <slot name="operationButton" :row="row"></slot>
         <BaseEditFormDialog v-if="tableColumnEditDialogConfig"
@@ -60,7 +61,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, shallowRef, toRaw, watch} from "vue";
+import {computed, ref, shallowRef, toRaw, useSlots, watch} from "vue";
 
 import MyMessage from "@/utils/myMessage";
 import type {AddDialogConfig, EditDialogConfig, TableColumnEditDialogConfig} from "@/components/public/form/formTypes";
@@ -96,6 +97,18 @@ const searchKey = ref('');//被搜索属性
 const searchValue = ref('');//搜索关键词
 const orderKey = ref<string>('id');      // 当前排序字段
 const orderDirection = ref<string>('asc');     // 排序顺序 asc/desc
+const slots = useSlots();
+const hasOperationSlot = computed(() => {
+  return !!slots.operationButton;
+});
+const showOperationColumn = computed(() => {
+  return !!(
+      props.tableConfig.deleteRows ||
+      props.tableColumnEditDialogConfig ||
+      hasOperationSlot.value
+  );
+});
+
 
 const createAddDialogConfig = (): AddDialogConfig => {
   const config = props.addDialogConfig!;

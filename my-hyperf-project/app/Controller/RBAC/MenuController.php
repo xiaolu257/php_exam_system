@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\RBAC;
 
+use App\Annotation\PublicAPI;
 use App\Model\Menu;
 use App\Request\MenuRequest;
 use App\Service\MenuService;
@@ -25,6 +26,7 @@ class MenuController
 
 
     #[GetMapping('')]
+    #[PublicAPI]
     //#[Permission('menu:paginate', '获取菜单分页数据，支持模糊查询')]
     #[Scene(MenuRequest::SCENE_GET_ONE_PAGE)]
     public function paginate(MenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
@@ -47,12 +49,14 @@ class MenuController
     }
 
     #[GetMapping('menu-tree-selector')]
+    #[PublicAPI]
     public function getMenuTree(ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         return $response->json($this->menuService->getMenuTree());
     }
 
     #[PostMapping('')]
+    #[PublicAPI]
     //#[Permission('menu:add', '新增菜单')]
     #[Scene(MenuRequest::SCENE_ADD)]
     public function add(MenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
@@ -68,6 +72,7 @@ class MenuController
     }
 
     #[PutMapping('')]
+    #[PublicAPI]
     //#[Permission('menu:update', '更新菜单')]
     #[Scene(MenuRequest::SCENE_UPDATE)]
     public function update(MenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
@@ -115,6 +120,7 @@ class MenuController
     }
 
     #[DeleteMapping('')]
+    #[PublicAPI]
     //#[Permission('menu:delete', '(批量)删除菜单')]
     #[Scene(MenuRequest::SCENE_DELETE)]
     public function delete(MenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface

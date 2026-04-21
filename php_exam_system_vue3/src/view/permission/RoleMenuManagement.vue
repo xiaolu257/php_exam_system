@@ -1,7 +1,6 @@
 <template>
   <BaseTableManager
       :add-dialog-config="addDialogConfig"
-      :table-column-edit-dialog-config="editDialogConfig"
       :table-config="tableConfig"
   />
 </template>

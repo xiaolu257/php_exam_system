@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\RBAC;
 
+use App\Annotation\PublicAPI;
 use App\Model\Menu;
 use App\Model\RoleMenu;
 use App\Request\RoleMenuRequest;
@@ -20,6 +21,7 @@ use Hyperf\Validation\Annotation\Scene;
 class RoleMenuController
 {
     #[GetMapping('menus-selector')]
+    #[PublicAPI]
     public function menusSelector(ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $data = Menu::query()->get([
@@ -30,6 +32,7 @@ class RoleMenuController
     }
 
     #[GetMapping('')]
+    #[PublicAPI]
     #[Scene(RoleMenuRequest::SCENE_GET_ONE_PAGE)]
     public function paginate(RoleMenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -72,6 +75,7 @@ class RoleMenuController
     }
 
     #[PostMapping('')]
+    #[PublicAPI]
     #[Scene(RoleMenuRequest::SCENE_ADD)]
     public function add(RoleMenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -84,6 +88,7 @@ class RoleMenuController
     }
 
     #[DeleteMapping('')]
+    #[PublicAPI]
     #[Scene(RoleMenuRequest::SCENE_DELETE)]
     public function delete(RoleMenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
