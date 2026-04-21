@@ -24,6 +24,12 @@ class MenuController
     #[Inject]
     protected MenuService $menuService;
 
+    #[GetMapping('menu-tree-selector')]
+    #[PublicAPI]
+    public function getMenuTree(ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        return $response->json($this->menuService->getMenuTree());
+    }
 
     #[GetMapping('')]
     #[PublicAPI]
@@ -46,13 +52,6 @@ class MenuController
             ->paginate(15, ['id', 'parent_id', 'name', 'code', 'sort', 'created_at', 'updated_at'], 'page', $page);
 
         return $response->json(['data' => $paginator->items(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()]);
-    }
-
-    #[GetMapping('menu-tree-selector')]
-    #[PublicAPI]
-    public function getMenuTree(ResponseInterface $response): \Psr\Http\Message\ResponseInterface
-    {
-        return $response->json($this->menuService->getMenuTree());
     }
 
     #[PostMapping('')]

@@ -83,7 +83,7 @@ class AuthMiddleware implements MiddlewareInterface
                 ->leftJoin('permissions as p', 'rp.permission_id', '=', 'p.id')
                 ->where('users.id', $userId)
                 ->distinct()
-                ->pluck('p.name')
+                ->pluck('p.code')
                 ->toArray();
             $this->authContext->setPermissions($permissions);
             return $handler->handle($request);

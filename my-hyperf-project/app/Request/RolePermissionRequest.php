@@ -6,9 +6,11 @@ namespace App\Request;
 
 use Hyperf\Validation\Request\FormRequest;
 
-class PermissionRequest extends FormRequest
+class RolePermissionRequest extends FormRequest
 {
+
     public const SCENE_GET_ONE_PAGE = 'getOnePage';
+    public const SCENE_ADD = 'add';
     public const SCENE_DELETE = 'delete';
 
     public function authorize(): bool
@@ -19,11 +21,17 @@ class PermissionRequest extends FormRequest
     protected array $scenes = [
         self::SCENE_GET_ONE_PAGE => [
             'page' => 'required|integer|min:1',
-            'orderBy' => 'string|in:id,code,description,path,method,created_at,updated_at',
+            'orderBy' => 'string|in:id,role_id,role_code,permission_id,permission_code,permission_description,path,method,created_at,updated_at',
             'orderDirection' => 'string|in:asc,desc',
-            'searchField' => 'string|in:id,code,description,path,method',
+            'searchField' => 'string|in:id,role_id,role_code,permission_id,permission_code,permission_description,path,method',
             'searchValue' => 'required_with:searchField|string|max:100'
         ],
+
+        self::SCENE_ADD => [
+            'role_id' => 'required|integer:strict|min:1',
+            'permission_id' => 'required|integer:strict|min:1',
+        ],
+
         self::SCENE_DELETE => [
             'ids' => 'required|array',
             'ids.*' => 'integer:strict|gt:0',
@@ -47,6 +55,8 @@ class PermissionRequest extends FormRequest
             'searchValue' => '搜索值',
             'ids' => 'ID列表',
             'ids.*' => 'ID列表的每一项ID',
+            'role_id' => '关联角色',
+            'permission_id' => '关联权限',
         ];
     }
 

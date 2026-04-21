@@ -109,7 +109,7 @@ class PermissionSyncCommand extends HyperfCommand
 
                 if ($hasChanged) {
                     $oldData = [
-                        'name' => $model->name,
+                        'name' => $model->code,
                         'description' => $model->description,
                         'method' => $model->method,
                         'path' => $model->path,

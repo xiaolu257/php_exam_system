@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Controller\RBAC;
 
 use App\Annotation\PublicAPI;
-use App\Model\RoleMenu;
-use App\Request\RoleMenuRequest;
+use App\Model\RolePermission;
+use App\Request\RolePermissionRequest;
 use Hyperf\Database\Model\Builder;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\DeleteMapping;
@@ -15,13 +15,14 @@ use Hyperf\HttpServer\Annotation\PostMapping;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Validation\Annotation\Scene;
 
-#[Controller(prefix: 'role-menu')]
-class RoleMenuController
+#[Controller(prefix: 'role-permission')]
+class RolePermissionController
 {
+
     #[GetMapping('')]
     #[PublicAPI]
-    #[Scene(RoleMenuRequest::SCENE_GET_ONE_PAGE)]
-    public function paginate(RoleMenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Scene(RolePermissionRequest::SCENE_GET_ONE_PAGE)]
+    public function paginate(RolePermissionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
 
@@ -33,8 +34,8 @@ class RoleMenuController
 
         $fieldMap = [
             'role_code' => 'roles.code',
-            'menu_name' => 'menus.name',
-            'menu_code' => 'menus.code',
+            'permission_code' => 'permissions.code',
+            'permission_description' => 'permissions.description',
         ];
         if (isset($fieldMap[$searchField])) {
             $searchField = $fieldMap[$searchField];
@@ -42,56 +43,58 @@ class RoleMenuController
         if (isset($fieldMap[$orderBy])) {
             $orderBy = $fieldMap[$orderBy];
         }
-        $paginator = RoleMenu::query()
-            ->leftJoin('roles', 'roles.id', '=', 'role_menus.role_id')
-            ->leftJoin('menus', 'menus.id', '=', 'role_menus.menu_id')
+        $paginator = RolePermission::query()
+            ->leftJoin('roles', 'roles.id', '=', 'role_permissions.role_id')
+            ->leftJoin('permissions', 'permissions.id', '=', 'role_permissions.permission_id')
             ->orderBy($orderBy, $orderDirection)
             ->when(!is_null($searchField) && !is_null($searchValue),
                 function (Builder $query) use ($searchField, $searchValue) {
                     $query->where($searchField, 'like', "%{$searchValue}%");
                 })
-            ->paginate(15, ['role_menus.id',
-                'role_menus.role_id',
+            ->paginate(15, ['role_permissions.id',
+                'role_permissions.role_id',
                 'roles.code as role_code',
-                'role_menus.menu_id',
-                'menus.name as menu_name',
-                'menus.code as menu_code',
-                'role_menus.created_at'
+                'role_permissions.permission_id',
+                'permissions.code as permission_code',
+                'permissions.description as permission_description',
+                'permissions.path',
+                'permissions.method',
+                'role_permissions.created_at'
             ], 'page', $page);
         return $response->json(['data' => $paginator->items(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()]);
     }
 
     #[PostMapping('')]
     #[PublicAPI]
-    #[Scene(RoleMenuRequest::SCENE_ADD)]
-    public function add(RoleMenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Scene(RolePermissionRequest::SCENE_ADD)]
+    public function add(RolePermissionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
-        $singleChoiceQuestion = new RoleMenu();
+        $singleChoiceQuestion = new RolePermission();
         $singleChoiceQuestion->role_id = $validatedData['role_id'];
-        $singleChoiceQuestion->menu_id = $validatedData['menu_id'];
+        $singleChoiceQuestion->permission_id = $validatedData['permission_id'];
         $singleChoiceQuestion->save();
-        return $response->json(['msg' => '新增菜单分配信息成功']);
+        return $response->json(['msg' => '新增权限分配信息成功']);
     }
 
     #[DeleteMapping('')]
     #[PublicAPI]
-    #[Scene(RoleMenuRequest::SCENE_DELETE)]
-    public function delete(RoleMenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    #[Scene(RolePermissionRequest::SCENE_DELETE)]
+    public function delete(RolePermissionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validatedData = $request->validated();
 
         $ids = $validatedData['ids'];
 
-        $existingIds = RoleMenu::query()
+        $existingIds = RolePermission::query()
             ->whereIn('id', $ids)
             ->pluck('id')
             ->toArray();
 
-        $count = RoleMenu::query()->whereIn('id', $existingIds)->delete();
+        $count = RolePermission::query()->whereIn('id', $existingIds)->delete();
 
         return $response->json([
-            'msg' => "成功删除 $count 条菜单分配信息数据"
+            'msg' => "成功删除 $count 条权限分配信息数据"
         ]);
     }
 

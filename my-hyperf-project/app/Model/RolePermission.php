@@ -20,6 +20,7 @@ class RolePermission extends Model
      */
     protected ?string $table = 'role_permissions';
 
+    public const UPDATED_AT = null;
     /**
      * The attributes that are mass assignable.
      */

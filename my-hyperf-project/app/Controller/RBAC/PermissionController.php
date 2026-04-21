@@ -8,6 +8,7 @@ use App\Annotation\PublicAPI;
 use App\Model\Permission;
 use App\Request\PermissionRequest;
 use Hyperf\Database\Model\Builder;
+use Hyperf\DbConnection\Db;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
 use Hyperf\HttpServer\Contract\ResponseInterface;
@@ -16,6 +17,16 @@ use Hyperf\Validation\Annotation\Scene;
 #[Controller(prefix: 'permission')]
 class PermissionController
 {
+    #[GetMapping('selector')]
+    #[PublicAPI]
+    public function selector(ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $data = Permission::query()->get([
+            'id as value',
+            Db::raw("CONCAT(code, '（', description, '）') as label")
+        ]);;
+        return $response->json($data->toArray());
+    }
 
     #[GetMapping('')]
     #[PublicAPI]
@@ -34,7 +45,7 @@ class PermissionController
             ->when(!is_null($searchField) && !is_null($searchValue), function (Builder $query) use ($searchField, $searchValue) {
                 $query->where($searchField, 'like', "%{$searchValue}%");
             })
-            ->paginate(15, ['id', 'name', 'description', 'path', 'method', 'created_at', 'updated_at'], 'page', $page);
+            ->paginate(15, ['id', 'code', 'description', 'path', 'method', 'created_at', 'updated_at'], 'page', $page);
 
         return $response->json(['data' => $paginator->items(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()]);
     }

@@ -16,7 +16,7 @@ const tableConfig = computed(() => ({
   searchData: menuCrud.searchOnePageData,
   tableColumns: [
     new TextTableColumn(80, "id", "ID", true, true, "left"),
-    new TextTableColumn(200, "name", "权限标识", true, true),
+    new TextTableColumn(200, "code", "权限标识", true, true),
     new TextTableColumn(200, "description", "描述", true, true),
     new TextTableColumn(200, "path", "接口", true, true),
     new TextTableColumn(80, "method", "请求方式", true),
