@@ -57,9 +57,8 @@ const tableConfig = computed(() => ({
   ]
 }));
 onMounted(() => {
-  myGet('menu/menu-tree').then((res) => {
+  myGet('menu/menu-tree-selector').then((res) => {
     menuTree.value = res;
-    //testLog(res)
   });
 })
 </script>

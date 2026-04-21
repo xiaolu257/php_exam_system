@@ -8,6 +8,7 @@ use App\Model\Role;
 use App\Request\RoleRequest;
 use App\Service\MenuService;
 use Hyperf\Database\Model\Builder;
+use Hyperf\DbConnection\Db;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\DeleteMapping;
@@ -23,6 +24,17 @@ class RoleController
     #[Inject]
     protected MenuService $menuService;
 
+
+    #[GetMapping('selector')]
+    //#[Permission('menu:add', '新增角色')]
+    public function rolesSelector(ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $data = Role::query()->get([
+            'id as value',
+            Db::raw("CONCAT(code, '（', description, '）') as label")
+        ]);;
+        return $response->json($data->toArray());
+    }
 
     #[GetMapping('')]
     //#[Permission('menu:paginate', '获取角色分页数据，支持模糊查询')]

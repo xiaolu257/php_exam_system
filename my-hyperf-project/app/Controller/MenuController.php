@@ -46,7 +46,7 @@ class MenuController
         return $response->json(['data' => $paginator->items(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()]);
     }
 
-    #[GetMapping('menu-tree')]
+    #[GetMapping('menu-tree-selector')]
     public function getMenuTree(ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         return $response->json($this->menuService->getMenuTree());

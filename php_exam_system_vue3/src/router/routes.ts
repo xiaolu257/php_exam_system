@@ -44,15 +44,20 @@ const allAsyncRoutes = [
         component: () => import('@/view/exam/ExamPreview.vue'),
     },
     {
-        name: 'MenuManager',
-        path: 'MenuManager',
-        component: () => import('@/view/permission/MenuManager.vue'),
+        name: 'MenuManagement',
+        path: 'MenuManagement',
+        component: () => import('@/view/permission/MenuManagement.vue'),
     },
     {
-        name: 'RoleManager',
-        path: 'RoleManager',
-        component: () => import('@/view/permission/RoleManager.vue'),
+        name: 'RoleManagement',
+        path: 'RoleManagement',
+        component: () => import('@/view/permission/RoleManagement.vue'),
     },
+    {
+        name: 'RoleMenuManagement',
+        path: 'RoleMenuManagement',
+        component: () => import('@/view/permission/RoleMenuManagement.vue'),
+    }
 ];
 
 function generateRoutesFromMenus(menus: any[]) {

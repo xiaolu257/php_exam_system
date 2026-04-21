@@ -10,12 +10,10 @@
 import {TextTableColumn} from "@/components/public/table/tableTypes";
 import {FormInputConfigFactory} from "@/utils/formInputConfig";
 import {TableCrudFactory} from "@/utils/tableCrudFactory";
-import {computed, onMounted, ref} from "vue";
-import {myGet} from "@/api/utils/axios";
+import {computed} from "vue";
 import BaseTableManager from "@/components/public/table/BaseTableManager.vue";
 
 const menuCrud = TableCrudFactory.creatStandardCrud("role");
-const menuTree = ref();
 const addDialogConfig = computed(() => ({
   title: "新增角色",
   formConfig: [
@@ -47,12 +45,6 @@ const tableConfig = computed(() => ({
     new TextTableColumn(180, "updated_at", "更新时间", true, false)
   ]
 }));
-onMounted(() => {
-  myGet('menu/menu-tree').then((res) => {
-    menuTree.value = res;
-    //testLog(res)
-  });
-})
 </script>
 
 <style scoped>
