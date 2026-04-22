@@ -68,6 +68,11 @@ const allAsyncRoutes = [
         path: 'RolePermissionManagement',
         component: () => import('@/view/permission/RolePermissionManagement.vue'),
     },
+    {
+        name: 'UserManagement',
+        path: 'UserManagement',
+        component: () => import('@/view/permission/UserManagement.vue'),
+    }
 ];
 
 function generateRoutesFromMenus(menus: any[]) {

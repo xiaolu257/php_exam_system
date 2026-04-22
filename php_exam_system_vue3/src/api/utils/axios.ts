@@ -44,7 +44,11 @@ myAxios.interceptors.request.use(
         firstTimeLoadFingerprint = false;
 
         // 过滤请求数据
-        if (config.data && typeof config.data === "object") {
+        if (
+            config.data &&
+            typeof config.data === "object" &&
+            !(config.data instanceof FormData)
+        ) {
             config.data = filterEmptyFields(config.data);
         }
 

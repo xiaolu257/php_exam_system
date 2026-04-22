@@ -38,8 +38,10 @@ const formConfig: AbstractFormConfigItem[] = [
 ];
 
 const updateProfile = async (data: Record<string, any>) => {
-  console.log(data)
   const formData = buildFormData(data, "avatar");
+  for (const [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
   myPost("user/register", formData, true, {
     headers: {'Content-Type': 'multipart/form-data'}
   }).then(({msg}) => {

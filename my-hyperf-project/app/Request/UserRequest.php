@@ -8,6 +8,8 @@ use Hyperf\Validation\Request\FormRequest;
 
 class UserRequest extends FormRequest
 {
+    public const SCENE_GET_ONE_PAGE = 'getOnePage';
+    public const SCENE_UPDATE = 'update';
     public const SCENE_LOGIN = 'login';
     public const SCENE_REGISTER = 'register';
     public const SCENE_GET_USER_AVATAR = 'getUserAvatar';
@@ -21,6 +23,17 @@ class UserRequest extends FormRequest
     }
 
     protected array $scenes = [
+        self::SCENE_GET_ONE_PAGE => [
+            'page' => 'required|integer|min:1',
+            'orderBy' => 'string|in:id,username,nickname,status,created_at,updated_at',
+            'orderDirection' => 'string|in:asc,desc',
+            'searchField' => 'string|in:id,username,nickname,status',
+            'searchValue' => 'required_with:searchField|string|max:100'
+        ],
+        self::SCENE_UPDATE => [
+            'id' => 'required|integer:strict|min:1',
+            'status' => 'required|integer:strict|in:0,1',
+        ],
         self::SCENE_LOGIN => ['username', 'password'],
         self::SCENE_REGISTER => ['username', 'password', 'nickname', 'avatar'],
         self::SCENE_GET_USER_AVATAR => ['avatarUrl' => 'required|string'],

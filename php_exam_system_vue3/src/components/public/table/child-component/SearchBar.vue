@@ -53,7 +53,7 @@ import {ElTreeSelect} from "element-plus";
 interface Props {
   isSearch: boolean
   searchKey: string
-  searchValue: string
+  searchValue: string | number
   tableColumns: TableColumn[]
 }
 
@@ -61,7 +61,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   (e: 'update:isSearch', value: boolean): void
   (e: 'update:searchKey', value: string): void
-  (e: 'update:searchValue', value: string): void
+  (e: 'update:searchValue', value: string | number): void
 }>()
 const searchKeyModel = computed({
   get: () => props.searchKey,
@@ -70,7 +70,7 @@ const searchKeyModel = computed({
 
 const searchValueModel = computed({
   get: () => props.searchValue,
-  set: (val: string) => emit('update:searchValue', val),
+  set: (val: string | number) => emit('update:searchValue', val),
 })
 const currentSearchColumn = computed(() => {
   return props.tableColumns.find(t => t.prop === searchKeyModel.value)
@@ -78,7 +78,7 @@ const currentSearchColumn = computed(() => {
 const onSearch = () => {
   if (!searchKeyModel.value) {
     MyMessage.error('请选择搜索依据')
-  } else if (!searchValueModel.value) {
+  } else if (!searchValueModel.value && searchValueModel.value !== 0) {
     MyMessage.error('请输入要搜索的关键字')
   } else {
     emit('update:isSearch', true)

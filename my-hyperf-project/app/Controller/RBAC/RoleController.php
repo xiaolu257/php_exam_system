@@ -7,10 +7,8 @@ namespace App\Controller\RBAC;
 use App\Annotation\PublicAPI;
 use App\Model\Role;
 use App\Request\RoleRequest;
-use App\Service\MenuService;
 use Hyperf\Database\Model\Builder;
 use Hyperf\DbConnection\Db;
-use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\DeleteMapping;
 use Hyperf\HttpServer\Annotation\GetMapping;
@@ -22,10 +20,6 @@ use Hyperf\Validation\Annotation\Scene;
 #[Controller(prefix: 'role')]
 class RoleController
 {
-    #[Inject]
-    protected MenuService $menuService;
-
-
     #[GetMapping('selector')]
     #[PublicAPI]
     //#[Permission('menu:add', '新增角色')]
