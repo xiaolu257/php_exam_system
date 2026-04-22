@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\RBAC;
 
-use App\Annotation\PublicAPI;
+use App\Annotation\AuthOnly;
 use App\Model\Permission;
 use App\Request\PermissionRequest;
 use Hyperf\Database\Model\Builder;
@@ -18,7 +18,7 @@ use Hyperf\Validation\Annotation\Scene;
 class PermissionController
 {
     #[GetMapping('selector')]
-    #[PublicAPI]
+    #[AuthOnly]
     public function selector(ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $data = Permission::query()->get([
@@ -29,7 +29,7 @@ class PermissionController
     }
 
     #[GetMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(PermissionRequest::SCENE_GET_ONE_PAGE)]
     public function paginate(PermissionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {

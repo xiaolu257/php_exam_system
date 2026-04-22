@@ -14,15 +14,26 @@
 <script lang="ts" setup>
 
 import {AbstractFormConfigItem, FormInputConfigFactory,} from "@/utils/formInputConfig";
-import {adminAccountRules} from "@/utils/formCheckRules";
 import router from "@/router";
-import {login} from "@/api/admin";
 import BaseForm from "@/components/public/form/BaseForm.vue";
+import {baseURL, myPost} from "@/api/utils/axios";
+import MyMessage from "@/utils/myMessage";
 // 导入 Element Plus 的 FormInstance 类型
 const formConfig: AbstractFormConfigItem[] = [
-  FormInputConfigFactory.createEditableTextInput('username', '账号', 'Username', adminAccountRules.username),
-  FormInputConfigFactory.createEditablePasswordInput('password', '密码', 'Password', true, adminAccountRules.password),
+  FormInputConfigFactory.createEditableTextInput('username', '账号', 'Username'),
+  FormInputConfigFactory.createEditablePasswordInput('password', '密码', 'Password', true),
+  FormInputConfigFactory.createEditableCaptchaInput('captcha', '验证码', baseURL + '/user/captcha'),
 ];
+
+async function login(data: Record<string, any>) {
+  myPost('user/login', data).then(async ({access_token, refresh_token}) => {
+    localStorage.setItem('access_token', access_token);
+    localStorage.setItem('refresh_token', refresh_token);
+    MyMessage.success('登录成功！');
+    await router.replace({name: 'Home'});
+  })
+}
+
 const goRegister = () => {
   router.push({name: 'Register'});
 };
@@ -39,7 +50,8 @@ const goRegister = () => {
 
 .login_panel {
   @extend .basic_vertical_layout;
-  height: 260px;
+  width: 300px;
+  height: 360px;
   background-color: white;
   padding: 20px 20px 0 20px;
   border-radius: 10px;

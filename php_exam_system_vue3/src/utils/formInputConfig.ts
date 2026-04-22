@@ -43,6 +43,21 @@ export class TextInputConfig extends FormInputConfig {
     }
 }
 
+export class CaptchaInputConfig extends FormInputConfig {
+    captchaUrl: string
+
+    constructor(name: string,
+                label: string,
+                captchaUrl: string,
+                formRules: FormItemRule[] = [],
+                disabled: boolean = false,
+                placeholder: string = '',
+                clearable: boolean = false) {
+        super(name, label, formRules, disabled, placeholder, clearable);
+        this.captchaUrl = captchaUrl;
+    }
+}
+
 type TextAreaAutosize = boolean | { minRows?: number; maxRows?: number };
 
 export class TextAreaInputConfig extends FormInputConfig {
@@ -125,6 +140,15 @@ export class FormInputConfigFactory {
                                           placeholder: string = '',
                                           rules: FormItemRule[] = []): FormInputConfig {
         return new OptionsListInputConfig(name, label, rules, false, placeholder, true);
+    }
+
+    // 创建验证码输入框
+    static createEditableCaptchaInput(name: string,
+                                      label: string,
+                                      captchaUrl: string,
+                                      placeholder: string = '',
+                                      rules: FormItemRule[] = []): FormInputConfig {
+        return new CaptchaInputConfig(name, label, captchaUrl, rules, false, placeholder, true);
     }
 }
 

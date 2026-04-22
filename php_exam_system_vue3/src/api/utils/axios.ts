@@ -131,10 +131,10 @@ const myRequest = async (
 
 
 // 快捷请求方法
-const myGet = (url: string, data = {}, showLoading = true) => myRequest('GET', url, data, showLoading);
+const myGet = (url: string, data = {}, showLoading = true, extraConfig: MyAxiosExtraConfig = {}) => myRequest('GET', url, data, showLoading, extraConfig);
 const myPost = (url: string, data = {}, showLoading = true, extraConfig: MyAxiosExtraConfig = {}) => myRequest('POST', url, data, showLoading, extraConfig);
 const myPut = (url: string, data = {}, showLoading = true) => myRequest('PUT', url, data, showLoading);
 const myDel = (url: string, data = {}, showLoading = true) => myRequest('DELETE', url, data, showLoading);
 
 // 默认导出 + 命名导出
-export {myAxios, myRequest, myGet, myPost, myPut, myDel};
+export {myAxios, myRequest, myGet, myPost, myPut, myDel, baseURL};

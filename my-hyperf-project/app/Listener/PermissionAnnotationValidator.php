@@ -2,6 +2,7 @@
 
 namespace App\Listener;
 
+use App\Annotation\AuthOnly;
 use App\Annotation\Permission;
 use App\Annotation\PublicAPI;
 use Hyperf\Di\Annotation\AnnotationCollector;
@@ -24,13 +25,27 @@ class PermissionAnnotationValidator implements ListenerInterface
         $this->checkConflict();
     }
 
+    private function collect(array &$map, array $methods, string $type): void
+    {
+        foreach ($methods as $item) {
+            $key = $item['class'] . '::' . $item['method'];
+
+            if (!isset($map[$key])) {
+                $map[$key] = [];
+            }
+
+            $map[$key][] = $type;
+        }
+    }
+
     protected function checkConflict(): void
     {
-        // 获取注解元信息
+        // 收集三类注解
+        $publicMethods = AnnotationCollector::getMethodsByAnnotation(PublicAPI::class);
+        $authOnlyMethods = AnnotationCollector::getMethodsByAnnotation(AuthOnly::class);
         $permissionMethods = AnnotationCollector::getMethodsByAnnotation(Permission::class);
-        $publicAPIMethods = AnnotationCollector::getMethodsByAnnotation(PublicAPI::class);
 
-        // 检查 Permission name 唯一性
+        // ===== 校验 Permission name 唯一性 =====
         $permissionNameMap = [];
 
         foreach ($permissionMethods as $item) {
@@ -52,24 +67,20 @@ class PermissionAnnotationValidator implements ListenerInterface
             $permissionNameMap[$name] = $location;
         }
 
-        // 检查 Permission vs PublicAPI 冲突
-        if (empty($permissionMethods) || empty($publicAPIMethods)) {
-            return;
-        }
-        // 构建 PublicAPI 索引
-        $publicAPIIndex = [];
-        foreach ($publicAPIMethods as $item) {
-            $key = $item['class'] . '::' . $item['method'];
-            $publicAPIIndex[$key] = true;
-        }
-        // 检查冲突
-        foreach ($permissionMethods as $item) {
-            $key = $item['class'] . '::' . $item['method'];
-            if (isset($publicAPIIndex[$key])) {
+        // ===== 构建方法 → 注解列表 =====
+        $methodMap = [];
+
+        $this->collect($methodMap, $publicMethods, 'PublicAPI');
+        $this->collect($methodMap, $authOnlyMethods, 'AuthOnly');
+        $this->collect($methodMap, $permissionMethods, 'Permission');
+
+        // ===== 检查冲突（关键）=====
+        foreach ($methodMap as $method => $annotations) {
+            if (count($annotations) > 1) {
                 throw new \LogicException(sprintf(
-                    '注解冲突：%s::%s 同时使用了 Permission 和 PublicAPI',
-                    $item['class'],
-                    $item['method']
+                    '注解冲突：%s 同时使用了多个访问控制注解 [%s]',
+                    $method,
+                    implode(', ', $annotations)
                 ));
             }
         }

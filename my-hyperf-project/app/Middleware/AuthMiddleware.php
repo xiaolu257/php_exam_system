@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Annotation\PublicAPI;
 use App\Middleware\Helper\MiddlewareContext;
 use App\Model\User;
 use App\Model\UserToken;
 use App\Util\TokenUtil;
 use Firebase\JWT\ExpiredException;
+use Hyperf\Di\Annotation\AnnotationCollector;
 use Hyperf\Di\Annotation\Inject;
-use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\HttpServer\Contract\ResponseInterface as HttpResponse;
+use Hyperf\HttpServer\Router\Dispatched;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use function Hyperf\Config\config;
 
 /**
  * 全局用户认证中间件
@@ -22,17 +25,29 @@ use function Hyperf\Config\config;
 class AuthMiddleware implements MiddlewareInterface
 {
     #[Inject]
-    protected ResponseInterface $response;
+    protected HttpResponse $response;
     #[Inject]
     protected MiddlewareContext $authContext;
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): \Psr\Http\Message\ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $route = trim($request->getUri()->getPath(), '/');
-        $except = config('auth.except', []);
-        if (in_array($route, $except, true)) {
+        /** @var Dispatched|null $dispatched */
+        $dispatched = $request->getAttribute(Dispatched::class);
+        // 路由没匹配统一404处理
+        if (!$dispatched || !$dispatched->handler || !isset($dispatched->handler->callback)) {
+            return $this->response->json(['msg' => '访问的接口不存在'])->withStatus(404);
+        }
+        [$class, $method] = $dispatched->handler->callback;
+        // 获取注解
+        $annotations = AnnotationCollector::getClassMethodAnnotation($class, $method);
+        //检查是否有公开接口注解,若有直接放行
+        /** @var PublicAPI|null $publicAPI */
+        $publicAPI = $annotations[PublicAPI::class] ?? null;
+        if ($publicAPI) {
+            $this->authContext::setSkipPermission();
             return $handler->handle($request);
         }
+
         try {
             // 获取前端传来的 Authorization 头部
             $authHeader = $request->getHeaderLine('Authorization');

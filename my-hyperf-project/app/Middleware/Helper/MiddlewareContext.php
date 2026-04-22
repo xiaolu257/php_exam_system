@@ -2,31 +2,43 @@
 
 namespace App\Middleware\Helper;
 
-use Hyperf\Di\Annotation\Inject;
-use Psr\Http\Message\ServerRequestInterface;
+
+use Hyperf\Context\Context;
 
 class MiddlewareContext
 {
-    #[Inject]
-    protected ServerRequestInterface $request;
+    private const USER_ID = 'auth.user_id';
+    private const PERMISSIONS = 'auth.permissions';
+    public const SKIP_PERMISSION = 'skip_permission';
+    private const ROLES = 'auth.roles';
 
-    public function setUserId(int $userId): void
+    public static function setUserId(int $userId): void
     {
-        $this->request = $this->request->withAttribute('userId', $userId);
+        Context::set(self::USER_ID, $userId);
     }
 
-    public function getUserId(): int
+    public static function getUserId(): ?int
     {
-        return $this->request->getAttribute('userId');
+        return Context::get(self::USER_ID);
     }
 
-    public function setPermissions(array $permissions): void
+    public static function setPermissions(array $permissions): void
     {
-        $this->request = $this->request->withAttribute('permissions', $permissions);
+        Context::set(self::PERMISSIONS, $permissions);
     }
 
-    public function getPermissions(): array
+    public static function getPermissions(): array
     {
-        return $this->request->getAttribute('permissions');
+        return Context::get(self::PERMISSIONS, []);
+    }
+
+    public static function setSkipPermission(): void
+    {
+        Context::set(self::SKIP_PERMISSION, true);
+    }
+
+    public static function getSkipPermission(): ?bool
+    {
+        return Context::get(self::SKIP_PERMISSION);
     }
 }

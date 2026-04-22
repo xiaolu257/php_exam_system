@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\RBAC;
 
-use App\Annotation\PublicAPI;
+use App\Annotation\AuthOnly;
 use App\Model\Role;
 use App\Request\RoleRequest;
 use Hyperf\Database\Model\Builder;
@@ -21,7 +21,7 @@ use Hyperf\Validation\Annotation\Scene;
 class RoleController
 {
     #[GetMapping('selector')]
-    #[PublicAPI]
+    #[AuthOnly]
     //#[Permission('menu:add', '新增角色')]
     public function rolesSelector(ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -33,7 +33,7 @@ class RoleController
     }
 
     #[GetMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     //#[Permission('menu:paginate', '获取角色分页数据，支持模糊查询')]
     #[Scene(RoleRequest::SCENE_GET_ONE_PAGE)]
     public function paginate(RoleRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
@@ -56,7 +56,7 @@ class RoleController
     }
 
     #[PostMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     //#[Permission('menu:add', '新增角色')]
     #[Scene(RoleRequest::SCENE_ADD)]
     public function add(RoleRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
@@ -70,7 +70,7 @@ class RoleController
     }
 
     #[PutMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     //#[Permission('menu:update', '更新角色')]
     #[Scene(RoleRequest::SCENE_UPDATE)]
     public function update(RoleRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
@@ -96,7 +96,7 @@ class RoleController
     }
 
     #[DeleteMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     //#[Permission('menu:delete', '(批量)删除角色')]
     #[Scene(RoleRequest::SCENE_DELETE)]
     public function delete(RoleRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface

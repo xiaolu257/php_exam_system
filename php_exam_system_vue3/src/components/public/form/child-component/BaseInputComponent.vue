@@ -11,10 +11,14 @@
   <template v-else-if="item instanceof TextAreaInputConfig">
     <TextAreaInput :config="item" v-model:text="formData[item.name]"/>
   </template>
+  <template v-else-if="item instanceof CaptchaInputConfig">
+    <CaptchaInput :config="item" v-model:text="formData[item.name]"/>
+  </template>
 </template>
 
 <script lang="ts" setup>
 import {
+  CaptchaInputConfig,
   type FormInputConfig,
   OptionsListInputConfig,
   PasswordInputConfig,
@@ -25,6 +29,7 @@ import TextAreaInput from "@/components/public/form/child-component/input-compon
 import TextInput from "@/components/public/form/child-component/input-component/TextInput.vue";
 import PasswordInput from "@/components/public/form/child-component/input-component/PasswordInput.vue";
 import OptionListInput from "@/components/public/form/child-component/input-component/OptionListInput.vue";
+import CaptchaInput from "@/components/public/form/child-component/input-component/CaptchaInput.vue";
 
 
 // Props 定义

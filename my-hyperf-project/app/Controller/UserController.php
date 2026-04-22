@@ -14,6 +14,7 @@ use App\Service\ImageService;
 use App\Util\TokenUtil;
 use Exception;
 use Firebase\JWT\ExpiredException;
+use Gregwar\Captcha\CaptchaBuilder;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpMessage\Upload\UploadedFile;
 use Hyperf\HttpServer\Annotation\Controller;
@@ -21,6 +22,7 @@ use Hyperf\HttpServer\Annotation\GetMapping;
 use Hyperf\HttpServer\Annotation\PostMapping;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Redis\Redis;
 use Hyperf\Validation\Annotation\Scene;
 
 #[Controller(prefix: 'user')]
@@ -30,6 +32,8 @@ class UserController
     protected ImageService $imageService;
     #[Inject]
     protected MiddlewareContext $middlewareContext;
+    #[Inject]
+    protected Redis $redis;
 
     private function getUserMenus($userId): array
     {
@@ -123,6 +127,22 @@ class UserController
         return $tree;
     }
 
+    #[GetMapping('captcha')]
+    #[PublicAPI]
+    public function getCaptcha(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $builder = new CaptchaBuilder();
+        //使用系统字体
+        $builder->build(160, 50, '/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf');
+        $code = strtolower($builder->getPhrase());
+        $fingerprint = $request->getHeaderLine('Fingerprint');
+        $this->redis->set("captcha:{$fingerprint}", $code, 300);
+        // 返回图片流（关键）
+        $response = $response->withHeader('Content-Type', 'image/jpeg');
+        $response->getBody()->write($builder->get());
+        return $response;
+    }
+
     #[PostMapping('register')]
     #[PublicAPI]
     #[Scene(UserRequest::SCENE_REGISTER)]
@@ -157,6 +177,9 @@ class UserController
         $validated = $request->validated();
         // ✅ 获取设备指纹（来自请求头）
         $validated['fingerprint'] = $request->header('Fingerprint', '666');
+        if ($validated['captcha'] !== $this->redis->get("captcha:{$validated['fingerprint']}")) {
+            return $response->json(['msg' => '验证码错误，请重新输入'])->withStatus(401);
+        }
         $model = User::select(['id', 'nickname', 'password', 'role', 'status', 'avatar_url'])->where('username', '=', $validated['username'])->first();
         if (!$model || !password_verify($validated['password'], $model->password)) {
             return $response->json(['msg' => '账号或密码错误，登录失败'])->withStatus(401);

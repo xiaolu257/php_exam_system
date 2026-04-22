@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\RBAC;
 
-use App\Annotation\PublicAPI;
+use App\Annotation\AuthOnly;
 use App\Model\UserRole;
 use App\Request\UserRoleRequest;
 use Hyperf\Database\Model\Builder;
@@ -20,7 +20,7 @@ class UserRoleController
 {
 
     #[GetMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(UserRoleRequest::SCENE_GET_ONE_PAGE)]
     public function paginate(UserRoleRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -64,7 +64,7 @@ class UserRoleController
     }
 
     #[PostMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(UserRoleRequest::SCENE_ADD)]
     public function add(UserRoleRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -77,7 +77,7 @@ class UserRoleController
     }
 
     #[DeleteMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(UserRoleRequest::SCENE_DELETE)]
     public function delete(UserRoleRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {

@@ -34,10 +34,23 @@ class UserRequest extends FormRequest
             'id' => 'required|integer:strict|min:1',
             'status' => 'required|integer:strict|in:0,1',
         ],
-        self::SCENE_LOGIN => ['username', 'password'],
-        self::SCENE_REGISTER => ['username', 'password', 'nickname', 'avatar'],
-        self::SCENE_GET_USER_AVATAR => ['avatarUrl' => 'required|string'],
-        self::SCENE_GET_USER_AVATAR_THUMB => ['avatarUrl' => 'required|string'],
+        self::SCENE_LOGIN => [
+            'username' => 'required|string|min:6|max:20',
+            'password' => 'required|string|min:6|max:20',
+            'captcha' => 'required|string|min:1|max:20',
+        ],
+        self::SCENE_REGISTER => [
+            'username' => 'required|string|min:6|max:20',
+            'password' => 'required|string|min:6|max:20',
+            'nickname' => 'required|string|min:2|max:20',
+            'avatar' => 'image|max:2048',
+        ],
+        self::SCENE_GET_USER_AVATAR => [
+            'avatarUrl' => 'required|string'
+        ],
+        self::SCENE_GET_USER_AVATAR_THUMB => [
+            'avatarUrl' => 'required|string'
+        ],
         self::SCENE_UPDATE_PROFILE => [
             'nickname' => 'required_without:avatar|filled|string|min:2|max:20',
             'avatar' => 'required_without:nickname|filled|image|max:2048',
@@ -53,10 +66,7 @@ class UserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string|min:6|max:20',
-            'password' => 'required|string|min:6|max:20',
-            'nickname' => 'required|string|min:2|max:20',
-            'avatar' => 'image|max:2048',
+
         ];
     }
 

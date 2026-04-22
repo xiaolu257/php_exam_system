@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\RBAC;
 
-use App\Annotation\PublicAPI;
+use App\Annotation\AuthOnly;
 use App\Model\RolePermission;
 use App\Request\RolePermissionRequest;
 use Hyperf\Database\Model\Builder;
@@ -20,7 +20,7 @@ class RolePermissionController
 {
 
     #[GetMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(RolePermissionRequest::SCENE_GET_ONE_PAGE)]
     public function paginate(RolePermissionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -67,7 +67,7 @@ class RolePermissionController
     }
 
     #[PostMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(RolePermissionRequest::SCENE_ADD)]
     public function add(RolePermissionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -80,7 +80,7 @@ class RolePermissionController
     }
 
     #[DeleteMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(RolePermissionRequest::SCENE_DELETE)]
     public function delete(RolePermissionRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {

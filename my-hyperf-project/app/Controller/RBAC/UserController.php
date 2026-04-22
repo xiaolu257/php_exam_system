@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\RBAC;
 
-use App\Annotation\PublicAPI;
+use App\Annotation\AuthOnly;
 use App\Model\User;
 use App\Request\UserRequest;
 use Hyperf\Database\Model\Builder;
@@ -18,7 +18,7 @@ use Hyperf\Validation\Annotation\Scene;
 class UserController
 {
     #[GetMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(UserRequest::SCENE_GET_ONE_PAGE)]
     public function paginate(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -44,7 +44,7 @@ class UserController
     }
 
     #[PutMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(UserRequest::SCENE_UPDATE)]
     public function update(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {

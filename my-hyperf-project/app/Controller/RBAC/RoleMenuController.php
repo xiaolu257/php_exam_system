@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\RBAC;
 
-use App\Annotation\PublicAPI;
+use App\Annotation\AuthOnly;
 use App\Model\RoleMenu;
 use App\Request\RoleMenuRequest;
 use Hyperf\Database\Model\Builder;
@@ -19,7 +19,7 @@ use Hyperf\Validation\Annotation\Scene;
 class RoleMenuController
 {
     #[GetMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(RoleMenuRequest::SCENE_GET_ONE_PAGE)]
     public function paginate(RoleMenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -64,7 +64,7 @@ class RoleMenuController
     }
 
     #[PostMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(RoleMenuRequest::SCENE_ADD)]
     public function add(RoleMenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
@@ -77,7 +77,7 @@ class RoleMenuController
     }
 
     #[DeleteMapping('')]
-    #[PublicAPI]
+    #[AuthOnly]
     #[Scene(RoleMenuRequest::SCENE_DELETE)]
     public function delete(RoleMenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
