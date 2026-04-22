@@ -72,6 +72,11 @@ const allAsyncRoutes = [
         name: 'UserManagement',
         path: 'UserManagement',
         component: () => import('@/view/permission/UserManagement.vue'),
+    },
+    {
+        name: 'UserRoleManagement',
+        path: 'UserRoleManagement',
+        component: () => import('@/view/permission/UserRoleManagement.vue'),
     }
 ];
 

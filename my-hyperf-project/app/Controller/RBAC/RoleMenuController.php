@@ -33,6 +33,7 @@ class RoleMenuController
 
         $fieldMap = [
             'role_code' => 'roles.code',
+            'role_description' => 'roles.description',
             'menu_name' => 'menus.name',
             'menu_code' => 'menus.code',
         ];
@@ -53,6 +54,7 @@ class RoleMenuController
             ->paginate(15, ['role_menus.id',
                 'role_menus.role_id',
                 'roles.code as role_code',
+                'roles.description as role_description',
                 'role_menus.menu_id',
                 'menus.name as menu_name',
                 'menus.code as menu_code',

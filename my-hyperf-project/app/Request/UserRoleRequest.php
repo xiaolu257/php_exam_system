@@ -6,7 +6,7 @@ namespace App\Request;
 
 use Hyperf\Validation\Request\FormRequest;
 
-class RoleMenuRequest extends FormRequest
+class UserRoleRequest extends FormRequest
 {
 
     public const SCENE_GET_ONE_PAGE = 'getOnePage';
@@ -21,15 +21,15 @@ class RoleMenuRequest extends FormRequest
     protected array $scenes = [
         self::SCENE_GET_ONE_PAGE => [
             'page' => 'required|integer|min:1',
-            'orderBy' => 'string|in:id,role_id,role_code,role_description,menu_id,menu_name,menu_code,created_at,updated_at',
+            'orderBy' => 'string|in:id,user_id,username,nickname,role_id,role_code,role_description,created_at',
             'orderDirection' => 'string|in:asc,desc',
-            'searchField' => 'string|in:id,role_id,role_code,role_description,menu_id,menu_name,menu_code,',
+            'searchField' => 'string|in:id,user_id,username,nickname,role_id,role_code,role_description',
             'searchValue' => 'required_with:searchField|string|max:100'
         ],
 
         self::SCENE_ADD => [
+            'user_id' => 'required|integer:strict|min:1',
             'role_id' => 'required|integer:strict|min:1',
-            'menu_id' => 'required|integer:strict|min:1',
         ],
 
         self::SCENE_DELETE => [
@@ -56,7 +56,7 @@ class RoleMenuRequest extends FormRequest
             'ids' => 'ID列表',
             'ids.*' => 'ID列表的每一项ID',
             'role_id' => '关联角色',
-            'menu_id' => '关联菜单',
+            'permission_id' => '关联权限',
         ];
     }
 

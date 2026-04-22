@@ -34,6 +34,7 @@ const tableConfig = computed(() => ({
     new TextTableColumn(80, "id", "ID", true, true, "left"),
     new TextTableColumn(100, "role_id", "角色ID", true, true),
     new TextTableColumn(300, "role_code", "角色标识", true, true),
+    new TextTableColumn(150, "role_description", "角色描述", true, true),
     new TextTableColumn(100, "menu_id", "菜单ID", true, true),
     new TextTableColumn(300, "menu_name", "菜单名", true, true),
     new TextTableColumn(300, "menu_code", "角色标识", true, true),

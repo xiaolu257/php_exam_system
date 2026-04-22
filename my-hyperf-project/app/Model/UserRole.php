@@ -20,6 +20,7 @@ class UserRole extends Model
      */
     protected ?string $table = 'user_roles';
 
+    public const UPDATED_AT = null;
     /**
      * The attributes that are mass assignable.
      */

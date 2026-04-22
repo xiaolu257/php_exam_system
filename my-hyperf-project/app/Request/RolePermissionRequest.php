@@ -21,9 +21,9 @@ class RolePermissionRequest extends FormRequest
     protected array $scenes = [
         self::SCENE_GET_ONE_PAGE => [
             'page' => 'required|integer|min:1',
-            'orderBy' => 'string|in:id,role_id,role_code,permission_id,permission_code,permission_description,path,method,created_at,updated_at',
+            'orderBy' => 'string|in:id,role_id,role_code,role_description,permission_id,permission_code,permission_description,path,method,created_at,updated_at',
             'orderDirection' => 'string|in:asc,desc',
-            'searchField' => 'string|in:id,role_id,role_code,permission_id,permission_code,permission_description,path,method',
+            'searchField' => 'string|in:id,role_id,role_code,role_description,permission_id,permission_code,permission_description,path,method',
             'searchValue' => 'required_with:searchField|string|max:100'
         ],
 
