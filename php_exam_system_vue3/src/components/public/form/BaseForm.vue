@@ -33,7 +33,7 @@
 
 <script lang="ts" setup>
 import {dayjs, ElForm, type FormRules} from 'element-plus';
-import {computed, reactive, ref, toRaw} from 'vue';
+import {computed, provide, reactive, ref, toRaw} from 'vue';
 import {AbstractFormConfigItem, FormInputConfig, OptionsListInputConfig,} from "@/utils/formInputConfig";
 
 import {AssociateSelectConfig, FormSelectConfig,} from "@/utils/formSelectConfig";
@@ -138,10 +138,14 @@ const createFormData = () => {
 const formData = reactive<Record<string, any>>(createFormData());
 // 表单引用
 const formRef = ref<InstanceType<typeof ElForm> | null>(null);
+const successSignal = ref(false)
+provide('formSuccessSignal', successSignal);
 const handleSave = () => {
   //默认为新增场景
   let submitData: Record<string, any> = structuredClone(toRaw(formData))
-  let onSuccess = () => {}
+  let onSuccess = () => {
+    successSignal.value = !successSignal.value;
+  }
 
   if (initData) {
     const changedData: Record<string, any> = {};
@@ -169,6 +173,7 @@ const handleSave = () => {
       Object.keys(submitData).forEach((key) => {
         initData[key] = submitData[key];
       });
+      successSignal.value = !successSignal.value;
     }
   }
   formRef.value?.validate((valid) => {

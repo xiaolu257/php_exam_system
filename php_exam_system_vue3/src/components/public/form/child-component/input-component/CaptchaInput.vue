@@ -5,12 +5,12 @@
       :disabled="config.disabled"
       :placeholder="config.placeholder"
   />
-  <el-image style="height: 50px;width: 160px;margin-top: 5px" :src="captchaUrl" @click="loadCaptcha"/>
+  <el-image style="height: 50px;width: 160px ;margin-top: 5px" :src="captchaUrl" @click="loadCaptcha"/>
 </template>
 
 <script lang="ts" setup>
 import {CaptchaInputConfig} from "@/utils/formInputConfig";
-import {computed, onMounted, ref} from "vue";
+import {computed, inject, onMounted, type Ref, ref, watch} from "vue";
 import {myGet} from "@/api/utils/axios";
 
 
@@ -28,11 +28,27 @@ const textModel = computed({
 })
 const captchaUrl = ref('')
 
+let lastUrl: string | null = null
+
 const loadCaptcha = async () => {
   const res = await myGet('user/captcha', {}, true, {responseType: 'blob'})
-  captchaUrl.value = URL.createObjectURL(res)
+
+  if (lastUrl) {
+    URL.revokeObjectURL(lastUrl)
+  }
+
+  lastUrl = URL.createObjectURL(res)
+  captchaUrl.value = lastUrl
 }
 onMounted(async () => {
   await loadCaptcha()
 })
+const successSignal = inject<Ref<number>>('formSuccessSignal')!
+
+watch(
+    () => successSignal.value,
+    () => {
+      loadCaptcha()
+    }
+)
 </script>

@@ -11,6 +11,7 @@ use App\Model\User;
 use App\Model\UserToken;
 use App\Request\UserRequest;
 use App\Service\ImageService;
+use App\Service\UserService;
 use App\Util\TokenUtil;
 use Exception;
 use Firebase\JWT\ExpiredException;
@@ -34,6 +35,8 @@ class UserController
     protected MiddlewareContext $middlewareContext;
     #[Inject]
     protected Redis $redis;
+    #[Inject]
+    protected UserService $userService;
 
     private function getUserMenus($userId): array
     {
@@ -175,38 +178,13 @@ class UserController
     public function login(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
+        $ip = $request->getServerParams()['remote_addr'];
         // ✅ 获取设备指纹（来自请求头）
-        $validated['fingerprint'] = $request->header('Fingerprint', '666');
-        if ($validated['captcha'] !== $this->redis->get("captcha:{$validated['fingerprint']}")) {
-            return $response->json(['msg' => '验证码错误，请重新输入'])->withStatus(401);
+        $fingerprint = $request->header('Fingerprint');
+        if (!$fingerprint) {
+            return $response->json(['msg' => '无效的请求'])->withStatus(422);
         }
-        $model = User::select(['id', 'nickname', 'password', 'role', 'status', 'avatar_url'])->where('username', '=', $validated['username'])->first();
-        if (!$model || !password_verify($validated['password'], $model->password)) {
-            return $response->json(['msg' => '账号或密码错误，登录失败'])->withStatus(401);
-        }
-        if ($model->status != 1) {
-            return $response->json(['msg' => '账号已被禁用，登录失败'])->withStatus(403);
-        }
-        // 创建 access_token & refresh_token
-//        $accessToken = TokenUtil::createToken($model->id, $validated['fingerprint'], 3600 * 24);      // 1小时
-        $accessToken = TokenUtil::createToken($model->id, $validated['fingerprint'], 3600 * 24 * 30);
-        $refreshToken = TokenUtil::createToken($model->id, $validated['fingerprint'], 3600 * 24 * 7); // 7天
-        // 设置过期时间
-        $expiresTime = date('Y-m-d H:i:s', time() + 3600);  // 当前时间 + 1小时（access_token过期时间）
-        $refreshExpiresTime = date('Y-m-d H:i:s', time() + 86400 * 7);  // 当前时间 + 7天（refresh_token过期时间）
-        // 更新 token 数据
-        UserToken::where('user_id', $model->id)->delete(); // 清理旧记录
-        UserToken::create([
-            'user_id' => $model->id,
-            'access_token' => $accessToken,
-            'refresh_token' => $refreshToken,
-            'expires_time' => $expiresTime,  // 设置 Access Token 过期时间
-            'refresh_expires_time' => $refreshExpiresTime,  // 设置 Refresh Token 过期时间
-        ]);
-        return $response->json([
-            'access_token' => $accessToken,
-            'refresh_token' => $refreshToken
-        ]);
+        return $this->userService->login($validated, $ip, $fingerprint, $response, $this->redis);
     }
 
     #[PostMapping('validate-admin-token')]

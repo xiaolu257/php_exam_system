@@ -25,12 +25,16 @@ const formConfig: AbstractFormConfigItem[] = [
   FormInputConfigFactory.createEditableCaptchaInput('captcha', '验证码', baseURL + '/user/captcha'),
 ];
 
-async function login(data: Record<string, any>) {
+async function login(data: Record<string, any>, callback: () => void) {
   myPost('user/login', data).then(async ({access_token, refresh_token}) => {
     localStorage.setItem('access_token', access_token);
     localStorage.setItem('refresh_token', refresh_token);
     MyMessage.success('登录成功！');
     await router.replace({name: 'Home'});
+  }).catch(({refresh_captcha = false}) => {
+    if (refresh_captcha) {
+      callback();
+    }
   })
 }
 
