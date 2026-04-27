@@ -13,14 +13,12 @@ declare(strict_types=1);
 
 use App\Middleware\AuthMiddleware;
 use App\Middleware\CorsMiddleware;
-use App\Middleware\PermissionMiddleware;
 use Hyperf\Validation\Middleware\ValidationMiddleware;
 
 return [
     'http' => [
         CorsMiddleware::class,
         AuthMiddleware::class,
-        PermissionMiddleware::class,
         ValidationMiddleware::class,
     ],
 ];

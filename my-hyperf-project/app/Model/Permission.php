@@ -30,7 +30,7 @@ class Permission extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected array $fillable = ['name', 'description', 'method', 'path'];
+    protected array $fillable = ['code', 'description', 'method', 'path'];
 
     /**
      * The attributes that should be cast to native types.

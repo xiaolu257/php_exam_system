@@ -90,15 +90,6 @@ class AuthMiddleware implements MiddlewareInterface
             }
 
             MiddlewareContext::setUserId($user->id);
-            $permissions = User::leftJoin('user_roles as ur', 'users.id', '=', 'ur.user_id')
-                ->leftJoin('roles as r', 'ur.role_id', '=', 'r.id')
-                ->leftJoin('role_permissions as rp', 'r.id', '=', 'rp.role_id')
-                ->leftJoin('permissions as p', 'rp.permission_id', '=', 'p.id')
-                ->where('users.id', $userId)
-                ->distinct()
-                ->pluck('p.code')
-                ->toArray();
-            MiddlewareContext::setPermissions($permissions);
             return $handler->handle($request);
         } catch (ExpiredException $e) {
             return $this->response->json(['msg' => 'Token 已过期'])->withStatus(401);

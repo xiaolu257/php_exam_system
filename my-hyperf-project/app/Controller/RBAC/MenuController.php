@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\RBAC;
 
 use App\Annotation\AuthOnly;
+use App\Annotation\Permission;
 use App\Model\Menu;
 use App\Request\MenuRequest;
 use App\Service\MenuService;
@@ -32,8 +33,7 @@ class MenuController
     }
 
     #[GetMapping('')]
-    #[AuthOnly]
-    //#[Permission('menu:paginate', '获取菜单分页数据，支持模糊查询')]
+    #[Permission('menu:paginate', '获取菜单分页数据，支持模糊查询')]
     #[Scene(MenuRequest::SCENE_GET_ONE_PAGE)]
     public function paginate(MenuRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {

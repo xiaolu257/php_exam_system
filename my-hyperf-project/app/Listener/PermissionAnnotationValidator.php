@@ -51,20 +51,19 @@ class PermissionAnnotationValidator implements ListenerInterface
         foreach ($permissionMethods as $item) {
             /** @var Permission $annotation */
             $annotation = $item['annotation'];
-
-            $name = $annotation->name;
+            $code = $annotation->code;
             $location = $item['class'] . '::' . $item['method'];
 
-            if (isset($permissionNameMap[$name])) {
+            if (isset($permissionNameMap[$code])) {
                 throw new \LogicException(sprintf(
                     '权限名重复，"%s"已存在于："%s"，重复定义于："%s"',
-                    $name,
-                    $permissionNameMap[$name],
+                    $code,
+                    $permissionNameMap[$code],
                     $location
                 ));
             }
 
-            $permissionNameMap[$name] = $location;
+            $permissionNameMap[$code] = $location;
         }
 
         // ===== 构建方法 → 注解列表 =====

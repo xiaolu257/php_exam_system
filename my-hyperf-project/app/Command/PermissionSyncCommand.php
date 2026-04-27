@@ -84,7 +84,7 @@ class PermissionSyncCommand extends HyperfCommand
                 }
 
                 $permissions[] = [
-                    'name' => $perm->name,
+                    'code' => $perm->code,
                     'description' => $perm->description,
                     'method' => $httpMethod,
                     'path' => $path,
@@ -98,7 +98,7 @@ class PermissionSyncCommand extends HyperfCommand
     {
         foreach ($permissions as $permission) {
             /** @var PermissionModel|null $model */
-            $model = $existing[$permission['name']] ?? null;
+            $model = $existing[$permission['code']] ?? null;
 
             if ($model) {
                 // 对比三个核心字段
@@ -109,7 +109,7 @@ class PermissionSyncCommand extends HyperfCommand
 
                 if ($hasChanged) {
                     $oldData = [
-                        'name' => $model->code,
+                        'code' => $model->code,
                         'description' => $model->description,
                         'method' => $model->method,
                         'path' => $model->path,
@@ -123,7 +123,7 @@ class PermissionSyncCommand extends HyperfCommand
 
                     $this->logService->record(
                         'update',
-                        $permission['name'],
+                        $permission['code'],
                         $oldData,
                         $permission,
                         $batchId
@@ -134,7 +134,7 @@ class PermissionSyncCommand extends HyperfCommand
 
                 $this->logService->record(
                     'create',
-                    $permission['name'],
+                    $permission['code'],
                     null,
                     $permission,
                     $batchId
@@ -143,18 +143,18 @@ class PermissionSyncCommand extends HyperfCommand
         }
     }
 
-    private function deleteInexistencePermission(Collection $existing, array $names, string $batchId): void
+    private function deleteInexistencePermission(Collection $existing, array $codes, string $batchId): void
     {
         $existingNames = $existing->keys()->toArray();
 
-        $toDeleteNames = array_diff($existingNames, $names);
+        $toDeleteNames = array_diff($existingNames, $codes);
 
         if (empty($toDeleteNames)) {
             return;
         }
 
-        $models = PermissionModel::whereIn('name', $toDeleteNames)
-            ->get(['id', 'name', 'description', 'method', 'path']);
+        $models = PermissionModel::whereIn('code', $toDeleteNames)
+            ->get(['id', 'code', 'description', 'method', 'path']);
 
         $deleteIds = $models->pluck('id');
 
@@ -172,9 +172,9 @@ class PermissionSyncCommand extends HyperfCommand
         foreach ($models as $model) {
             $this->logService->record(
                 'delete',
-                $model->name,
+                $model->code,
                 [
-                    'name' => $model->name,
+                    'code' => $model->code,
                     'description' => $model->description,
                     'method' => $model->method,
                     'path' => $model->path,
@@ -188,24 +188,24 @@ class PermissionSyncCommand extends HyperfCommand
     public function handle(): void
     {
         $permissions = $this->collectPermissionsFromAnnotation();
-        $names = array_column($permissions, 'name');
+        $codes = array_column($permissions, 'code');
 
-        if (empty($names)) {
+        if (empty($codes)) {
             $this->error('未扫描到任何权限，已中止删除操作！');
             return;
         }
-        //var_dump($names);
-        Db::transaction(function () use ($permissions, $names) {
+        //var_dump($codes);
+        Db::transaction(function () use ($permissions, $codes) {
             $batchId = uniqid('perm_sync_', true);
 
             //只查未删除的
             $existing = PermissionModel::query()
-                ->get(['id', 'name', 'description', 'method', 'path'])
-                ->keyBy('name');
+                ->get(['id', 'code', 'description', 'method', 'path'])
+                ->keyBy('code');
 
             $this->createOrUpdatePermission($existing, $permissions, $batchId);
             // 删除数据库中没有相关注解的权限
-            $this->deleteInexistencePermission($existing, $names, $batchId);
+            $this->deleteInexistencePermission($existing, $codes, $batchId);
         });
 
     }
