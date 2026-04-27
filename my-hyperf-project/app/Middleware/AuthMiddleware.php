@@ -26,8 +26,6 @@ class AuthMiddleware implements MiddlewareInterface
 {
     #[Inject]
     protected HttpResponse $response;
-    #[Inject]
-    protected MiddlewareContext $authContext;
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -44,7 +42,7 @@ class AuthMiddleware implements MiddlewareInterface
         /** @var PublicAPI|null $publicAPI */
         $publicAPI = $annotations[PublicAPI::class] ?? null;
         if ($publicAPI) {
-            $this->authContext::setSkipPermission();
+            MiddlewareContext::setSkipPermission();
             return $handler->handle($request);
         }
 
@@ -91,7 +89,7 @@ class AuthMiddleware implements MiddlewareInterface
                 return $this->response->json(['success' => false, 'error' => '用户不存在']);
             }
 
-            $this->authContext->setUserId($user->id);
+            MiddlewareContext::setUserId($user->id);
             $permissions = User::leftJoin('user_roles as ur', 'users.id', '=', 'ur.user_id')
                 ->leftJoin('roles as r', 'ur.role_id', '=', 'r.id')
                 ->leftJoin('role_permissions as rp', 'r.id', '=', 'rp.role_id')
@@ -100,7 +98,7 @@ class AuthMiddleware implements MiddlewareInterface
                 ->distinct()
                 ->pluck('p.code')
                 ->toArray();
-            $this->authContext->setPermissions($permissions);
+            MiddlewareContext::setPermissions($permissions);
             return $handler->handle($request);
         } catch (ExpiredException $e) {
             return $this->response->json(['msg' => 'Token 已过期'])->withStatus(401);

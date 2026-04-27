@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b463efb5ee83ac9a91ab80fe04c57903",
+    "content-hash": "be2987bf06f47e72a2307ac7602aa472",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -3127,6 +3127,80 @@
             "time": "2025-10-30T01:44:44+00:00"
         },
         {
+            "name": "hyperf/rate-limit",
+            "version": "v3.1.63",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hyperf/rate-limit.git",
+                "reference": "c9db5037dbbb951760768d95248cc398c9dde84d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hyperf/rate-limit/zipball/c9db5037dbbb951760768d95248cc398c9dde84d",
+                "reference": "c9db5037dbbb951760768d95248cc398c9dde84d",
+                "shasum": ""
+            },
+            "require": {
+                "hyperf/contract": "~3.1.0",
+                "hyperf/coroutine": "~3.1.0",
+                "hyperf/support": "~3.1.0",
+                "hyperf/tappable": "~3.1.0",
+                "hyperf/token-bucket": "^2.0",
+                "php": ">=8.1",
+                "psr/container": "^1.0 || ^2.0",
+                "psr/simple-cache": "^1.0 || ^2.0 || ^3.0"
+            },
+            "suggest": {
+                "hyperf/contract": "Required to use annotations.",
+                "hyperf/di": "Required to use annotations.",
+                "hyperf/http-server": "Required to use annotations.",
+                "hyperf/redis": "Required to use RedisStorage."
+            },
+            "type": "library",
+            "extra": {
+                "hyperf": {
+                    "config": "Hyperf\\RateLimit\\ConfigProvider"
+                },
+                "branch-alias": {
+                    "dev-master": "3.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Hyperf\\RateLimit\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A rate limiter implemented for Hyperf or other coroutine framework",
+            "homepage": "https://hyperf.io",
+            "keywords": [
+                "hyperf",
+                "php",
+                "rate-limiter",
+                "token-bucket"
+            ],
+            "support": {
+                "docs": "https://hyperf.wiki",
+                "issues": "https://github.com/hyperf/hyperf/issues",
+                "pull-request": "https://github.com/hyperf/hyperf/pulls",
+                "source": "https://github.com/hyperf/hyperf"
+            },
+            "funding": [
+                {
+                    "url": "https://hyperf.wiki/#/zh-cn/donate",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://opencollective.com/hyperf",
+                    "type": "open_collective"
+                }
+            ],
+            "time": "2025-10-30T01:44:44+00:00"
+        },
+        {
             "name": "hyperf/redis",
             "version": "v3.1.66",
             "source": {
@@ -3606,6 +3680,72 @@
             "time": "2025-10-30T01:44:44+00:00"
         },
         {
+            "name": "hyperf/token-bucket",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hyperf/token-bucket.git",
+                "reference": "7ebb9e7d01d3daecf23b80502b2adffd2fcb2283"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hyperf/token-bucket/zipball/7ebb9e7d01d3daecf23b80502b2adffd2fcb2283",
+                "reference": "7ebb9e7d01d3daecf23b80502b2adffd2fcb2283",
+                "shasum": ""
+            },
+            "require": {
+                "ext-bcmath": "*",
+                "malkusch/lock": "^2.0",
+                "php": "^8.0"
+            },
+            "replace": {
+                "bandwidth-throttle/token-bucket": "2.0.0"
+            },
+            "require-dev": {
+                "mikey179/vfsstream": "^1.5.0",
+                "mockery/mockery": "^1.5",
+                "php-mock/php-mock-phpunit": "^2.6",
+                "phpunit/phpunit": "^9.0",
+                "predis/predis": "^1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "bandwidthThrottle\\tokenBucket\\": "classes/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "WTFPL"
+            ],
+            "authors": [
+                {
+                    "name": "Markus Malkusch",
+                    "email": "markus@malkusch.de",
+                    "homepage": "http://markus.malkusch.de",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Hyperf Developers",
+                    "email": "group@hyperf.io"
+                }
+            ],
+            "description": "Implementation of the Token Bucket algorithm.",
+            "homepage": "https://github.com/bandwidth-throttle/token-bucket",
+            "keywords": [
+                "bandwidth",
+                "rate limit",
+                "rate limiting",
+                "throttle",
+                "throttling",
+                "token bucket"
+            ],
+            "support": {
+                "source": "https://github.com/hyperf/token-bucket/tree/v2.0.0"
+            },
+            "time": "2023-01-07T12:45:03+00:00"
+        },
+        {
             "name": "hyperf/translation",
             "version": "v3.1.63",
             "source": {
@@ -3867,6 +4007,100 @@
                 }
             ],
             "time": "2025-10-11T18:13:12+00:00"
+        },
+        {
+            "name": "malkusch/lock",
+            "version": "2.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-lock/lock.git",
+                "reference": "66ccdccbb3b9a2cabdeba077f6aa1759dd3fbcd2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-lock/lock/zipball/66ccdccbb3b9a2cabdeba077f6aa1759dd3fbcd2",
+                "reference": "66ccdccbb3b9a2cabdeba077f6aa1759dd3fbcd2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4 <8.4",
+                "psr/log": "^1.0 || ^2.0 || ^3.0"
+            },
+            "require-dev": {
+                "eloquent/liberator": "^2.0 || ^3.0",
+                "ergebnis/composer-normalize": "^2.13",
+                "ergebnis/phpunit-slow-test-detector": "^2.9",
+                "ext-memcached": "*",
+                "ext-pcntl": "*",
+                "ext-pdo": "*",
+                "ext-pdo_mysql": "*",
+                "ext-pdo_sqlite": "*",
+                "ext-sysvsem": "*",
+                "friendsofphp/php-cs-fixer": "^3.0",
+                "mikey179/vfsstream": "^1.6.11",
+                "php-mock/php-mock-phpunit": "^2.1",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^9.5.25 || ^10.0 || ^11.0",
+                "predis/predis": "^1.1.8",
+                "spatie/async": "^1.5"
+            },
+            "suggest": {
+                "ext-igbinary": "To use this library with PHP Redis igbinary serializer enabled.",
+                "ext-lzf": "To use this library with PHP Redis lzf compression enabled.",
+                "ext-pnctl": "Enables locking with flock without busy waiting in CLI scripts.",
+                "ext-redis": "To use this library with the PHP Redis extension.",
+                "ext-sysvsem": "Enables locking using semaphores.",
+                "predis/predis": "To use this library with predis."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "malkusch\\lock\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Markus Malkusch",
+                    "email": "markus@malkusch.de",
+                    "homepage": "http://markus.malkusch.de"
+                },
+                {
+                    "name": "Willem Stuursma-Ruwen",
+                    "email": "willem@stuursma.name"
+                },
+                {
+                    "name": "Michael Voříšek",
+                    "homepage": "https://mvorisek.cz/"
+                }
+            ],
+            "description": "Mutex library for exclusive code execution.",
+            "homepage": "https://github.com/malkusch/lock",
+            "keywords": [
+                "advisory-locks",
+                "cas",
+                "flock",
+                "lock",
+                "locking",
+                "memcache",
+                "mutex",
+                "mysql",
+                "postgresql",
+                "redis",
+                "redlock",
+                "semaphore"
+            ],
+            "support": {
+                "issues": "https://github.com/php-lock/lock/issues",
+                "source": "https://github.com/php-lock/lock/tree/2.3.0"
+            },
+            "time": "2024-12-05T22:54:07+00:00"
         },
         {
             "name": "monolog/monolog",

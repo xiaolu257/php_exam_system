@@ -17,13 +17,11 @@ class PermissionMiddleware implements MiddlewareInterface
 {
     #[Inject]
     protected ResponseInterface $response;
-    #[Inject]
-    protected MiddlewareContext $authContext;
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): \Psr\Http\Message\ResponseInterface
     {
         // Auth中间件若加入跳过权限校验标志，直接放行
-        if ($this->authContext::getSkipPermission()) {
+        if (MiddlewareContext::getSkipPermission()) {
             return $handler->handle($request);
         }
         /** @var Dispatched|null $dispatched */
@@ -49,7 +47,7 @@ class PermissionMiddleware implements MiddlewareInterface
         }
         $name = $permission->name;
 
-        $userPermission = $this->authContext->getPermissions();
+        $userPermission = MiddlewareContext::getPermissions();
         if (!in_array($name, $userPermission)) {
             return $this->response->json(['msg' => '您的权限不足，无法使用本接口'])->withStatus(403);
         }

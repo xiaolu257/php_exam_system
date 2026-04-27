@@ -10,7 +10,7 @@ use Hyperf\Redis\Redis;
 
 class UserService
 {
-    public function login(array $validated, string $ip, string $fingerprint, ResponseInterface $response, Redis $redis): \Psr\Http\Message\ResponseInterface
+    public function login(array $validated, string $fingerprint, ResponseInterface $response, Redis $redis): \Psr\Http\Message\ResponseInterface
     {
         // 1. 检查账号锁定状态
         $username = $validated['username'];
@@ -22,23 +22,6 @@ class UserService
             if ($lockTTL > 0 && $redis->get($failKey) >= $maxAttempts) {
                 return $response->json(['msg' => "账号已锁定，请{$lockTTL}秒后再试"])->withStatus(401);
             }
-        }
-
-
-        // 2. IP限流（防御性）
-        $ipKey = "login:ip:{$ip}";
-        $ipCount = $redis->incr($ipKey);
-        if ($ipCount === 1) $redis->expire($ipKey, 60);
-        if ($ipCount > 100) {
-            return $response->json(['msg' => '请求过于频繁，请稍后再试'])->withStatus(429);
-        }
-
-        // 3. 指纹限流（核心限流）
-        $fingerprintKey = "login:fingerprint:{$fingerprint}";
-        $fpCount = $redis->incr($fingerprintKey);
-        if ($fpCount === 1) $redis->expire($fingerprintKey, 60);
-        if ($fpCount > 10) {
-            return $response->json(['msg' => '请求过于频繁，请稍后再试'])->withStatus(429);
         }
 
         // 4. 验证码验证

@@ -178,13 +178,12 @@ class UserController
     public function login(UserRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
     {
         $validated = $request->validated();
-        $ip = $request->getServerParams()['remote_addr'];
         // ✅ 获取设备指纹（来自请求头）
         $fingerprint = $request->header('Fingerprint');
         if (!$fingerprint) {
             return $response->json(['msg' => '无效的请求'])->withStatus(422);
         }
-        return $this->userService->login($validated, $ip, $fingerprint, $response, $this->redis);
+        return $this->userService->login($validated, $fingerprint, $response, $this->redis);
     }
 
     #[PostMapping('validate-admin-token')]

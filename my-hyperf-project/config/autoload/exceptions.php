@@ -11,6 +11,7 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
+use App\Exception\Handler\RateLimitExceptionHandler;
 use App\Exception\Handler\ValidationExceptionHandler;
 
 return [
@@ -19,6 +20,7 @@ return [
             Hyperf\HttpServer\Exception\Handler\HttpExceptionHandler::class,
             ValidationExceptionHandler::class,
             App\Exception\Handler\AppExceptionHandler::class,
+            RateLimitExceptionHandler::class,
         ],
     ],
 ];
