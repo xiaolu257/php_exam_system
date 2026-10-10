@@ -136,7 +136,12 @@ class UserController
     {
         $builder = new CaptchaBuilder();
         //使用系统字体
-        $builder->build(160, 50, '/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf');
+//        $builder->build(160, 50, '/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf');
+        $builder->build(
+            160,
+            50,
+            BASE_PATH . '/vendor/gregwar/captcha/src/Gregwar/Captcha/Font/captcha0.ttf'
+        );
         $code = strtolower($builder->getPhrase());
         $fingerprint = $request->getHeaderLine('Fingerprint');
         $this->redis->set("captcha:{$fingerprint}", $code, 300);

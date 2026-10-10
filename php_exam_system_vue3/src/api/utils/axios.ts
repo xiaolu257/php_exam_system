@@ -8,7 +8,7 @@ import MyMessage from "@/utils/myMessage";
 let loadingInstance: any = null;
 
 // const baseURL = 'https://xiaolu.cn/api';
-const baseURL = 'http://192.168.217.130:9501';
+const baseURL = 'http://192.168.217.10:9501';
 
 const myAxios = axios.create({
     baseURL,

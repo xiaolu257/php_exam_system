@@ -9,6 +9,7 @@ use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Di\Aop\AbstractAspect;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
+use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Redis\Redis;
 
@@ -17,6 +18,8 @@ class PermissionAspect extends AbstractAspect
 {
     #[Inject]
     protected Redis $redis;
+    #[Inject]
+    protected RequestInterface $request;
     #[Inject]
     protected ResponseInterface $response;
     // 要切入的类或 Trait，可以多个，亦可通过 :: 标识到具体的某个方法，通过 * 可以模糊匹配
@@ -41,6 +44,16 @@ class PermissionAspect extends AbstractAspect
         $userId = MiddlewareContext::getUserId();
         if (!$userId) {
             return $this->response->json(['msg' => '未登录用户无法使用本接口'])->withStatus(401);
+        }
+
+        //用户级限流
+        $path = trim($this->request->getPathInfo(), '/');
+        $method = $this->request->getMethod();
+        $ipKey = "$path:$method:userId:{$userId}";
+        $ipCount = $this->redis->incr($ipKey);
+        if ($ipCount === 1) $this->redis->expire($ipKey, 60);
+        if ($ipCount > 30) {
+            return $this->response->json(['msg' => '请求过于频繁，请稍后再试'])->withStatus(429);
         }
         $userPermission = User::leftJoin('user_roles as ur', 'users.id', '=', 'ur.user_id')
             ->leftJoin('roles as r', 'ur.role_id', '=', 'r.id')

@@ -39,6 +39,9 @@ class PublicAPIAspect extends AbstractAspect
         // 在调用前进行某些处理
         $ip = $this->request->getServerParams()['remote_addr'];
         $fingerprint = $this->request->header('Fingerprint');
+        if (!$fingerprint) {
+            return $this->response->json(['msg' => '无效的请求'])->withStatus(422);
+        }
         $path = trim($this->request->getPathInfo(), '/');
         $method = $this->request->getMethod();
 
@@ -54,7 +57,7 @@ class PublicAPIAspect extends AbstractAspect
         $fingerprintKey = "$path:$method:fingerprint:{$fingerprint}";
         $fpCount = $this->redis->incr($fingerprintKey);
         if ($fpCount === 1) $this->redis->expire($fingerprintKey, 60);
-        if ($fpCount > 10) {
+        if ($fpCount > 5) {
             return $this->response->json(['msg' => '请求过于频繁，请稍后再试'])->withStatus(429);
         }
 

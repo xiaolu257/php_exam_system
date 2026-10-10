@@ -15,7 +15,7 @@ class PermissionLogService
         $this->logger = $loggerFactory->get('PermissionLogService', 'permission_logs');
     }
 
-    public function record(string $action, string $name, array $old = null, array $new = null, ?string $batchId = null): void
+    public function record(string $action, string $name, ?array $old = null, ?array $new = null, ?string $batchId = null): void
     {
         // 1️⃣ 数据库日志
         PermissionLog::create([
