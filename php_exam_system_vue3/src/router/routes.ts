@@ -1,8 +1,9 @@
 import router from "@/router/index";
 import {useGlobalStore} from "@/stores/global";
 import {buildMenu} from "@/router/menu";
+import type {RouteRecordRaw} from "vue-router";
 
-const allAsyncRoutes = [
+const menuRoutes = [
     {
         path: 'SingleChoiceQuestionManagement',
         name: 'SingleChoiceQuestionManagement',
@@ -27,21 +28,6 @@ const allAsyncRoutes = [
         path: 'ExamPaperManagement',
         name: 'ExamPaperManagement',
         component: () => import("@/view/exam/ExamPaperManagement.vue"),
-    },
-    {
-        name: 'BeforeExam',
-        path: '/exam/:id/before',
-        component: () => import("@/view/exam/BeforeExam.vue"),
-    },
-    {
-        name: 'ExamStart',
-        path: '/exam/:id/start',
-        component: () => import('@/view/exam/ExamStart.vue'),
-    },
-    {
-        name: 'ExamPreview',
-        path: '/exam/:id/preview',
-        component: () => import('@/view/exam/ExamPreview.vue'),
     },
     {
         name: 'MenuManagement',
@@ -79,17 +65,34 @@ const allAsyncRoutes = [
         component: () => import('@/view/permission/UserRoleManagement.vue'),
     }
 ];
+const standaloneRoutes = [
+    {
+        name: 'BeforeExam',
+        path: '/exam/:id/before',
+        component: () => import("@/view/exam/BeforeExam.vue"),
+    },
+    {
+        name: 'ExamStart',
+        path: '/exam/:id/start',
+        component: () => import('@/view/exam/ExamStart.vue'),
+    },
+    {
+        name: 'ExamPreview',
+        path: '/exam/:id/preview',
+        component: () => import('@/view/exam/ExamPreview.vue'),
+    },
+]
 
-function generateRoutesFromMenus(menus: any[]) {
-    const routes: any[] = [];
+// 通用函数：根据菜单 code 筛选对应的路由
+function generateRoutesFromMenus(
+    menus: any[],
+    routeConfigs: RouteRecordRaw[]
+): RouteRecordRaw[] {
+    const menuCodes = new Set<string>();
 
     function traverse(items: any[]) {
         for (const item of items) {
-            const matchRoute = allAsyncRoutes.find(r => r.name === item.code);
-
-            if (matchRoute) {
-                routes.push(matchRoute);
-            }
+            menuCodes.add(item.code);
 
             if (item.children?.length) {
                 traverse(item.children);
@@ -98,17 +101,39 @@ function generateRoutesFromMenus(menus: any[]) {
     }
 
     traverse(menus);
-    return routes;
+
+    return routeConfigs.filter(route =>
+        route.name != null && menuCodes.has(String(route.name))
+    );
 }
 
 export function setupDynamicRoutes(menus: any[]) {
-    const routesToAdd = generateRoutesFromMenus(menus);
+    // 1. 菜单路由：添加到 Manager 下
+    const routesToAdd = generateRoutesFromMenus(
+        menus,
+        menuRoutes
+    );
 
     routesToAdd.forEach(route => {
-        if (!router.hasRoute(route.name)) {
+        if (!router.hasRoute(route.name!)) {
             router.addRoute('Manager', route);
         }
     });
 
-    useGlobalStore().setSidebarMenus(buildMenu(menus));
+    // 2. 独立路由：添加到根路由
+    const standaloneRoutesToAdd = generateRoutesFromMenus(
+        menus,
+        standaloneRoutes
+    );
+
+    standaloneRoutesToAdd.forEach(route => {
+        if (!router.hasRoute(route.name!)) {
+            router.addRoute(route);
+        }
+    });
+    
+    // 3. 更新侧边栏
+    useGlobalStore().setSidebarMenus(buildMenu(menus.filter(route => {
+        return route.code !== 'HidePage';
+    })));
 }
