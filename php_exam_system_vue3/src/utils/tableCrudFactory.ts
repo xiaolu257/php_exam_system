@@ -1,5 +1,14 @@
-import {addItem, deleteItemRows, getOnePageItem, type PageCallback, searchItem, updateItem} from "@/api/utils/baseAPI";
+import {
+    addItem,
+    batchAction,
+    deleteItemRows,
+    getOnePageItem,
+    type PageCallback,
+    searchItem,
+    updateItem
+} from "@/api/utils/baseAPI";
 import type {
+    BatchActionFunction,
     DeleteRowsFunction,
     GetOnePageDataFunction,
     SearchOnePageDataFunction
@@ -32,6 +41,12 @@ export class TableCrudFactory {
     static creatDeleteRows(url: string): DeleteRowsFunction {
         return (selectedRows: number[], deleteRowsSuccess: () => void) => {
             deleteItemRows(selectedRows, deleteRowsSuccess, url)
+        }
+    }
+
+    static creatBatchAction(url: string, batchActionName: string = '批量操作'): BatchActionFunction {
+        return (selectedRows: number[], deleteRowsSuccess: () => void) => {
+            batchAction(batchActionName, selectedRows, deleteRowsSuccess, url)
         }
     }
 

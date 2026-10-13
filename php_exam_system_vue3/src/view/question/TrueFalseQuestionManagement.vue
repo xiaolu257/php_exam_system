@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-import type {TableConfig} from "@/components/public/table/tableTypes";
+import type {BaseTableConfig} from "@/components/public/table/tableTypes";
 import {TextTableColumn} from "@/components/public/table/tableTypes";
 import {FormInputConfigFactory} from "@/utils/formInputConfig";
 import {FormSelectConfigFactory} from "@/utils/formSelectConfig";
@@ -35,7 +35,7 @@ const editDialogConfig: TableColumnEditDialogConfig = {
   ],
   submitAction: TrueFalseQuestionStandardCRUD.updateItem,
 };
-const tableConfig: TableConfig = {
+const tableConfig: BaseTableConfig = {
   deleteRows: TrueFalseQuestionStandardCRUD.deleteRows,
   getOnePageData: TrueFalseQuestionStandardCRUD.getOnePageData,
   searchData: TrueFalseQuestionStandardCRUD.searchOnePageData,

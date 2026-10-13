@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-import type {TableConfig} from "@/components/public/table/tableTypes";
+import type {BaseTableConfig} from "@/components/public/table/tableTypes";
 import {TextTableColumn} from "@/components/public/table/tableTypes";
 import {FormInputConfigFactory} from "@/utils/formInputConfig";
 import {computed} from 'vue';
@@ -47,7 +47,7 @@ const editDialogConfig: TableColumnEditDialogConfig = {
   ],
   submitAction: singleChoiceQuestionStandardCRUD.updateItem,
 };
-const tableConfig: TableConfig = {
+const tableConfig: BaseTableConfig = {
   deleteRows: singleChoiceQuestionStandardCRUD.deleteRows,
   getOnePageData: singleChoiceQuestionStandardCRUD.getOnePageData,
   searchData: singleChoiceQuestionStandardCRUD.searchOnePageData,

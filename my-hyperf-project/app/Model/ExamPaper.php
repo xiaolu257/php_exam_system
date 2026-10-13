@@ -9,16 +9,18 @@ use Hyperf\DbConnection\Model\Model;
 
 /**
  * @property int $id
- * @property string $title
- * @property string $description
- * @property int $duration
- * @property int $total_score
- * @property Carbon $start_time
- * @property Carbon $end_time
- * @property int $max_attempts
- * @property Carbon $created_at
- * @property Carbon $updated_at
- * @property string $deleted_at
+ * * @property string $title
+ * * @property string $description
+ * * @property int $duration
+ * * @property int $total_score
+ * * @property Carbon $start_time
+ * * @property Carbon $end_time
+ * * @property int $max_attempts
+ * * @property int $publisher_id
+ * * @property string $admission_password_hash
+ * * @property Carbon $created_at
+ * * @property Carbon $updated_at
+ * * @property string $deleted_at
  */
 class ExamPaper extends Model
 {
@@ -42,6 +44,7 @@ class ExamPaper extends Model
         'max_attempts' => 'integer',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'publisher_id' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];

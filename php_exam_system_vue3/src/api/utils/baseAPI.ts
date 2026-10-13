@@ -74,5 +74,28 @@ function deleteItemRows(
         });
 }
 
+function batchAction(
+    batchActionName: string,
+    ids: number[],
+    deleteSuccess: () => void,
+    url: string
+) {
+    const message = h('div', [
+        `确认${batchActionName}选中的 ${ids.length} 条数据吗？`,
+        h('br'),
+        `IDs: [${ids.join(', ')}]`
+    ])
 
-export {getOnePageItem, searchItem, addItem, updateItem, deleteItemRows};
+    ElMessageBox.confirm(message, 'Warning', {confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning',})
+        .then(() => {
+            myDel(url, {ids}).then(({msg}) => {
+                MyMessage.success(msg);
+                deleteSuccess();
+            });
+        })
+        .catch(() => {
+            MyMessage.info('取消操作');
+        });
+}
+
+export {getOnePageItem, searchItem, addItem, updateItem, deleteItemRows, batchAction};

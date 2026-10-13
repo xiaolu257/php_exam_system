@@ -16,6 +16,8 @@ class ExamPaperRequest extends FormRequest
     public const SCENE_DELETE = 'delete';
     public const SCENE_SUBMIT_EXAM_PAPER = 'submitExamPaper';
 
+    public const SCENE_GET_EXAM_ADMISSION = 'getExamAdmission';
+
     public function authorize(): bool
     {
         return true;
@@ -23,55 +25,66 @@ class ExamPaperRequest extends FormRequest
 
     protected array $scenes = [
         self::SCENE_GET_ONE_PAGE => [
-            'page' => 'required|integer|gt:0',
-            'orderBy' => 'string|in:id,content,created_at',
+            'page'           => 'required|integer|gt:0',
+            'orderBy'        => 'string|in:id,content,created_at',
             'orderDirection' => 'string|in:asc,desc',
-            'searchField' => 'string|in:id,content,options',
-            'searchValue' => 'required_with:searchField|string|max:100'
+            'searchField'    => 'string|in:id,content,options',
+            'searchValue'    => 'required_with:searchField|string|max:100',
         ],
 
-        self::SCENE_ADD => [
-            'title' => 'required|string|max:255',
-            'description' => 'filled|string|max:500',
-            'duration' => 'required|integer:strict|gt:0',
-            'single_count' => 'required|integer:strict|gt:0',
-            'multiple_count' => 'required|integer:strict|gt:0',
-            'true_false_count' => 'required|integer:strict|gt:0',
+        self::SCENE_GET_EXAM_ADMISSION => [
+            'id'             => 'required|integer|gt:0',
+            'page'           => 'required|integer|gt:0',
+            'orderBy'        => 'string|in:id,content,created_at',
+            'orderDirection' => 'string|in:asc,desc',
+            'searchField'    => 'string|in:id,user_id,username,nickname',
+            'searchValue'    => 'required_with:searchField|string|max:100',
+        ],
+        self::SCENE_ADD                => [
+            'title'              => 'required|string|max:255',
+            'description'        => 'filled|string|max:500',
+            'duration'           => 'required|integer:strict|gt:0',
+            'single_count'       => 'required|integer:strict|gt:0',
+            'multiple_count'     => 'required|integer:strict|gt:0',
+            'true_false_count'   => 'required|integer:strict|gt:0',
             'short_answer_count' => 'required|integer:strict|gt:0',
-            'start_time' => 'required|date_format:Y-m-d H:i:s',
-            'end_time' => 'required|date_format:Y-m-d H:i:s',
-            'max_attempts' => 'integer:strict|gt:0',
+            'start_time'         => 'required|date_format:Y-m-d H:i:s',
+            'end_time'           => 'required|date_format:Y-m-d H:i:s',
+            'max_attempts'       => 'integer:strict|gt:0',
         ],
 
         self::SCENE_UPDATE => [
-            'id' => 'required|integer:strict|gt:0',
-            'title' => 'filled|string|max:255',
-            'description' => 'filled|string|max:500',
-            'duration' => 'integer:strict|gt:0',
-            'start_time' => 'date_format:Y-m-d H:i:s',
-            'end_time' => 'date_format:Y-m-d H:i:s',
+            'id'           => 'required|integer:strict|gt:0',
+            'title'        => 'filled|string|max:255',
+            'description'  => 'filled|string|max:500',
+            'duration'     => 'integer:strict|gt:0',
+            'start_time'   => 'date_format:Y-m-d H:i:s',
+            'end_time'     => 'date_format:Y-m-d H:i:s',
             'max_attempts' => 'integer:strict|gt:0',
         ],
 
-        self::SCENE_DELETE => [
-            'ids' => 'required|array',
+        self::SCENE_DELETE            => [
+            'ids'   => 'required|array',
             'ids.*' => 'integer:strict|gt:0',
         ],
         self::SCENE_SUBMIT_EXAM_PAPER => [
-            'answers.single_questions' => 'present|array',
-            'answers.single_questions.*.id' => 'required|integer:strict|gt:0',
+            'answers.single_questions'                => 'present|array',
+            'answers.single_questions.*.id'           => 'required|integer:strict|gt:0',
             //single_questions.*.answer,  ""为未作答
-            'answers.multiple_questions' => 'present|array',
-            'answers.multiple_questions.*.id' => 'required|integer:strict|gt:0',
-            'answers.multiple_questions.*.answer' => 'present|array',//[]为未作答
-            'answers.multiple_questions.*.answer.*' => 'filled|regex:/^[A-J]$/',
-            'answers.true_false_questions' => 'present|array',
-            'answers.true_false_questions.*.id' => 'required|integer:strict|gt:0',
-            'answers.true_false_questions.*.answer' => 'required|integer:strict|in:-1,0,1',//-1为未作答
-            'answers.short_answer_questions' => 'present|array',
-            'answers.short_answer_questions.*.id' => 'required|integer:strict|gt:0',
-            'answers.short_answer_questions.*.answer' => 'present|string|max:1000',//""为未作答
-        ]
+            'answers.multiple_questions'              => 'present|array',
+            'answers.multiple_questions.*.id'         => 'required|integer:strict|gt:0',
+            'answers.multiple_questions.*.answer'     => 'present|array',
+            //[]为未作答
+            'answers.multiple_questions.*.answer.*'   => 'filled|regex:/^[A-J]$/',
+            'answers.true_false_questions'            => 'present|array',
+            'answers.true_false_questions.*.id'       => 'required|integer:strict|gt:0',
+            'answers.true_false_questions.*.answer'   => 'required|integer:strict|in:-1,0,1',
+            //-1为未作答
+            'answers.short_answer_questions'          => 'present|array',
+            'answers.short_answer_questions.*.id'     => 'required|integer:strict|gt:0',
+            'answers.short_answer_questions.*.answer' => 'present|string|max:1000',
+            //""为未作答
+        ],
     ];
 
     public function rules(): array
@@ -89,7 +102,7 @@ class ExamPaperRequest extends FormRequest
                         if (!preg_match('/^[A-J]$/', $value)) {
                             $fail('单选答案必须是 ""或A-J');
                         }
-                    }
+                    },
                 ],
             ];
 
@@ -102,28 +115,28 @@ class ExamPaperRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'page' => '页码',
-            'orderBy' => '排序字段',
+            'page'           => '页码',
+            'orderBy'        => '排序字段',
             'orderDirection' => '排序方向',
-            'searchField' => '搜索字段',
-            'searchValue' => '搜索值',
-            'content' => '题目',
-            'options' => '选项',
-            'options.*' => '选项内容',
+            'searchField'    => '搜索字段',
+            'searchValue'    => '搜索值',
+            'content'        => '题目',
+            'options'        => '选项',
+            'options.*'      => '选项内容',
             'correct_answer' => '正确答案',
-            'ids' => 'ID列表',
-            'ids.*' => 'ID列表的每一项ID'
+            'ids'            => 'ID列表',
+            'ids.*'          => 'ID列表的每一项ID',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'content.filled' => ':attribute 不能为空',
-            'options.*.filled' => ':attribute 不能为空',
+            'content.filled'          => ':attribute 不能为空',
+            'options.*.filled'        => ':attribute 不能为空',
             'correct_answer.index_in' => ':attribute 必须存在于 :field 中',
-            'correct_answer.regex' => ':attribute 必须是 A 到 J 之间的字母',
-            'correct_answer.filled' => ':attribute 不能为空',
+            'correct_answer.regex'    => ':attribute 必须是 A 到 J 之间的字母',
+            'correct_answer.filled'   => ':attribute 不能为空',
         ];
     }
 }

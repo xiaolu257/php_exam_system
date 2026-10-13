@@ -9,11 +9,14 @@
                        :export-data-to-excel="exportDataToExcel"
       />
     </el-col>
-    <SearchBar v-model:is-search="isSearch"
-               :table-columns="tableConfig.tableColumns"
-               v-model:searchKey="searchKey"
-               v-model:searchValue="searchValue"
-    />
+    <div style="margin-left: auto;">
+      <SearchBar v-model:is-search="isSearch"
+                 :table-columns="tableConfig.tableColumns"
+                 v-model:searchKey="searchKey"
+                 v-model:searchValue="searchValue"
+      />
+    </div>
+
   </el-row>
 
   <el-table ref="tableRef"
@@ -22,7 +25,7 @@
             border
             show-overflow-tooltip
             stripe
-            style="width: 98%;height: 668px; margin: 0 15px; border: 1px solid darkgrey;"
+            style="width: 98%;height: 668px; margin: 1%; border: 1px solid darkgrey;"
             @sort-change="handleSortChange"
             @selection-change="handleSelectionChange"
   >
@@ -31,7 +34,7 @@
     <el-table-column v-if="showOperationColumn" align="center" fixed="right" label="操作"
                      :width="tableConfig.operationWidth||200">
       <template #default="{row}">
-        <slot name="operationButton" :row="row"></slot>
+        <slot name="operationButton" :row="row" :refreshTable="refreshTableData"></slot>
         <BaseEditFormDialog v-if="tableColumnEditDialogConfig"
                             :edit-dialog-config="createTableColumnEditDialogConfig(row)"
         />
@@ -45,17 +48,15 @@
     </el-table-column>
   </el-table>
 
-  <el-row style="margin: 15px">
-    <el-col :span="6">
-      <template v-if="tableConfig.deleteRows">
-        <el-button type="primary" @click="selectAll">全选</el-button>
-        <el-button type="primary" @click="clearSelection">取消选中行</el-button>
-        <el-button type="danger" @click="deleteSelection">删除选中行</el-button>
-      </template>
-    </el-col>
-    <el-col :offset="2" :span="6" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+  <el-row style="width:98%;margin: 1%;">
+    <template v-if="tableConfig.deleteRows">
+      <el-button type="primary" @click="selectAll">全选</el-button>
+      <el-button type="primary" @click="clearSelection">取消选中行</el-button>
+      <el-button type="danger" @click="deleteSelection">删除选中行</el-button>
+    </template>
+    <div style="margin-left: 30%;">
       <BottomPagination v-model:current-page="currentPage" v-model:page-count="pageCount"/>
-    </el-col>
+    </div>
   </el-row>
 
 </template>
@@ -67,7 +68,7 @@ import MyMessage from "@/utils/myMessage";
 import type {AddDialogConfig, EditDialogConfig, TableColumnEditDialogConfig} from "@/components/public/form/formTypes";
 import {OptionsListInputConfig} from "@/utils/formInputConfig";
 import type {TableInstance} from "element-plus/es/components/table";
-import type {TableConfig} from "@/components/public/table/tableTypes";
+import type {BaseTableConfig} from "@/components/public/table/tableTypes";
 import type {PageCallback} from "@/api/utils/baseAPI";
 import BottomPagination from "@/components/public/table/child-component/BottomPagination.vue";
 import BaseEditFormDialog from "@/components/public/dialog/BaseEditFormDialog.vue";
@@ -77,7 +78,7 @@ import TableSummaryBar from "@/components/public/table/child-component/TableSumm
 import BaseAddFormDialog from "@/components/public/dialog/BaseAddFormDialog.vue";
 
 interface Props {
-  tableConfig: TableConfig;
+  tableConfig: BaseTableConfig;
   addDialogConfig?: AddDialogConfig;
   tableColumnEditDialogConfig?: TableColumnEditDialogConfig;
   exportDataToExcel?: () => void;
@@ -228,7 +229,7 @@ watch(isSearch, () => {
 </script>
 <style>
 .row {
-  background-color: rgb(247, 247, 247);
-  margin: 10px 15px;
+  width: 98%;
+  margin: 1%;
 }
 </style>

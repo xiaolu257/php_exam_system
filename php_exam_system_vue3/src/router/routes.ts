@@ -63,7 +63,17 @@ const menuRoutes = [
         name: 'UserRoleManagement',
         path: 'UserRoleManagement',
         component: () => import('@/view/permission/UserRoleManagement.vue'),
-    }
+    },
+    {
+        path: 'MyExam',
+        name: 'MyExam',
+        component: () => import("@/view/exam/MyExam.vue"),
+    },
+    {
+        path: 'MyExamPaper',
+        name: 'MyExamPaper',
+        component: () => import("@/view/exam/MyExamPaper.vue"),
+    },
 ];
 const standaloneRoutes = [
     {
@@ -131,7 +141,7 @@ export function setupDynamicRoutes(menus: any[]) {
             router.addRoute(route);
         }
     });
-    
+
     // 3. 更新侧边栏
     useGlobalStore().setSidebarMenus(buildMenu(menus.filter(route => {
         return route.code !== 'HidePage';

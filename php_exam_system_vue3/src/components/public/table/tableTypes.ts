@@ -117,7 +117,10 @@ export type SearchOnePageDataFunction = (key: string,
                                          callback: PageCallback) => void
 export type DeleteRowsFunction = (selectedRows: number[], deleteRowsSuccess: () => void) => void
 
-export interface TableConfig {
+export type BatchActionFunction = (selectedRows: number[], batchActionSuccess: () => void) => void
+
+
+export interface BaseTableConfig {
     tableColumns: TableColumn[],
     getOnePageData: GetOnePageDataFunction,
     searchData: SearchOnePageDataFunction,
@@ -125,3 +128,15 @@ export interface TableConfig {
     operationWidth?: number,
 }
 
+export interface CustomTableConfig {
+    tableHeight?: string | number;
+    tableWidth?: string;
+    paginationMarginLeft?: string;
+    tableColumns: TableColumn[],
+    getOnePageData: GetOnePageDataFunction,
+    searchData: SearchOnePageDataFunction,
+    operationButtonName?: string,//行内“单个”操作的按钮名称，本质与批量操作按钮共同调用handleBatchAction
+    handleBatchActionName?: string,
+    handleBatchAction?: BatchActionFunction,
+    operationWidth?: number,
+}

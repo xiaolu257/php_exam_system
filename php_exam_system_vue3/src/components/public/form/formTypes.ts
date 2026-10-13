@@ -1,5 +1,16 @@
 import {AbstractFormConfigItem} from "@/utils/formInputConfig";
 
+export interface DialogConfig {
+    buttonText?: string;
+    buttonSize?: "large" | "default" | "small";
+    buttonType?: "default" | "primary" | "success" | "warning" | "danger" | "info" | "" | "text"
+    title: string;
+    formConfig: AbstractFormConfigItem[];
+    submitAction: (data: Record<string, any>, callback: () => void) => void;
+    closeDialogAfterSuccess?: boolean;
+    width?: number;
+}
+
 export interface AddDialogConfig {
     title: string;
     formConfig: AbstractFormConfigItem[];

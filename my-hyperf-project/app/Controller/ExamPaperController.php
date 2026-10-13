@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Annotation\Permission;
 use App\Middleware\Helper\MiddlewareContext;
 use App\Model\Exam;
+use App\Model\ExamAdmission;
 use App\Model\ExamPaper;
 use App\Model\ExamPaperQuestion;
 use App\Request\ExamPaperRequest;
@@ -48,9 +49,150 @@ class ExamPaperController
             ->when(!is_null($searchField) && !is_null($searchValue), function (Builder $query) use ($searchField, $searchValue) {
                 $query->where($searchField, 'like', "%{$searchValue}%");
             })
-            ->paginate(15, ['id', 'title', 'description', 'duration', 'total_score', 'start_time', 'end_time', 'max_attempts', 'created_at', 'updated_at'], 'page', $page);
+            ->paginate(15, [
+                'id',
+                'title',
+                'description',
+                'duration',
+                'total_score',
+                'start_time',
+                'end_time',
+                'max_attempts',
+                'created_at',
+                'updated_at',
+            ], 'page', $page);
 
-        return $response->json(['data' => $paginator->items(), 'last_page' => $paginator->lastPage(), 'total' => $paginator->total()]);
+        return $response->json([
+            'data'      => $paginator->items(),
+            'last_page' => $paginator->lastPage(),
+            'total'     => $paginator->total(),
+        ]);
+    }
+
+    #[GetMapping('getMyExam')]
+    #[Permission('examPaper:getMyExam', '学生获取与本人相关的试卷分页数据，支持模糊查询')]
+    #[Scene(ExamPaperRequest::SCENE_GET_ONE_PAGE)]
+    public function getMyExam(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validated = $request->validated();
+
+        $page = (int)$validated['page'];
+        $orderBy = $validated['orderBy'] ?? 'id';
+        $orderDirection = $validated['orderDirection'] ?? 'asc';
+        $searchField = $validated['searchField'] ?? null;
+        $searchValue = $validated['searchValue'] ?? null;
+        $userId = $this->middlewareContext::getUserId();
+
+        $paperIds = ExamAdmission::query()->where('user_id', $userId)->pluck('exam_paper_id');
+        $paginator = ExamPaper::query()->orderBy($orderBy, $orderDirection)
+            ->when(!is_null($searchField) && !is_null($searchValue), function (Builder $query) use ($searchField, $searchValue) {
+                $query->where($searchField, 'like', "%{$searchValue}%");
+            })
+            ->whereIn('id', $paperIds)
+            ->paginate(15, [
+                'id',
+                'title',
+                'description',
+                'duration',
+                'total_score',
+                'start_time',
+                'end_time',
+                'max_attempts',
+                'created_at',
+                'updated_at',
+            ], 'page', $page);
+
+        return $response->json([
+            'data'      => $paginator->items(),
+            'last_page' => $paginator->lastPage(),
+            'total'     => $paginator->total(),
+        ]);
+    }
+
+    #[GetMapping('getMyExamPapers')]
+    #[Permission('examPaper:getMyExamPapers', '管理员获取本人发布的试卷分页数据，支持模糊查询')]
+    #[Scene(ExamPaperRequest::SCENE_GET_ONE_PAGE)]
+    public function getMyExamPapers(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validated = $request->validated();
+
+        $page = (int)$validated['page'];
+        $orderBy = $validated['orderBy'] ?? 'id';
+        $orderDirection = $validated['orderDirection'] ?? 'asc';
+        $searchField = $validated['searchField'] ?? null;
+        $searchValue = $validated['searchValue'] ?? null;
+        $userId = $this->middlewareContext::getUserId();
+
+        $paginator = ExamPaper::query()->orderBy($orderBy, $orderDirection)
+            ->when(!is_null($searchField) && !is_null($searchValue), function (Builder $query) use ($searchField, $searchValue) {
+                $query->where($searchField, 'like', "%{$searchValue}%");
+            })
+            ->where('publisher_id', $userId)
+            ->paginate(15, [
+                'id',
+                'title',
+                'description',
+                'duration',
+                'total_score',
+                'start_time',
+                'end_time',
+                'max_attempts',
+                'created_at',
+                'updated_at',
+            ], 'page', $page);
+
+        return $response->json([
+            'data'      => $paginator->items(),
+            'last_page' => $paginator->lastPage(),
+            'total'     => $paginator->total(),
+        ]);
+    }
+
+    #[GetMapping('getExamAdmission')]
+    #[Permission('examPaper:getExamAdmission', '管理员获取本人发布的试卷的考试资格分页数据，支持模糊查询')]
+    #[Scene(ExamPaperRequest::SCENE_GET_EXAM_ADMISSION)]
+    public function getExamAdmission(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validated = $request->validated();
+
+        $examPaperId = (int)$validated['id'];
+        $page = (int)$validated['page'];
+        $orderBy = $validated['orderBy'] ?? 'id';
+        $orderDirection = $validated['orderDirection'] ?? 'asc';
+        $searchField = $validated['searchField'] ?? null;
+        $searchValue = $validated['searchValue'] ?? null;
+        $userId = $this->middlewareContext::getUserId();
+
+        $examPaper = ExamPaper::query()->where('id', $examPaperId)->first();
+        if (empty($examPaper)) {
+            return $response->json(['message' => '未找到相关考试信息'])->withStatus(404);
+        }
+        if ($examPaper->publisher_id !== $userId) {
+            return $response->json(['message' => '非试卷发布者无法获取相关考试资格信息'])->withStatus(403);
+        }
+
+        $paginator = ExamAdmission::query()->orderBy($orderBy, $orderDirection)
+            ->when(!is_null($searchField) && !is_null($searchValue), function (Builder $query) use ($searchField, $searchValue) {
+                $query->where($searchField, 'like', "%{$searchValue}%");
+            })
+            ->where('exam_paper_id', $examPaperId)
+            ->leftJoin('users', 'users.id', '=', 'exam_admissions.user_id')
+            ->paginate(15, [
+                'exam_admissions.id',
+                'exam_admissions.user_id',
+                'users.username',
+                'users.nickname',
+                'admission_method',
+                'exam_admissions.status',
+                'exam_admissions.created_at',
+                'exam_admissions.updated_at',
+            ], 'page', $page);
+
+        return $response->json([
+            'data'      => $paginator->items(),
+            'last_page' => $paginator->lastPage(),
+            'total'     => $paginator->total(),
+        ]);
     }
 
     #[GetMapping('{id:\d+}')]
@@ -61,7 +203,16 @@ class ExamPaperController
 
         $exam = ExamPaper::query()
             ->where('id', $id)
-            ->first(['id', 'title', 'description', 'duration', 'total_score', 'start_time', 'end_time', 'max_attempts']);
+            ->first([
+                'id',
+                'title',
+                'description',
+                'duration',
+                'total_score',
+                'start_time',
+                'end_time',
+                'max_attempts',
+            ]);
 
         if (!$exam) {
             return $response->json(['message' => '考试不存在'])->withStatus(404);
@@ -244,4 +395,35 @@ class ExamPaperController
         return $response->json(['msg' => $msg]);
     }
 
+    #[DeleteMapping('revokeExamAdmission')]
+    #[Permission('examPaper:revokeExamAdmission', '(批量)取消考试资格')]
+    #[Scene(ExamPaperRequest::SCENE_DELETE)]
+    public function revokeExamAdmission(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validatedData = $request->validated();
+        $ids = $validatedData['ids'];
+
+        //找到实际存在的试卷ID
+        $count = ExamAdmission::query()
+            ->whereIn('id', $ids)
+            ->update(['status' => 'revoked']);
+
+        return $response->json(['msg' => "成功“取消资格” $count 条考试授权数据"]);
+    }
+
+    #[DeleteMapping('restoreExamAdmission')]
+    #[Permission('examPaper:restoreExamAdmission', '(批量)恢复已撤销的考试资格')]
+    #[Scene(ExamPaperRequest::SCENE_DELETE)]
+    public function restoreExamAdmission(ExamPaperRequest $request, ResponseInterface $response): \Psr\Http\Message\ResponseInterface
+    {
+        $validatedData = $request->validated();
+        $ids = $validatedData['ids'];
+
+        //找到实际存在的试卷ID
+        $count = ExamAdmission::query()
+            ->whereIn('id', $ids)
+            ->update(['status' => 'authorized']);
+
+        return $response->json(['msg' => "成功“重新授权” $count 条考试授权数据"]);
+    }
 }

@@ -4,13 +4,12 @@
                     :table-config="tableConfig">
     <template v-slot:operationButton="{row}">
       <el-button size="small" type="success" @click="previewExamPaper(row.id)">预览</el-button>
-      <el-button size="small" type="success" @click="startExamPaper(row.id)">考试</el-button>
     </template>
   </BaseTableManager>
 </template>
 
 <script lang="ts" setup>
-import type {TableConfig} from "@/components/public/table/tableTypes";
+import type {BaseTableConfig} from "@/components/public/table/tableTypes";
 import {TextTableColumn} from "@/components/public/table/tableTypes";
 import {FormInputConfigFactory} from "@/utils/formInputConfig";
 import type {AddDialogConfig, TableColumnEditDialogConfig} from "@/components/public/form/formTypes";
@@ -68,8 +67,7 @@ const editDialogConfig: TableColumnEditDialogConfig = {
   },
   submitAction: ExamPaperCRUDStandardCRUD.updateItem
 };
-const tableConfig: TableConfig = {
-  operationWidth: 300,
+const tableConfig: BaseTableConfig = {
   deleteRows: ExamPaperCRUDStandardCRUD.deleteRows,
   getOnePageData: ExamPaperCRUDStandardCRUD.getOnePageData,
   searchData: ExamPaperCRUDStandardCRUD.searchOnePageData,
@@ -88,9 +86,6 @@ const tableConfig: TableConfig = {
 };
 const previewExamPaper = (examPaperId: number) => {
   router.push(`/exam/${examPaperId}/preview`)
-}
-const startExamPaper = (examPaperId: number) => {
-  router.push(`/exam/${examPaperId}/before`)
 }
 </script>
 
