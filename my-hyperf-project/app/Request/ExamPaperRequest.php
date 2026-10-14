@@ -18,29 +18,58 @@ class ExamPaperRequest extends FormRequest
 
     public const SCENE_GET_EXAM_ADMISSION = 'getExamAdmission';
 
+    public const SCENE_GET_USERS_WITHOUT_EXAM_ADMISSION = 'getUsersWithoutExamAdmission';
+    public const SCENE_CHANGE_EXAM_ADMISSION = 'changeExamAdmission';
+    public const SCENE_ONLY_ID = 'onlyId';
+    public const SCENE_GET_MY_EXAM_PAPERS = 'getMyExamPapers';
+
+
     public function authorize(): bool
     {
         return true;
     }
 
     protected array $scenes = [
-        self::SCENE_GET_ONE_PAGE => [
+        self::SCENE_GET_ONE_PAGE       => [
             'page'           => 'required|integer|gt:0',
             'orderBy'        => 'string|in:id,content,created_at',
             'orderDirection' => 'string|in:asc,desc',
             'searchField'    => 'string|in:id,content,options',
             'searchValue'    => 'required_with:searchField|string|max:100',
         ],
-
-        self::SCENE_GET_EXAM_ADMISSION => [
-            'id'             => 'required|integer|gt:0',
+        self::SCENE_GET_MY_EXAM_PAPERS => [
             'page'           => 'required|integer|gt:0',
-            'orderBy'        => 'string|in:id,content,created_at',
+            'orderBy'        => 'string|in:id,duration,total_score,start_time,end_time,max_attempts,created_at,updated_at',
             'orderDirection' => 'string|in:asc,desc',
-            'searchField'    => 'string|in:id,user_id,username,nickname',
+            'searchField'    => 'string|in:id,title,description,duration,total_score,start_time,end_time,max_attempts',
             'searchValue'    => 'required_with:searchField|string|max:100',
         ],
-        self::SCENE_ADD                => [
+
+        self::SCENE_GET_EXAM_ADMISSION               => [
+            'id'             => 'required|integer|gt:0',
+            'page'           => 'required|integer|gt:0',
+            'orderBy'        => 'string|in:id,user_id,created_at',
+            'orderDirection' => 'string|in:asc,desc',
+            'searchField'    => 'string|in:id,user_id,username,nickname,admission_method,status',
+            'searchValue'    => 'required_with:searchField|string|max:100',
+        ],
+        self::SCENE_GET_USERS_WITHOUT_EXAM_ADMISSION => [
+            'id'             => 'required|integer|gt:0',
+            'page'           => 'required|integer|gt:0',
+            'orderBy'        => 'string|in:id,created_at',
+            'orderDirection' => 'string|in:asc,desc',
+            'searchField'    => 'string|in:id,username,nickname',
+            'searchValue'    => 'required_with:searchField|string|max:100',
+        ],
+        self::SCENE_CHANGE_EXAM_ADMISSION            => [
+            'id'    => 'required|integer|gt:0',
+            'ids'   => 'required|array',
+            'ids.*' => 'integer:strict|gt:0',
+        ],
+        self::SCENE_ONLY_ID                          => [
+            'id' => 'required|integer|gt:0',
+        ],
+        self::SCENE_ADD                              => [
             'title'              => 'required|string|max:255',
             'description'        => 'filled|string|max:500',
             'duration'           => 'required|integer:strict|gt:0',

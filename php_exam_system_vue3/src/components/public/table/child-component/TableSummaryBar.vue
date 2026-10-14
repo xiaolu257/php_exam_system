@@ -1,4 +1,5 @@
 <template>
+  总共
   <el-tag effect="dark" size="default" style="margin: 0 10px" type="success">{{ totalDataLength }}</el-tag>
   条数据，
   当前页共

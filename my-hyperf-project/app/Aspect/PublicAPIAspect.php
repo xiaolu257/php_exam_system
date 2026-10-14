@@ -49,7 +49,7 @@ class PublicAPIAspect extends AbstractAspect
         $ipKey = "$path:$method:ip:{$ip}";
         $ipCount = $this->redis->incr($ipKey);
         if ($ipCount === 1) $this->redis->expire($ipKey, 60);
-        if ($ipCount > 100) {
+        if ($ipCount > 10000) {
             return $this->response->json(['msg' => '请求过于频繁，请稍后再试'])->withStatus(429);
         }
 
@@ -57,7 +57,7 @@ class PublicAPIAspect extends AbstractAspect
         $fingerprintKey = "$path:$method:fingerprint:{$fingerprint}";
         $fpCount = $this->redis->incr($fingerprintKey);
         if ($fpCount === 1) $this->redis->expire($fingerprintKey, 60);
-        if ($fpCount > 5) {
+        if ($fpCount > 500) {
             return $this->response->json(['msg' => '请求过于频繁，请稍后再试'])->withStatus(429);
         }
 

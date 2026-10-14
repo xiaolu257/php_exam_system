@@ -1,10 +1,7 @@
 <template>
   <el-row class="row">
-    <!--    <el-col v-if="addDialogConfig" :span="2">-->
-    <!--      <BaseAddFormDialog :add-dialog-config="createAddDialogConfig()"/>-->
-    <!--    </el-col>-->
     <el-col :span="10" style="display: flex;align-items: center;">
-      <slot name="leftTopOperationButton"></slot>
+      <slot name="leftTopOperationButton" :refreshTable="refreshTableData"></slot>
       <TableSummaryBar :total-data-length="totalDataLength"
                        :table-data-length="tableDataLength"
                        :export-data-to-excel="exportDataToExcel"
@@ -41,28 +38,14 @@
                      :width="tableConfig.operationWidth||200">
       <template #default="{row}">
         <slot name="operationButton" :row="row" :refreshTable="refreshTableData"></slot>
-        <BaseEditFormDialog v-if="tableColumnEditDialogConfig"
-                            :edit-dialog-config="createTableColumnEditDialogConfig(row)"
-        />
-        <el-button v-if="tableConfig.handleBatchAction"
-                   size="small"
-                   type="danger"
-                   @click="tableConfig.handleBatchAction?.([row.id], refreshTableData)"
-        >
-          {{ tableConfig.operationButtonName ?? '删除' }}
-        </el-button>
       </template>
     </el-table-column>
   </el-table>
 
   <el-row style="width:98%;margin: 1%;">
-    <template v-if="tableConfig.handleBatchAction">
-      <el-button type="primary" @click="selectAll">全选</el-button>
-      <el-button type="primary" @click="clearSelection">取消选中行</el-button>
-      <el-button type="danger" @click="deleteSelection">
-        {{ tableConfig.handleBatchActionName ?? '删除选中行' }}
-      </el-button>
-    </template>
+    <el-button type="primary" @click="selectAll">全选</el-button>
+    <el-button type="primary" @click="clearSelection">取消选中行</el-button>
+    <slot name="batchActionButton" :selectedRows="selectedRows" :refreshTable="refreshTableData"></slot>
 
     <div :style="{
         marginLeft: tableConfig.paginationMarginLeft ?? 'auto',
@@ -75,24 +58,17 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, shallowRef, toRaw, useSlots, watch} from "vue";
-
-import MyMessage from "@/utils/myMessage";
-import type {AddDialogConfig, EditDialogConfig, TableColumnEditDialogConfig} from "@/components/public/form/formTypes";
-import {OptionsListInputConfig} from "@/utils/formInputConfig";
+import {computed, ref, shallowRef, useSlots, watch} from "vue";
 import type {TableInstance} from "element-plus/es/components/table";
 import type {CustomTableConfig} from "@/components/public/table/tableTypes";
 import type {PageCallback} from "@/api/utils/baseAPI";
 import BottomPagination from "@/components/public/table/child-component/BottomPagination.vue";
-import BaseEditFormDialog from "@/components/public/dialog/BaseEditFormDialog.vue";
 import BaseTableColumns from "@/components/public/table/child-component/BaseTableColumns.vue";
 import SearchBar from "@/components/public/table/child-component/SearchBar.vue";
 import TableSummaryBar from "@/components/public/table/child-component/TableSummaryBar.vue";
 
 interface Props {
   tableConfig: CustomTableConfig;
-  addDialogConfig?: AddDialogConfig;
-  tableColumnEditDialogConfig?: TableColumnEditDialogConfig;
   exportDataToExcel?: () => void;
 }
 
@@ -116,67 +92,9 @@ const hasOperationSlot = computed(() => {
 });
 const showOperationColumn = computed(() => {
   return !!(
-      props.tableConfig.handleBatchAction ||
-      props.tableColumnEditDialogConfig ||
       hasOperationSlot.value
   );
 });
-
-
-const createAddDialogConfig = (): AddDialogConfig => {
-  const config = props.addDialogConfig!;
-  return {
-    title: config.title,
-    formConfig: config.formConfig,
-    width: config.width,
-    closeDialogAfterSuccess: config.closeDialogAfterSuccess,
-    submitAction: (data: Record<string, any>, callback: () => void) => {
-      config.submitAction(data, () => {
-        callback();
-        refreshTableData();
-      });
-    },
-  };
-};
-
-const createTableColumnEditDialogConfig = (scopeRow: Record<string, any>): EditDialogConfig => {
-  const config = props.tableColumnEditDialogConfig!;
-  const mapRowToInitData = (): Record<string, any> => {
-    const row = structuredClone(toRaw(scopeRow)); // ✅ 完全隔离：先使用toRaw隔离响应式才能使用structuredClone隔离引用
-    const filteredData: Record<string, any> = {};
-
-    config.formConfig.forEach((item) => {
-      const key = item.name;
-      if (item instanceof OptionsListInputConfig) {
-        filteredData[key] = Object.values(row[key]);
-      } else {
-        filteredData[key] = row[key];
-      }
-    });
-
-    if (config.afterMapRowToInitData) {
-      config.afterMapRowToInitData(filteredData, row);
-    }
-    return filteredData;
-  }
-  return {
-    title: config.title,
-    formConfig: config.formConfig,
-    width: config.width,
-    controlButtonName: config.controlButtonName,
-    buttonSize: config.buttonSize,
-    buttonType: config.buttonType,
-    initData: mapRowToInitData(),
-    updateIdentityFields: config.updateIdentityFields,
-    submitAction: (data: Record<string, any>, callback: () => void) => {
-      config.submitAction(data, () => {
-        callback();
-        refreshTableData();
-      });
-    },
-  };
-}
-
 // 监听排序变更
 const handleSortChange = (sortInfo: { prop: string, order: 'ascending' | 'descending' | null }) => {
   if (sortInfo.order) {
@@ -204,31 +122,29 @@ const clearSelection = () => {
   tableRef.value?.clearSelection();
 };
 
-//删除选中
-const deleteSelection = () => {
-  if (selectedRows.value.length > 0) {
-    props.tableConfig.handleBatchAction?.(selectedRows.value, refreshTableData)
-  } else {
-    MyMessage.error('请先选择要批量操作的数据！')
-  }
-};
 
-const refreshTableData = () => {
+const refreshTableData = (clearSelection: boolean = true) => {
   const getPageDataSuccess: PageCallback = (data: any[], lastPage: number, totalCount: number) => {
     tableData.value = data;
     pageCount.value = lastPage;
     totalDataLength.value = totalCount;
   };
   if (isSearch.value) {
-    props.tableConfig.searchData(searchKey.value, searchValue.value, currentPage.value, orderKey.value, orderDirection.value, getPageDataSuccess);
+    props.tableConfig.searchData(
+        searchKey.value, searchValue.value, currentPage.value, orderKey.value, orderDirection.value,
+        getPageDataSuccess
+    );
   } else {
     props.tableConfig.getOnePageData(currentPage.value, orderKey.value, orderDirection.value, getPageDataSuccess);
+  }
+  if (clearSelection) {
+    tableRef.value?.clearSelection();
   }
 };
 
 //监听换页
 watch(currentPage, () => {
-  refreshTableData()
+  refreshTableData(false)
 }, {immediate: true})
 //监听模式改变
 watch(isSearch, () => {

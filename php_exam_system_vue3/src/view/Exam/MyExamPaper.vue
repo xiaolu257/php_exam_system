@@ -36,11 +36,16 @@ const addDialogConfig: AddDialogConfig = {
     FormInputConfigFactory.createEditableTextAreaInput('description', '试卷说明', 'description'),
     FormNumberInputConfigFactory.createEditableIntegerInput('duration', '考试时长(分钟)', 'duration'),
     FormNumberInputConfigFactory.createEditableIntegerInput('single_count', '单选题数量(2分/题)', 'single_count', 1),
-    FormNumberInputConfigFactory.createEditableIntegerInput('multiple_count', '多选题数量(4分/题)', 'multiple_count', 1),
-    FormNumberInputConfigFactory.createEditableIntegerInput('true_false_count', '判断题数量(1分/题)', 'true_false_count', 1),
-    FormNumberInputConfigFactory.createEditableIntegerInput('short_answer_count', '简答题数量(5分/题)', 'short_count', 1),
-    FormDatePickerConfigFactory.createEditableDateTimeRangerPicker('exam_time', '考试时间', '至',
-        '开始时间', '结束时间'),
+    FormNumberInputConfigFactory.createEditableIntegerInput(
+        'multiple_count', '多选题数量(4分/题)', 'multiple_count', 1),
+    FormNumberInputConfigFactory.createEditableIntegerInput(
+        'true_false_count', '判断题数量(1分/题)', 'true_false_count', 1),
+    FormNumberInputConfigFactory.createEditableIntegerInput(
+        'short_answer_count', '简答题数量(5分/题)', 'short_count', 1),
+    FormDatePickerConfigFactory.createEditableDateTimeRangerPicker(
+        'exam_time', '考试时间', '至',
+        '开始时间', '结束时间'
+    ),
     FormNumberInputConfigFactory.createEditableIntegerInput('max_attempts', '最大考试次数', 'max_attempts', 1)
   ],
   submitAction: (data: Record<string, any>, callback: () => void) => {
@@ -64,8 +69,10 @@ const editDialogConfig: TableColumnEditDialogConfig = {
     FormInputConfigFactory.createEditableTextInput('title', '试卷名称', 'title'),
     FormInputConfigFactory.createEditableTextAreaInput('description', '试卷说明', 'description'),
     FormNumberInputConfigFactory.createEditableIntegerInput('duration', '考试时长(分钟)', 'duration'),
-    FormDatePickerConfigFactory.createEditableDateTimeRangerPicker('exam_time', '考试时间', '至',
-        '开始时间', '结束时间'),
+    FormDatePickerConfigFactory.createEditableDateTimeRangerPicker(
+        'exam_time', '考试时间', '至',
+        '开始时间', '结束时间'
+    ),
     FormNumberInputConfigFactory.createEditableIntegerInput('max_attempts', '最大考试次数', 'max_attempts', 1)
   ],
   afterMapRowToInitData: (filteredData: Record<string, any>, scopeRow: Record<string, any>) => {
@@ -78,8 +85,10 @@ const dialogConfig: DialogConfig = {
   buttonSize: 'small',
   title: '修改准考密码',
   formConfig: [
-    FormInputConfigFactory.createEditablePasswordInput('newPassword', '新准考密码', 'newPassword', true, adminAccountRules.password),
-    FormInputConfigFactory.createEditablePasswordInput('confirmPassword', '确认准考密码', 'confirmPassword', true, adminAccountRules.password),
+    FormInputConfigFactory.createEditablePasswordInput(
+        'newPassword', '新准考密码', 'newPassword', true, adminAccountRules.password),
+    FormInputConfigFactory.createEditablePasswordInput(
+        'confirmPassword', '确认准考密码', 'confirmPassword', true, adminAccountRules.password),
   ],
   submitAction: (data: Record<string, any>, callback: () => void) => {
     const {exam_time, ...rest} = data;
@@ -99,14 +108,14 @@ const tableConfig: BaseTableConfig = {
   getOnePageData: TableCrudFactory.createGetOnePageData('exam-paper/getMyExamPapers'),
   searchData: TableCrudFactory.createSearchOnePageData('exam-paper/getMyExamPapers'),
   tableColumns: [
-    new TextTableColumn(80, 'id', 'ID', true, true),
-    new TextTableColumn(200, 'title', '试卷名称'),
-    new TextTableColumn(250, 'description', '试卷说明', false, false),
-    new TextTableColumn(90, 'duration', '考试时长'),
-    new TextTableColumn(80, 'total_score', '总分'),
-    new TextTableColumn(180, 'start_time', '开始时间'),
-    new TextTableColumn(180, 'end_time', '结束时间'),
-    new TextTableColumn(100, 'max_attempts', '最大次数'),
+    new TextTableColumn(80, 'id', 'ID', true),
+    new TextTableColumn(200, 'title', '试卷名称', false, true),
+    new TextTableColumn(250, 'description', '试卷说明', false, true),
+    new TextTableColumn(110, 'duration', '考试时长', true),
+    new TextTableColumn(80, 'total_score', '总分', true),
+    new TextTableColumn(180, 'start_time', '开始时间', true),
+    new TextTableColumn(180, 'end_time', '结束时间', true),
+    new TextTableColumn(110, 'max_attempts', '最大次数', true),
     new TextTableColumn(180, 'created_at', '创建时间', true, false),
     new TextTableColumn(180, 'updated_at', '更新时间', true, false)
   ]

@@ -135,8 +135,5 @@ export interface CustomTableConfig {
     tableColumns: TableColumn[],
     getOnePageData: GetOnePageDataFunction,
     searchData: SearchOnePageDataFunction,
-    operationButtonName?: string,//行内“单个”操作的按钮名称，本质与批量操作按钮共同调用handleBatchAction
-    handleBatchActionName?: string,
-    handleBatchAction?: BatchActionFunction,
     operationWidth?: number,
 }

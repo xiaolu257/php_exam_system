@@ -17,7 +17,7 @@
       <!-- 头像部分，鼠标悬浮显示个人信息 -->
       <el-popover placement="bottom" trigger="hover" width="200">
         <template #reference>
-          <el-avatar :src="`${AvatarThumbBaseURL}${userAvatarUrl}`"/>
+          <el-avatar :src="avatarUrl"/>
         </template>
         <div>
           <p><strong>账号：</strong>{{ username }}</p>
@@ -41,17 +41,61 @@ import {useGlobalStore} from "@/stores/global";
 import {storeToRefs} from "pinia";
 import {AvatarThumbBaseURL} from "@/utils/global";
 import {quitLogin} from "@/api/admin";
+import {myGet} from "@/api/utils/axios";
+import {onBeforeUnmount, onMounted, ref} from "vue";
 
-const {isFolded, username, userType, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
+const {isFolded, username, userNickName, userAvatarUrl} = storeToRefs(useGlobalStore());
 
 function changeFolded() {
   isFolded.value = !isFolded.value;
 }
 
-
 function goToProfile() {
   router.push('/Manager/Profile');
 }
+
+const avatarUrl = ref('')
+
+// 组件是否已经卸载
+let disposed = false
+
+// 请求缩略图：组件挂载时只请求缩略图
+onMounted(async () => {
+  try {
+    const blob = await myGet(`${AvatarThumbBaseURL}${userAvatarUrl.value}`, {}, false, {
+          responseType: 'blob',
+          silent: true,
+        },
+    ) as Blob
+
+    if (!(blob instanceof Blob) || blob.size === 0) {
+      throw new Error('缩略图数据为空')
+    }
+
+    const url = URL.createObjectURL(blob)
+
+    // 请求完成前组件可能已经卸载
+    if (disposed) {
+      URL.revokeObjectURL(url)
+      return
+    }
+
+    avatarUrl.value = url
+  } catch (error) {
+    if (!disposed) {
+      console.error('缩略图加载失败：', error)
+    }
+  }
+})
+
+// 组件卸载时释放已创建的 Blob URL
+onBeforeUnmount(() => {
+  disposed = true
+
+  if (avatarUrl.value) {
+    URL.revokeObjectURL(avatarUrl.value)
+  }
+});
 </script>
 
 <style scoped>

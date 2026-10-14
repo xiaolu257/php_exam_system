@@ -1,24 +1,16 @@
 <template>
   <el-table-column v-for="item in tableColumns" :fixed="item.fixed" :label="item.label" :min-width="item.min_width"
                    :prop="item.prop" :sortable="item.sortable" align="center">
-    <template #default="scope">
-      <el-text v-if="item instanceof TextTableColumn" :type="item.textType">{{ scope.row[item.prop] }}</el-text>
+    <template #default="{row}">
+      <el-text v-if="item instanceof TextTableColumn" :type="item.textType">{{ row[item.prop] }}</el-text>
       <el-text v-else-if="item instanceof SelectTextColumn">{{
-          item.options.find((i) => i.value === scope.row[item.prop])?.label
-        }}
+          item.options.find((i) => i.value === row[item.prop])?.label
+                                                            }}
       </el-text>
       <el-text v-else-if="item instanceof TreeSelectTextColumn">
-        {{ findTreeLabel(item.treeData, scope.row[item.prop]) }}
+        {{ findTreeLabel(item.treeData, row[item.prop]) }}
       </el-text>
-      <el-image
-          v-else-if="item instanceof ImageTableColumn"
-          :fit="item.fit"
-          :preview-src-list="[item.getOriginImageURL(scope.row[item.prop])]"
-          :src="item.getThumbImageURL(scope.row[item.prop])"
-          lazy
-          preview-teleported
-          style="width: 50px; height: 50px"
-      />
+      <ImageColumn v-else-if="item instanceof ImageTableColumn" :item="item" :image-url="row[item.prop]"></ImageColumn>
     </template>
   </el-table-column>
 </template>
@@ -32,6 +24,7 @@ import {
   TreeSelectTextColumn
 } from "@/components/public/table/tableTypes";
 import type {TreeSelectOption} from "@/utils/formSelectConfig";
+import ImageColumn from "@/components/public/table/child-component/TableColumns/ImageColumn.vue";
 
 interface Props {
   tableColumns: TableColumn[];
@@ -50,6 +43,7 @@ function findTreeLabel(options: TreeSelectOption[], value: any): string | undefi
   }
   return undefined;
 }
+
 </script>
 <style>
 </style>

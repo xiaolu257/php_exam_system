@@ -13,8 +13,9 @@ function getOnePageItem(currentPage: number,
                         orderBy: string,
                         orderDirection: string,
                         callback: PageCallback,
-                        url: string) {
-    myGet(url, {page: currentPage, orderBy: orderBy, orderDirection: orderDirection})
+                        url: string,
+                        otherGetData: Record<string, any>) {
+    myGet(url, {page: currentPage, orderBy: orderBy, orderDirection: orderDirection, ...otherGetData})
         .then((res) => {
             const {data = [], last_page = 0, total = 0} = res;
             callback(data, last_page, total);
@@ -27,8 +28,9 @@ function searchItem(searchField: string,
                     orderBy: string,
                     orderDirection: string,
                     callback: PageCallback,
-                    url: string) {
-    myGet(url, {searchField, searchValue, page, orderBy, orderDirection})
+                    url: string,
+                    otherGetData: Record<string, any>) {
+    myGet(url, {searchField, searchValue, page, orderBy, orderDirection, ...otherGetData})
         .then((res) => {
             const {data = [], last_page = 0, total = 0} = res;
             callback(data, last_page, total);
@@ -77,9 +79,14 @@ function deleteItemRows(
 function batchAction(
     batchActionName: string,
     ids: number[],
-    deleteSuccess: () => void,
-    url: string
+    batchActionSuccess: () => void,
+    url: string,
+    otherPostData: Record<string, any>
 ) {
+    if (ids.length === 0) {
+        MyMessage.warning('请先选择要批量操作的对象！')
+        return;
+    }
     const message = h('div', [
         `确认${batchActionName}选中的 ${ids.length} 条数据吗？`,
         h('br'),
@@ -88,9 +95,10 @@ function batchAction(
 
     ElMessageBox.confirm(message, 'Warning', {confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning',})
         .then(() => {
-            myDel(url, {ids}).then(({msg}) => {
+            console.log(otherPostData)
+            myPost(url, {ids, ...otherPostData}).then(({msg}) => {
                 MyMessage.success(msg);
-                deleteSuccess();
+                batchActionSuccess();
             });
         })
         .catch(() => {

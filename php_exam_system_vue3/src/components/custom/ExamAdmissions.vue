@@ -1,7 +1,16 @@
 <template>
-  <el-button size="small" type="primary" @click="openDialog">考试资格</el-button>
-  <el-dialog v-model="dialogVisible" title="考试资格管理" width="70%" align-center
-             append-to-body center destroy-on-close>
+  <el-button size="small" type="primary" @click="async ()=>{openDialog();await getExamAdmissionStatistics()}">考试资格
+  </el-button>
+  <el-dialog v-model="dialogVisible" width="70%" align-center
+             append-to-body center destroy-on-close :show-close="false">
+    <template #header="{close}">
+      <el-row align="middle" justify="center">
+        <el-text style="margin-left: 45%;font-size: 20px;">考试资格管理</el-text>
+        <el-button style="margin-left: auto" round size="default" type="danger" :icon="Close" @click="close">
+          关闭
+        </el-button>
+      </el-row>
+    </template>
     <el-row align="middle" justify="center">
       <el-row
           :gutter="16"
@@ -17,49 +26,67 @@
           </el-tag>
         </el-col>
 
-        <el-col :span="8">
+        <el-col :span="6">
           <div style="background: #eff6ff; border-radius: 8px; padding: 16px">
             <el-statistic
-                title="已授权人数"
-                :value="268500"
+                title="当前有效资格人数"
+                :value="authorizedUserCount"
                 :value-style="{ color: '#2563eb' }"
             />
           </div>
         </el-col>
 
-        <el-col :span="8">
+        <el-col :span="6">
           <div style="background: #ecfdf5; border-radius: 8px; padding: 16px">
             <el-statistic
                 title="已参加人数"
-                :value="268000"
+                :value="participatedUserCount"
                 :value-style="{ color: '#059669' }"
             />
           </div>
         </el-col>
 
-        <el-col :span="8">
+        <el-col :span="6">
           <div style="background: #fff7ed; border-radius: 8px; padding: 16px">
             <el-statistic
-                title="尚未参加"
-                :value="500"
+                title="尚未参加人数"
+                :value="notParticipatedUserCount"
                 :value-style="{ color: '#ea580c' }"
+            />
+          </div>
+        </el-col>
+
+        <el-col :span="6">
+          <div style="background: #f5f3ff; border-radius: 8px; padding: 16px">
+            <el-statistic
+                title="已取消资格人数"
+                :value="revokedUserCount"
+                :value-style="{ color: '#7c3aed' }"
             />
           </div>
         </el-col>
       </el-row>
       <CustomTableManager :table-config="tableConfig">
-        <template v-slot:leftTopOperationButton>
-          <el-button style="margin-right: 10px" size="default" type="primary"
-                     :icon="User"
-                     @click="()=>{}">
-
-            添加考生
-          </el-button>
+        <template v-slot:leftTopOperationButton="{refreshTable}">
+          <AddExamAdmissions :exam-paper-id="examPaperId"
+                             :on-dialog-close="refreshAdmissionData(refreshTable)"></AddExamAdmissions>
         </template>
         <template v-slot:operationButton="{row,refreshTable}">
           <el-button v-if="row.status=='revoked'" size="small" type="success"
-                     @click="restoreExamAdmission([row.id],refreshTable)">
+                     @click="restoreExamAdmission([row.id],refreshAdmissionData(refreshTable))">
             重新授权
+          </el-button>
+          <el-button v-else size="small" type="danger"
+                     @click="revokeExamAdmission([row.id],refreshAdmissionData(refreshTable))">
+            取消资格
+          </el-button>
+        </template>
+        <template v-slot:batchActionButton="{selectedRows,refreshTable}">
+          <el-button type="success" @click="restoreExamAdmission(selectedRows,refreshAdmissionData(refreshTable))">
+            批量重新授权
+          </el-button>
+          <el-button type="danger" @click="revokeExamAdmission(selectedRows,refreshAdmissionData(refreshTable))">
+            批量取消资格
           </el-button>
         </template>
       </CustomTableManager>
@@ -70,11 +97,11 @@
 <script lang="ts" setup>
 import {ref} from 'vue';
 import {type CustomTableConfig, SelectTextColumn, TextTableColumn} from "@/components/public/table/tableTypes";
-import type {PageCallback} from "@/api/utils/baseAPI";
-import {myGet} from "@/api/utils/axios";
 import CustomTableManager from "@/components/public/table/CustomTableManager.vue";
 import {TableCrudFactory} from "@/utils/tableCrudFactory";
-import {User} from "@element-plus/icons-vue";
+import AddExamAdmissions from "@/components/custom/AddExamAdmissions.vue";
+import {myGet} from "@/api/utils/axios";
+import {Close} from "@element-plus/icons-vue";
 
 const props = defineProps<{
   examPaperId: number
@@ -86,53 +113,16 @@ const dialogVisible = ref(false);
 const openDialog = () => {
   dialogVisible.value = true;
 };
-// 关闭 dialog 的方法
 
-const restoreExamAdmission = TableCrudFactory.creatBatchAction('exam-paper/restoreExamAdmission', '批量“重新授权”')
+const restoreExamAdmission = TableCrudFactory.creatBatchAction(
+    'exam-paper/restoreExamAdmission', '批量“重新授权”', {id: props.examPaperId})
 const tableConfig: CustomTableConfig = {
-  // getOnePageData: TableCrudFactory.createGetOnePageData('exam-paper/getExamAdmission'),
-  getOnePageData: (currentPage: number,
-                   orderKey: string,
-                   orderDirection: string,
-                   callback: PageCallback) => {
-    myGet('exam-paper/getExamAdmission', {
-      id: props.examPaperId,
-      page: currentPage,
-      orderBy: orderKey,
-      orderDirection: orderDirection
-    })
-        .then((res) => {
-          const {data = [], last_page = 0, total = 0} = res;
-          callback(data, last_page, total);
-        })
-  },
-  searchData: (key: string,
-               value: string,
-               page: number,
-               orderKey: string,
-               orderDirection: string,
-               callback: PageCallback) => {
-    myGet('exam-paper/getExamAdmission', {
-      id: props.examPaperId,
-      searchField: key,
-      searchValue: value,
-      page: page,
-      orderBy: orderKey,
-      orderDirection: orderDirection
-    })
-        .then((res) => {
-          const {data = [], last_page = 0, total = 0} = res;
-          callback(data, last_page, total);
-        })
-  },
+  getOnePageData: TableCrudFactory.createGetOnePageData('exam-paper/getExamAdmission', {id: props.examPaperId,}),
+  searchData: TableCrudFactory.createSearchOnePageData('exam-paper/getExamAdmission', {id: props.examPaperId,}),
   tableHeight: 500,
-  paginationMarginLeft: '25%',
-  operationButtonName: '取消资格',
-  handleBatchActionName: '批量取消资格',
-  handleBatchAction: TableCrudFactory.creatBatchAction('exam-paper/revokeExamAdmission', '批量“取消资格”'),
   tableColumns: [
-    new TextTableColumn(80, 'id', 'ID', true, true),
-    new TextTableColumn(80, 'user_id', '用户ID'),
+    new TextTableColumn(80, 'id', 'ID', true),
+    new TextTableColumn(100, 'user_id', '用户ID', true),
     new TextTableColumn(180, 'username', '账号'),
     new TextTableColumn(180, 'nickname', '昵称'),
     new SelectTextColumn(100, 'admission_method', '授权方式', [
@@ -159,5 +149,37 @@ const tableConfig: CustomTableConfig = {
     new TextTableColumn(180, 'updated_at', '更新时间', true, false)
   ]
 };
+const revokeExamAdmission = TableCrudFactory.creatBatchAction(
+    'exam-paper/revokeExamAdmission', '批量“取消资格”', {id: props.examPaperId,})
+
+const authorizedUserCount = ref(0)
+const participatedUserCount = ref(0)
+const notParticipatedUserCount = ref(0)
+const revokedUserCount = ref(0)
+const getExamAdmissionStatistics = async () => {
+  try {
+    const res = await myGet(
+        'exam-paper/getExamAdmissionStatistics',
+        {id: props.examPaperId}
+    )
+
+    authorizedUserCount.value = res.authorizedUserCount
+    participatedUserCount.value = res.participatedUserCount
+    notParticipatedUserCount.value = res.notParticipatedUserCount
+    revokedUserCount.value = res.revokedUserCount
+  } catch (error) {
+    console.error('获取考试资格统计信息失败：', error)
+  }
+}
+
+const refreshAdmissionData = (
+    refreshTable: (clearSelection?: boolean) => void
+) => {
+  return async () => {
+    refreshTable()
+    await getExamAdmissionStatistics()
+  }
+
+}
 </script>
 
